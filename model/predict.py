@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from tensorflow.keras.models import load_model
@@ -5,7 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 from preprocessing import FEATURES, INPUT_STEPS, scale_data
 
 # Load the trained model once when this file is imported
-MODEL_PATH = 'saved/proximascale_lstm.keras'
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'saved', 'proximascale_lstm.keras')
 model = load_model(MODEL_PATH)
 
 def detect_anomaly(values, threshold=2.0):
