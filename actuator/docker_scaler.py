@@ -1,6 +1,7 @@
 import docker
+from actuator.scaler_interface import ScalerInterface
 
-class DockerActuator:
+class DockerActuator(ScalerInterface):
     def __init__(self, config):
         # This connects to the Docker Desktop engine you have running
         self.client = docker.from_env()
