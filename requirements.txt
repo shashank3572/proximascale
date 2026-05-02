@@ -1,6 +1,18 @@
-# ProximaScale — feature/app-monitoring
-# Pin versions for reproducibility across all team members' machines
+# ProximaScale — all dependencies pinned
 
+# LSTM model (Person B)
+tensorflow==2.16.1
+tf-keras==2.16.0
+keras==3.14.0
+scikit-learn==1.4.2
+pandas==2.2.2
+numpy==1.26.4
+matplotlib==3.8.4
+joblib==1.4.2
+prophet==1.1.5
+streamlit==1.35.0
+
+# App + Monitoring (Person A)
 flask==3.0.3
 psutil==5.9.8
 locust==2.28.0
