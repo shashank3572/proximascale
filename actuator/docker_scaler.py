@@ -11,7 +11,10 @@ class DockerActuator(ScalerInterface):
         
         # Pull the image so it doesn't lag on the first run
         print(f"Actuator: Ensuring image {self.image} is available...")
-        self.client.images.pull(self.image)
+        try:
+            self.client.images.pull(self.image)
+        except Exception as e:
+            print(f"⚠️ Actuator: Could not pull image '{self.image}': {e}. Will use cached version if available.")
     
     def get_workers(self):
         # Find all containers we are actively managing
@@ -32,7 +35,7 @@ class DockerActuator(ScalerInterface):
         workers = self.get_workers()
         if len(workers) > self.config['scaling_rules']['min_containers']:
             # Grab the last container spawned and kill it
-            target = workers[-1]
+            target = sorted(workers, key=lambda c: c.name)[-1]
             print(f"🛑 Actuator: Stopping and removing -> {target.name}")
             target.stop()
             target.remove()

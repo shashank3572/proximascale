@@ -4,3 +4,4 @@ venv/
 .env
 .vscode/
 .idea/
+app/.app.py.swp
