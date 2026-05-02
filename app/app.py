@@ -1,49 +1,77 @@
 from flask import Flask, request, jsonify
+import threading
+import time
+import math
 import sys
 import os
 
-# So Flask can find the model folder
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'model'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from predict import predict
+from model.predict import predict
 
 app = Flask(__name__)
 
-@app.route('/health', methods=['GET'])
+# Thread-safe request counter (Person A)
+_lock = threading.Lock()
+_request_count = 0
+_request_rate = 0
+
+@app.before_request
+def count_request():
+    global _request_count
+    with _lock:
+        _request_count += 1
+
+def _reset_counter():
+    global _request_count, _request_rate
+    while True:
+        time.sleep(60)
+        with _lock:
+            _request_rate = _request_count
+            _request_count = 0
+
+threading.Thread(target=_reset_counter, daemon=True).start()
+
+@app.route("/")
+def home():
+    result = 0
+    for i in range(1, 500000):
+        result += math.sqrt(i)
+    return "App is running"
+
+@app.route("/heavy")
+def heavy():
+    result = 0
+    for i in range(1, 2000000):
+        result += math.sqrt(i)
+    return "Heavy load complete"
+
+@app.route("/metrics")
+def metrics():
+    """Exposes current request_rate for collector.py to poll."""
+    with _lock:
+        rate = _request_rate
+    return jsonify({"request_rate": rate})
+
+@app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ProximaScale API is running!"})
 
-@app.route('/predict', methods=['POST'])
+@app.route("/predict", methods=["POST"])
 def get_prediction():
     """
     Accepts 10 metric records and returns CPU predictions + anomaly flag.
-    
-    Expected input:
-    {
-        "records": [
-            {
-                "timestamp": "2024-01-15T14:32:00",
-                "cpu_percent": 67.4,
-                "memory_percent": 52.1,
-                "request_rate": 143
-            },
-            ... (10 records total)
-        ]
-    }
     """
     data = request.get_json()
 
-    # Validate input
-    if not data or 'records' not in data:
+    if not data or "records" not in data:
         return jsonify({"error": "Missing records in request"}), 400
 
-    if len(data['records']) != 10:
+    if len(data["records"]) != 10:
         return jsonify({"error": "Exactly 10 records required"}), 400
 
-    # Run prediction
-    result = predict(data['records'])
-
+    result = predict(data["records"])
     return jsonify(result)
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=False)
