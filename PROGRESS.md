@@ -47,3 +47,18 @@ scaler.pkl committed alongside model weights.
 - [ ] Regenerate metrics.csv â€” run all 3 Locust scenarios
 - [ ] Target: â‰¥1,000 rows with real variance
 - [ ] Hand off metrics.csv to Person B for LSTM training
+---
+
+## Person C — Decision Engine + Actuator
+
+### Week 9 — Sem 1 (Complete)
+- decision/engine.py — evaluate() with static threshold, anomaly bypass, cooldown
+- decision/hysteresis.py — extracted Hysteresis class, 3 min cooldown
+- actuator/docker_scaler.py — Docker SDK, min/max replica guards, pull guard, sorted scale_down
+- actuator/scaler_interface.py — abstract base class
+- main.py — orchestration loop, signal normaliser, dummy predictions
+- tests/test_decision.py — 5 pytest cases, Docker mocked
+- tests/test_integration.py — 9 smoke tests
+
+### Status
+Semester 1 complete. Pending: swap dummy predictions for Person B's predict(records) call in main.py.
