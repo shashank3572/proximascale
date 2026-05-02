@@ -1,9 +1,17 @@
+# Python
 __pycache__/
-*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
 venv/
 .env
+
+# OS
+.DS_Store
+
+# IDE
 .vscode/
 .idea/
-app/.app.py.swp
-
 app/.app.py.swp

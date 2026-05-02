@@ -1,54 +1,64 @@
-# ProximaScale — Decision Engine + Actuator — Progress Log
-
-**Branch:** `feature/decision-actuator`  
-**Owner:** Person C (Decision Engine + Actuator)  
-**Updated by:** Person D (Integration) on handover
+# PROGRESS.md — ProximaScale
 
 ---
 
-## Week 9 — Sem 1 (Handover + Completion)
+## Person B — LSTM Prediction Engine
 
-### What was done
-- `decision/engine.py` — `evaluate(predicted_cpu, anomaly_flag)` fully implemented.
-  Handles: anomaly bypass, cooldown timer, upper/lower threshold logic, min/max replica guards.
-  Returns one of: `scale_up`, `scale_down`, `hold`, `hold_cooldown`, `hold_max_reached`, `hold_min_reached`.
-- `actuator/docker_scaler.py` — `DockerActuator` implemented with Docker SDK.
-  Uses `containers.run()` / `stop()` / `remove()`. Min/max replica bounds enforced.
-- `actuator/scaler_interface.py` — Abstract base class. `scale_up`, `scale_down`, `hold`.
-- `config.yaml` — Static thresholds (cpu_upper=75, cpu_lower=30), replica limits (min=1, max=5), image name.
-- `decision/hysteresis.py` — `Hysteresis` class extracted from engine inline code.
-  Encapsulates `last_action_time`, `cooldown_seconds`, `is_cooling_down()`, `record_action()`.
-- `main.py` — Wired by Person D. Includes absolute config path, Docker guard on startup,
-  signal normaliser (`hold_*` → `hold`), and orchestration loop with dummy predictions.
-- `tests/test_decision.py` — 5 pytest test cases. Docker fully mocked. Tests: scale_up, scale_down,
-  hold, anomaly bypass, cooldown enforcement.
-- `tests/test_integration.py` — Smoke tests: all 4 modules import cleanly, Hysteresis logic verified,
-  signal normaliser parametrised across all 6 return values.
-- `requirements.txt` — Replaced 103-line pip freeze dump with 10-package minimal file.
+### Week 10–11 (Apr 28 – May 2, 2026)
+- Fixed critical scaler persistence bug: scaler now saved/loaded via joblib
+- Fixed bare imports: all model files work from project root
+- Populated anomaly.py as standalone module
+- Updated evaluate.py to accept optional real CSV via --data flag
+- Fixed misindented print in train.py
+- Switched keras imports to tf_keras for TF 2.16.1 compatibility
+- Pinned all library versions in requirements.txt
+- Verified: predict import OK, RMSE=5.48, MAE=4.39, chart saved
 
-### Known limitations (flagged for Sem 1 report)
-- Actuator uses `containers.run()` (Docker Desktop, single machine) instead of
-  `services.get().scale()` (Docker Swarm, multi-host). This is intentional for Sem 1 demo scope.
-  Will be swapped to Swarm API in Sem 2 if moving to multi-host setup.
-
-### What's next (Sem 2)
-- `decision/adaptive_threshold.py` — Dynamic threshold using rolling mean + std of recent CPU.
-- `decision/cost_model.py` — Cost-aware scaling (conditional, only if ahead of schedule).
-- `actuator/k8s_scaler.py` — Kubernetes scaler (optional).
-- Integrate Person B's real `predict.py` in `main.py` (replace dummy predictions).
-
-### Blockers
-- None for Sem 1. Person B's model not yet integrated — using dummy predictions.
+### Status
+Semester 1 complete. Model loads, predicts, evaluates correctly.
+Ready for Person C and Person D integration.
+scaler.pkl committed alongside model weights.
 
 ---
 
-## Week 5 — Sem 1
+## Person A — App + Monitoring
 
-### What was done
-- Interface designed: `evaluate(predicted_cpu, anomaly_flag)` agreed with Person D.
-- Static threshold logic implemented in `engine.py`.
-- Hysteresis (cooldown timer) added inline in `engine.py`.
-- `config.yaml` created with threshold values and replica limits.
+### Week 1–2 (Environment + Schema)
+- Set up virtual environment, installed Flask, psutil, Locust
+- Agreed data schema with team: `{timestamp, cpu_percent, memory_percent, request_rate}`
+- Created initial `app/app.py` with CPU-load routes and request counter
 
-### Blockers
-- None. Docker SDK (`pip install docker`) straightforward to use.
+### Week 3–4 (Flask App + Collector skeleton)
+- Flask routes `/`, `/heavy` generating measurable CPU load via math loop
+- `before_request` hook incrementing `_request_count`
+- `monitoring/collector.py` skeleton — polls psutil every 5s, writes to CSV
+- **Issue found:** `request_rate` was hardcoded to `0` — `/metrics` endpoint missing
+
+### Week 5 (Fixes + Full module completion)
+- Added `/metrics` JSON endpoint to `app.py` exposing live `request_rate`
+- Fixed `app.run(host='0.0.0.0')` so Flask is reachable inside Docker
+- Refactored `collector.py` — separated `collect_metrics(window)` from `run_collector()`
+- Added `monitoring/schema.py` — MetricRecord dataclass
+- Added `monitoring/storage.py` — append_row and read_last_n
+- Added `app/Dockerfile`
+- Added Locust scenarios: spike, gradual ramp, normal load
+
+### TODO
+- [ ] Regenerate metrics.csv — run all 3 Locust scenarios
+- [ ] Target: ≥1,000 rows with real variance
+- [ ] Hand off metrics.csv to Person B for LSTM training
+---
+
+## Person C � Decision Engine + Actuator
+
+### Week 9 � Sem 1 (Complete)
+- decision/engine.py � evaluate() with static threshold, anomaly bypass, cooldown
+- decision/hysteresis.py � extracted Hysteresis class, 3 min cooldown
+- actuator/docker_scaler.py � Docker SDK, min/max replica guards, pull guard, sorted scale_down
+- actuator/scaler_interface.py � abstract base class
+- main.py � orchestration loop, signal normaliser, dummy predictions
+- tests/test_decision.py � 5 pytest cases, Docker mocked
+- tests/test_integration.py � 9 smoke tests
+
+### Status
+Semester 1 complete. Pending: swap dummy predictions for Person B's predict(records) call in main.py.
