@@ -1,5 +1,7 @@
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import LSTM, Dense, Dropout
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
+from tf_keras.models import Sequential
+from tf_keras.layers import LSTM, Dense, Dropout
 
 def build_model(input_steps=10, features=3, output_steps=3):
     """
