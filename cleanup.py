@@ -2,7 +2,7 @@ import docker
 
 def cleanup_environment():
     client = docker.from_env()
-    prefix = "ai_sysadmin_worker_"
+    prefix = "proximascale_worker_"
     
     # Find all containers (even stopped ones) with our project prefix
     containers = client.containers.list(all=True, filters={"name": prefix})

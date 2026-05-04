@@ -14,7 +14,7 @@ from anomaly import detect_anomaly
 
 # Load model and scaler ONCE at import time (not per-call)
 _DIR        = os.path.dirname(__file__)
-MODEL_PATH  = os.path.join(_DIR, 'saved', 'proximascale_lstm.keras')
+MODEL_PATH  = os.path.join(_DIR, 'saved', 'proximascale_lstm.h5')
 SCALER_PATH = os.path.join(_DIR, 'saved', 'scaler.pkl')
 
 model  = load_model(MODEL_PATH)

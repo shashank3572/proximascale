@@ -7,6 +7,8 @@ matplotlib.use('Agg')  # Non-interactive backend — safe on all machines
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from tf_keras.models import load_model
+import joblib
+SCALER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'saved', 'scaler.pkl')
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -27,18 +29,19 @@ def evaluate(data_path=None):
         df = generate_synthetic_data(n=500)
 
     print("Preprocessing...")
-    scaled, scaler = scale_data(df)
+    scaler = joblib.load(SCALER_PATH)
+    scaled = scaler.transform(df[['cpu_percent', 'memory_percent', 'request_rate']])
     X, y = create_windows(scaled)
     X_train, X_test, y_train, y_test = train_test_split_data(X, y)
 
     _DIR = os.path.dirname(__file__)
-    model = load_model(os.path.join(_DIR, 'saved', 'proximascale_lstm.keras'))
+    model = load_model(os.path.join(_DIR, 'saved', 'proximascale_lstm.h5'))
 
     print("Running predictions...")
     y_pred_scaled = model.predict(X_test, verbose=0)
 
     def inverse_first_feature(arr):
-        dummy = np.zeros((arr.shape[0] * arr.shape[1], scaled.shape[1]))
+        dummy = np.zeros((arr.shape[0] * arr.shape[1], 3))  # 3 features
         dummy[:, 0] = arr.flatten()
         return scaler.inverse_transform(dummy)[:, 0].reshape(arr.shape)
 
