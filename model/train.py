@@ -1,6 +1,7 @@
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
 import numpy as np
 import pandas as pd
-import os
 import sys
 import joblib
 
@@ -18,13 +19,13 @@ def generate_synthetic_data(n=500):
     np.random.seed(42)
     t = np.linspace(0, 50, n)
 
-    cpu_percent    = 40 + 20 * np.sin(t) + np.random.normal(0, 5, n)
+    cpu_percent    = 50 + 40 * np.sin(t) + np.random.normal(0, 8, n)   # NEW: max ~100
     memory_percent = 50 + 10 * np.sin(t + 1) + np.random.normal(0, 3, n)
-    request_rate   = 100 + 50 * np.sin(t + 2) + np.random.normal(0, 10, n)
+    request_rate   = 400 + 350 * np.sin(t + 2) + np.random.normal(0, 60, n) # NEW: max ~900
 
     cpu_percent    = np.clip(cpu_percent, 0, 100)
     memory_percent = np.clip(memory_percent, 0, 100)
-    request_rate   = np.clip(request_rate, 0, 500)
+    request_rate   = np.clip(request_rate, 0, 1000)
 
     timestamps = pd.date_range(start='2024-01-15', periods=n, freq='1min')
 
@@ -68,15 +69,24 @@ def train(data_path=None):
         verbose=1
     )
 
-    os.makedirs('saved', exist_ok=True)
+    # FIX: Use absolute path based on this file's location,
+    # so train.py works whether called from project root or model/ dir.
+    SAVE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'saved')
+    os.makedirs(SAVE_DIR, exist_ok=True)
 
-    # FIX B3: Save the scaler — this is the critical missing piece
-    joblib.dump(scaler, 'saved/scaler.pkl')
-    print("Scaler saved to saved/scaler.pkl")
+    scaler_path = os.path.join(SAVE_DIR, 'scaler.pkl')
+    model_path  = os.path.join(SAVE_DIR, 'proximascale_lstm.h5')
 
-    model.save('saved/proximascale_lstm.keras')
-    # FIX B1: print is now INSIDE train(), after model.save()
-    print("Model saved to saved/proximascale_lstm.keras")
+    joblib.dump(scaler, scaler_path)
+    print(f"Scaler saved to {scaler_path}")
+
+    model.save(model_path)
+    print(f"Model saved to {model_path}")
 
 if __name__ == "__main__":
-    train()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data', type=str, default=None,
+                        help='Path to real CSV from Person A (optional)')
+    args = parser.parse_args()
+    train(data_path=args.data)

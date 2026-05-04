@@ -58,14 +58,16 @@ def test_high_cpu_triggers_scale_up(engine):
 # ---------------------------------------------------------------------------
 def test_low_cpu_triggers_scale_down(engine):
     """cpu=10 is below lower_threshold (30) → must return scale_down"""
-    # Give the engine 1 fake running container so scale_down is allowed
-    engine.actuator.client.containers.list.return_value = [MagicMock()]
-    engine.hysteresis.last_action_time = 0   # ensure no cooldown
+    # Give the engine 2 fake running containers so min_containers (1) is not hit
+
+    c1, c2 = MagicMock(), MagicMock()
+    c1.name = "proximascale_1"
+    c2.name = "proximascale_2"
+    engine.actuator.client.containers.list.return_value = [c1, c2]
+    engine.hysteresis.last_action_time = 0
 
     result = engine.evaluate(predicted_cpu=10.0, anomaly_flag=False)
     assert result == "scale_down", f"Expected 'scale_down', got '{result}'"
-
-
 # ---------------------------------------------------------------------------
 # Test 3: mid-range CPU → hold
 # ---------------------------------------------------------------------------

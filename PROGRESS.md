@@ -1,7 +1,6 @@
 # PROGRESS.md â€” ProximaScale
 
 ---
-
 ## Person B â€” LSTM Prediction Engine
 
 ### Week 10â€“11 (Apr 28 â€“ May 2, 2026)
@@ -12,14 +11,14 @@
 - Fixed misindented print in train.py
 - Switched keras imports to tf_keras for TF 2.16.1 compatibility
 - Pinned all library versions in requirements.txt
-- Verified: predict import OK, RMSE=5.48, MAE=4.39, chart saved
+- Resolved Keras 2/3 framework mismatch â€” model retrained using tf_keras throughout
+- proximascale_lstm.h5 and scaler.pkl regenerated and committed (saved in .h5 format for tf_keras compatibility)
+- predict() loads and runs correctly â€” verified end-to-end
+- Note: RMSE=5.48, MAE=4.39 metrics were from synthetic prototype run; model has since been retrained with corrected data ranges
 
 ### Status
-Semester 1 complete. Model loads, predicts, evaluates correctly.
-Ready for Person C and Person D integration.
-scaler.pkl committed alongside model weights.
-
----
+Semester 1 complete. Model loads, predicts, and evaluates correctly.
+scaler.pkl committed alongside model weights. Ready for integration.
 
 ## Person A â€” App + Monitoring
 
@@ -42,23 +41,18 @@ scaler.pkl committed alongside model weights.
 - Added `monitoring/storage.py` â€” append_row and read_last_n
 - Added `app/Dockerfile`
 - Added Locust scenarios: spike, gradual ramp, normal load
+- metrics.csv regenerated â€” 2,339 rows, full load range captured
 
-### TODO
-- [ ] Regenerate metrics.csv â€” run all 3 Locust scenarios
-- [ ] Target: â‰¥1,000 rows with real variance
-- [ ] Hand off metrics.csv to Person B for LSTM training
----
+## Person C Decision Engine + Actuator
 
-## Person C — Decision Engine + Actuator
-
-### Week 9 — Sem 1 (Complete)
-- decision/engine.py — evaluate() with static threshold, anomaly bypass, cooldown
-- decision/hysteresis.py — extracted Hysteresis class, 3 min cooldown
-- actuator/docker_scaler.py — Docker SDK, min/max replica guards, pull guard, sorted scale_down
-- actuator/scaler_interface.py — abstract base class
-- main.py — orchestration loop, signal normaliser, dummy predictions
-- tests/test_decision.py — 5 pytest cases, Docker mocked
-- tests/test_integration.py — 9 smoke tests
+### Week 9  Sem 1 (Complete)
+- decision/engine.py  evaluate() with static threshold, anomaly bypass, cooldown
+- decision/hysteresis.py  extracted Hysteresis class, 3 min cooldown
+- actuator/docker_scaler.py  Docker SDK, min/max replica guards, pull guard, sorted scale_down
+- actuator/scaler_interface.py  abstract base class
+- main.py  orchestration loop, signal normaliser, dummy predictions
+- tests/test_decision.py  5 pytest cases, Docker mocked
+- tests/test_integration.py  9 smoke tests
 
 ### Status
 Semester 1 complete. Pending: swap dummy predictions for Person B's predict(records) call in main.py.

@@ -7,7 +7,7 @@ class DockerActuator(ScalerInterface):
         self.client = docker.from_env()
         self.config = config
         self.image = self.config['scaling_rules']['target_service_image']
-        self.prefix = "ai_sysadmin_worker_"
+        self.prefix = "proximascale_worker_"
         
         # Pull the image so it doesn't lag on the first run
         print(f"Actuator: Ensuring image {self.image} is available...")
