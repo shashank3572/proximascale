@@ -102,3 +102,29 @@ def test_cooldown_returns_hold_cooldown(engine):
     assert result == "hold_cooldown", (
         f"Expected 'hold_cooldown' during cooldown window, got '{result}'"
     )
+
+def test_upper_bound_triggers_scale_up_even_when_mean_is_safe(engine):
+    # mean 50 is below static upper 75, but upper_bound 85 > threshold
+    action = engine.evaluate(predicted_cpu=50.0, upper_bound=85.0, anomaly_flag=False)
+    assert action == "scale_up"
+
+
+def test_upper_bound_not_triggered_when_low(engine):
+    # warm the window so adaptive bounds are ~50 ± 5
+    for _ in range(15):
+        engine.evaluate(predicted_cpu=50.0, upper_bound=50.0, anomaly_flag=False)
+    engine.hysteresis.last_action_time = 0       # clear cooldown if any
+    action = engine.evaluate(predicted_cpu=50.0, upper_bound=60.0, anomaly_flag=False)
+    assert action == "hold"
+
+
+def test_scaling_event_written_on_action(tmp_path, monkeypatch, engine):
+    import json
+    import decision.scaling_log as slog
+    monkeypatch.setattr(slog, "_LOG_PATH", tmp_path / "events.json")
+
+    engine.evaluate(predicted_cpu=95.0, upper_bound=99.0, anomaly_flag=False)
+
+    events = json.loads((tmp_path / "events.json").read_text())
+    assert events[-1]["action"] == "scale_up"
+    assert {"action", "timestamp", "expires_after_steps"} <= events[-1].keys()
