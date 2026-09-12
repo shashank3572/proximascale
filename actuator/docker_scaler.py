@@ -1,44 +1,57 @@
 import docker
+from docker.errors import DockerException
+import uuid
 from actuator.scaler_interface import ScalerInterface
 
 class DockerActuator(ScalerInterface):
     def __init__(self, config):
-        # This connects to the Docker Desktop engine you have running
-        self.client = docker.from_env()
         self.config = config
         self.image = self.config['scaling_rules']['target_service_image']
         self.prefix = "ai_sysadmin_worker_"
         
-        # Pull the image so it doesn't lag on the first run
-        print(f"Actuator: Ensuring image {self.image} is available...")
+        # Safely attempt to connect to the Docker engine
         try:
+            self.client = docker.from_env()
+            print(f"Actuator: Ensuring image {self.image} is available...")
             self.client.images.pull(self.image)
-        except Exception as e:
-            print(f"⚠️ Actuator: Could not pull image '{self.image}': {e}. Will use cached version if available.")
-    
+        except DockerException as e:
+            print("❌ Actuator Error: Cannot connect to Docker. Is it installed and running?")
+            self.client = None
+
     def get_workers(self):
-        # Find all containers we are actively managing
+        if not self.client:
+            return []
         return self.client.containers.list(filters={"name": self.prefix})
 
     def scale_up(self):
-        current_workers = len(self.get_workers())
-        if current_workers < self.config['scaling_rules']['max_containers']:
-            new_name = f"{self.prefix}{current_workers + 1}"
+        if not self.client:
+            return False
+            
+        workers = self.get_workers()
+        if len(workers) < self.config['scaling_rules']['max_containers']:
+            # Generate a unique 6-character string to avoid name collisions
+            unique_id = uuid.uuid4().hex[:6]
+            new_name = f"{self.prefix}{unique_id}"
+            
             print(f"⚙️ Actuator: Spinning up new container -> {new_name}")
-            # detach=True means it runs in the background
             self.client.containers.run(self.image, name=new_name, detach=True)
             return True
+            
         print("⚠️ Actuator: Max container limit reached. Cannot scale up.")
         return False
 
     def scale_down(self):
+        if not self.client:
+            return False
+            
         workers = self.get_workers()
         if len(workers) > self.config['scaling_rules']['min_containers']:
-            # Grab the last container spawned and kill it
-            target = sorted(workers, key=lambda c: c.name)[-1]
+            # Grab any active worker from the list safely
+            target = workers[0]
             print(f"🛑 Actuator: Stopping and removing -> {target.name}")
             target.stop()
             target.remove()
             return True
+            
         print("⚠️ Actuator: Minimum container limit reached. Cannot scale down.")
         return False
