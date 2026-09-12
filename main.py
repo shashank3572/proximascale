@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import logging
+from decision.scaling_log import clear_scaling_events
 
 logging.basicConfig(
     level=logging.INFO,
@@ -46,29 +47,40 @@ def execute(signal: str):
 
 def simulate_lstm_predictions():
     """Dummy predictions standing in for Person B's model output.
-    Swap this for: from model.predict import get_prediction"""
+
+    Each row: (predicted_cpu, upper_bound_or_None, anomaly_flag).
+    None = 'Person B hasn't shipped MC-Dropout yet' → risk branch skipped.
+    Swap for: from model.predict import get_prediction
+    """
     return [
-        (45.0, False),   # normal → hold
-        (80.0, False),   # high   → scale_up
-        (82.0, False),   # still high but cooldown active → hold_cooldown
-        (88.0, True),    # anomaly → scale_up regardless
-        (25.0, False),   # low    → scale_down (after cooldown)
-        (50.0, False),   # normal → hold
+        (45.0, None, False),   # normal       → hold
+        (80.0, None, False),   # high         → scale_up
+        (82.0, None, False),   # high, in cd  → hold_cooldown
+        (88.0, None, True),    # anomaly      → scale_up (bypasses cooldown)
+        (25.0, None, False),   # low          → scale_down
+        (50.0, 85.0, False),   # safe mean, risky bound → scale_up  ← NEW
+        (50.0, None, False),   # normal       → hold
     ]
 
 
 if __name__ == "__main__":
+    clear_scaling_events()
     logger.info("🚀 ProximaScale Decision Engine starting...")
 
     predictions = simulate_lstm_predictions()
 
-    for predicted_cpu, anomaly_flag in predictions:
-        raw_signal = engine.evaluate(predicted_cpu, anomaly_flag=anomaly_flag)
-        logger.info(f"Raw signal from engine: {raw_signal}")
+    for predicted_cpu, upper_bound, anomaly_flag in predictions:
+    # Backward-compat: -inf means "no risk info" → branch skipped
+        ub = upper_bound
 
-        signal = normalise_signal(raw_signal)   # Fix 3 applied here
+        raw_signal = engine.evaluate(predicted_cpu, ub, anomaly_flag=anomaly_flag)
+        logger.info(
+            f"cpu={predicted_cpu} upper={ub} anomaly={anomaly_flag} "
+            f"→ raw={raw_signal}"
+        )
+
+        signal = normalise_signal(raw_signal)
         execute(signal)
 
-        time.sleep(2)   # Pause between cycles (use 30–60s in real deployment)
-
+        time.sleep(2)
     logger.info("✅ Simulation complete.")
