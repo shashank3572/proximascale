@@ -1,53 +1,35 @@
-from flask import Flask, jsonify
-import threading
-import time
+from flask import Flask
 import math
+from monitoring.metrics import increment_request_count
 
 app = Flask(__name__)
 
-# Thread-safe request counter
-_lock = threading.Lock()
-_request_count = 0
-_request_rate = 0  # requests in the last 60s window, updated every 60s
 
 @app.before_request
 def count_request():
-    global _request_count
-    with _lock:
-        _request_count += 1
+    increment_request_count()
 
-def _reset_counter():
-    """Every 60s, snapshot count into request_rate, then reset."""
-    global _request_count, _request_rate
-    while True:
-        time.sleep(60)
-        with _lock:
-            _request_rate = _request_count
-            _request_count = 0
 
-threading.Thread(target=_reset_counter, daemon=True).start()
-
-@app.route("/")
-def home():
+@app.route("/work/light")
+def light_work():
     result = 0
-    for i in range(1, 500000):
+    for i in range(200000):
         result += math.sqrt(i)
-    return "App is running"
+    return "Light work completed"
 
-@app.route("/heavy")
-def heavy():
-    # CPU-intensive: simulate real load
+
+@app.route("/work/heavy")
+def heavy_work():
     result = 0
-    for i in range(1, 2000000):
+    for i in range(5000000):
         result += math.sqrt(i)
-    return "Heavy load complete"
+    return "Heavy work completed"
 
-@app.route("/metrics")
-def metrics():
-    """Exposes current request_rate for collector.py to poll."""
-    with _lock:
-        rate = _request_rate
-    return jsonify({"request_rate": rate})
+
+@app.route("/health")
+def health():
+    return "OK"
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000)

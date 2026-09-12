@@ -1,74 +1,118 @@
-"""
-collector.py — Polls CPU%, memory%, and request_rate every POLL_INTERVAL seconds.
-Stores each reading via storage.append_row().
-
-Usage (standalone):
-    python -m monitoring.collector
-
-Usage (from code):
-    from monitoring.collector import collect_metrics
-    records = collect_metrics(window=50)   # returns last 50 records as list of dicts
-"""
+import csv
+import json
+import os
 import time
-import psutil
-import requests
 from datetime import datetime
 
-from monitoring.schema import MetricRecord
-from monitoring import storage
+import docker
 
-POLL_INTERVAL = 10       # seconds between each sample
-import os
-APP_METRICS_URL = os.environ.get("APP_METRICS_URL", "http://localhost:5000/metrics")
+from monitoring.metrics import get_request_count, reset_request_count
 
 
-def _fetch_request_rate() -> int:
-    """
-    Calls the Flask /metrics endpoint to get request_rate.
-    Returns 0 if the app is unreachable (collector can start before the app).
-    """
+CONTAINER_NAME = "proximascale-app"
+FILE_PATH = "data/collected/metrics.csv"
+
+docker_client = docker.from_env()
+
+
+def get_container_cpu_percent():
+    container = docker_client.containers.get(CONTAINER_NAME)
+    stats = container.stats(stream=False)
+
+    cpu_delta = (
+        stats["cpu_stats"]["cpu_usage"]["total_usage"]
+        - stats["precpu_stats"]["cpu_usage"]["total_usage"]
+    )
+
+    system_delta = (
+        stats["cpu_stats"]["system_cpu_usage"]
+        - stats["precpu_stats"]["system_cpu_usage"]
+    )
+
+    if system_delta <= 0 or cpu_delta < 0:
+        return 0.0
+
+    num_cpus = stats["cpu_stats"].get("online_cpus", 1)
+
+    return round(
+        min((cpu_delta / system_delta) * num_cpus * 100, 100.0),
+        2
+    )
+
+
+def get_container_memory_percent():
+    container = docker_client.containers.get(CONTAINER_NAME)
+    stats = container.stats(stream=False)
+
+    usage = stats["memory_stats"]["usage"]
+    limit = stats["memory_stats"]["limit"]
+
+    return round((usage / limit) * 100, 2)
+
+
+def is_post_scaling():
+    event_path = "data/scaling_events.json"
+
+    if not os.path.exists(event_path):
+        return False
+
     try:
-        resp = requests.get(APP_METRICS_URL, timeout=3)
-        resp.raise_for_status()
-        return int(resp.json().get("request_rate", 0))
-    except Exception:
-        return 0
+        with open(event_path, "r") as file:
+            event = json.load(file)
+
+        elapsed = time.time() - event["timestamp"]
+        return elapsed < (event["expires_after_steps"] * 60)
+
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return False
 
 
-def collect_metrics(window: int = None) -> list:
-    """
-    Returns the last `window` MetricRecord dicts from storage.
-    If window is None, returns ALL stored records.
-    This is the function Person B's code can call for the latest data.
-    """
-    n = window if window is not None else 999_999
-    records = storage.read_last_n(n)
-    return [r.to_dict() for r in records]
+def ensure_csv_header():
+    os.makedirs(os.path.dirname(FILE_PATH), exist_ok=True)
+
+    if not os.path.exists(FILE_PATH) or os.path.getsize(FILE_PATH) == 0:
+        with open(FILE_PATH, "w", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow([
+                "timestamp",
+                "cpu_percent",
+                "memory_percent",
+                "request_rate",
+                "post_scaling"
+            ])
 
 
-def run_collector():
-    """
-    Infinite polling loop. Call this to actively collect + persist metrics.
-    Runs forever — launch in a thread or as a standalone process.
-    """
-    print(f"[collector] Starting. Polling every {POLL_INTERVAL}s → {storage.CSV_PATH}")
+def collect_metrics():
+    ensure_csv_header()
+
     while True:
-        cpu    = psutil.cpu_percent(interval=1)
-        memory = psutil.virtual_memory().percent
-        rate   = _fetch_request_rate()
-        ts     = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+        cpu = get_container_cpu_percent()
+        memory = get_container_memory_percent()
+        request_rate = get_request_count()
+        post_scaling = is_post_scaling()
+        timestamp = datetime.now().isoformat()
 
-        record = MetricRecord(
-            timestamp=ts,
-            cpu_percent=round(cpu, 2),
-            memory_percent=round(memory, 2),
-            request_rate=rate,
+        with open(FILE_PATH, "a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow([
+                timestamp,
+                cpu,
+                memory,
+                request_rate,
+                post_scaling
+            ])
+
+        print(
+            f"{timestamp} | "
+            f"Container CPU: {cpu}% | "
+            f"Container Memory: {memory}% | "
+            f"Requests: {request_rate} | "
+            f"Post-scaling: {post_scaling}"
         )
-        storage.append_row(record)
-        print(f"[collector] {ts} | CPU: {cpu}% | MEM: {memory}% | REQ/min: {rate}")
 
-        time.sleep(POLL_INTERVAL - 1)   # -1 because cpu_percent(interval=1) already took 1s
+        reset_request_count()
+        time.sleep(60)
 
 
 if __name__ == "__main__":
-    run_collector()
+    collect_metrics()

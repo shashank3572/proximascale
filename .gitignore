@@ -14,3 +14,16 @@ venv/
 # IDE
 .vscode/
 .idea/
+
+# Jupyter
+.ipynb_checkpoints/
+dashboard/.ipynb_checkpoints/
+
+# Project cache
+data/__pycache__/
+data/locust_scenarios/__pycache__/
+
+# Generated monitoring data
+data/collected/*.csv
+data/collected/*.db
+data/processed/
