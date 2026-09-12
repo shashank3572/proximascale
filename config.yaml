@@ -1,6 +1,22 @@
-scaling_rules:
-  cpu_upper_threshold: 75.0
-  cpu_lower_threshold: 30.0
-  max_containers: 5
-  min_containers: 1
-  target_service_image: "nginx:alpine" # Alpine is super lightweight
+# config.yaml (relevant keys)
+image: proximascale-worker:latest
+container_prefix: proximascale-worker
+
+min_containers: 1
+max_containers: 10                    # was 5 — matches locked spec
+
+cpu_quota: 50000                      # 0.5 CPU
+mem_limit: "256m"
+cpu_period: 100000
+
+cpu_upper_threshold: 75.0             # static fallback for adaptive
+cpu_lower_threshold: 30.0
+
+cooldown_seconds: 180
+tick_seconds: 3
+
+adaptive_window: 30
+adaptive_k: 1.5
+adaptive_min_samples: 10
+
+scale_down_strategy: newest           # or "oldest" — pick one and update both docs
