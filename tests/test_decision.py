@@ -128,3 +128,27 @@ def test_scaling_event_written_on_action(tmp_path, monkeypatch, engine):
     events = json.loads((tmp_path / "events.json").read_text())
     assert events[-1]["action"] == "scale_up"
     assert {"action", "timestamp", "expires_after_steps"} <= events[-1].keys()
+
+def test_anomaly_bypasses_cooldown_then_starts_fresh_cooldown(engine):
+    """
+    Full sequence:
+      1. High CPU            → scale_up, starts cooldown
+      2. Same step, high CPU → hold_cooldown (proves cooldown is active)
+      3. Anomaly while cool  → scale_up (proves anomaly bypasses cooldown)
+      4. High CPU again      → hold_cooldown (proves anomaly reset the clock)
+    """
+    # Step 1 — normal scale_up
+    r1 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r1 == "scale_up"
+
+    # Step 2 — cooldown is now armed
+    r2 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r2 == "hold_cooldown"
+
+    # Step 3 — anomaly ignores cooldown, fires scale_up, re-arms the clock
+    r3 = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
+    assert r3 == "scale_up"
+
+    # Step 4 — must be cooling down again from step 3 (not from step 1)
+    r4 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r4 == "hold_cooldown"
