@@ -1,5 +1,4 @@
 import docker
-from docker.errors import DockerException
 import uuid
 from actuator.scaler_interface import ScalerInterface
 
@@ -9,14 +8,10 @@ class DockerActuator(ScalerInterface):
         self.image = self.config['scaling_rules']['target_service_image']
         self.prefix = "ai_sysadmin_worker_"
         
-        # Safely attempt to connect to the Docker engine
-        try:
-            self.client = docker.from_env()
-            print(f"Actuator: Ensuring image {self.image} is available...")
-            self.client.images.pull(self.image)
-        except DockerException as e:
-            print("❌ Actuator Error: Cannot connect to Docker. Is it installed and running?")
-            self.client = None
+        # Let main.py handle the connection errors!
+        self.client = docker.from_env()
+        print(f"Actuator: Ensuring image {self.image} is available...")
+        self.client.images.pull(self.image)
 
     def get_workers(self):
         if not self.client:
