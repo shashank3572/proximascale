@@ -1,52 +1,92 @@
+# actuator/docker_scaler.py  (edited)
 import docker
-import uuid
-from actuator.scaler_interface import ScalerInterface
+import time
 
-class DockerActuator(ScalerInterface):
-    def __init__(self, config):
-        self.config = config
-        self.image = self.config['scaling_rules']['target_service_image']
-        self.prefix = "ai_sysadmin_worker_"
-        
-        # Let main.py handle the connection errors!
+
+class DockerActuator:
+    def __init__(self, config: dict):
+        # Flatten nested scaling_rules → same trick as engine
+        flat = dict(config)
+        flat.update(config.get("scaling_rules", {}))
+
         self.client = docker.from_env()
-        print(f"Actuator: Ensuring image {self.image} is available...")
-        self.client.images.pull(self.image)
 
-    def get_workers(self):
-        if not self.client:
-            return []
-        return self.client.containers.list(filters={"name": self.prefix})
+        # Image: accept either 'image' (flat) or 'target_service_image' (nested)
+        self.image = (
+            flat.get("image")
+            or flat.get("target_service_image")
+            or "nginx:alpine"
+        )
 
-    def scale_up(self):
-        if not self.client:
+        # Optional: pre-pull (no-op if already cached; mocked in tests)
+        try:
+            self.client.images.pull(self.image)
+        except Exception:
+            pass
+
+        self.container_prefix = flat.get("container_prefix", "proximascale-worker")
+        self.min_containers   = flat.get("min_containers", 1)
+        self.max_containers   = flat.get("max_containers", 10)
+
+        # cgroup limits — locked in the plan
+        self.cpu_quota  = int(flat.get("cpu_quota", 50_000))   # 0.5 CPU
+        self.mem_limit  = flat.get("mem_limit", "256m")
+        self.cpu_period = int(flat.get("cpu_period", 100_000))
+
+        self.scale_down_strategy = flat.get("scale_down_strategy", "newest")
+    # ------------------------------------------------------------------ helpers
+    def _workers(self):
+        """All running containers managed by this scaler, oldest → newest."""
+        containers = self.client.containers.list(
+            filters={"name": self.container_prefix}
+        )
+        # sort by creation time — Docker list order is not guaranteed
+        return sorted(containers, key=lambda c: c.attrs["Created"])
+
+    # ------------------------------------------------------------------ actions
+    def scale_up(self) -> bool:
+        current = self._workers()
+        if len(current) >= self.max_containers:
             return False
-            
-        workers = self.get_workers()
-        if len(workers) < self.config['scaling_rules']['max_containers']:
-            # Generate a unique 6-character string to avoid name collisions
-            unique_id = uuid.uuid4().hex[:6]
-            new_name = f"{self.prefix}{unique_id}"
-            
-            print(f"⚙️ Actuator: Spinning up new container -> {new_name}")
-            self.client.containers.run(self.image, name=new_name, detach=True)
-            return True
-            
-        print("⚠️ Actuator: Max container limit reached. Cannot scale up.")
-        return False
 
-    def scale_down(self):
-        if not self.client:
+        n = len(current) + 1
+        new_name = f"{self.container_prefix}-{n}-{int(time.time())}"
+
+        self.client.containers.run(
+            self.image,
+            name=new_name,
+            detach=True,
+            cpu_quota=self.cpu_quota,
+            cpu_period=self.cpu_period,
+            mem_limit=self.mem_limit,
+            # DO NOT auto-remove — we need it to survive for the demo
+            remove=False,
+        )
+        return True
+
+    def scale_down(self) -> bool:
+        current = self._workers()          # oldest → newest
+        if len(current) <= self.min_containers:
             return False
-            
-        workers = self.get_workers()
-        if len(workers) > self.config['scaling_rules']['min_containers']:
-            # Grab any active worker from the list safely
-            target = workers[0]
-            print(f"🛑 Actuator: Stopping and removing -> {target.name}")
-            target.stop()
-            target.remove()
-            return True
-            
-        print("⚠️ Actuator: Minimum container limit reached. Cannot scale down.")
-        return False
+
+        # Spec resolution: c.md says "most recently added" (containers[-1]);
+        # master plan says "oldest extra". Per audit, DEFAULT to newest
+        # (matches c.md, which is the stricter/authoritative doc), but keep
+        # it configurable so the team can flip without a code change.
+        pick = self._pick_down_target(current)
+        pick.stop(timeout=5)
+        pick.remove()
+        return True
+
+    def _pick_down_target(self, ordered):
+        strategy = self.cfg_strategy()
+        if strategy == "oldest":
+            return ordered[0]
+        return ordered[-1]                 # default: newest
+
+    def cfg_strategy(self):
+        # read from env if you don't want a constructor arg; or store on self
+        import os
+        return os.getenv("SCALE_DOWN_STRATEGY", "newest")
+
+DockerScaler = DockerActuator
