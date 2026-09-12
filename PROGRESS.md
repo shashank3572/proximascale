@@ -49,16 +49,16 @@ scaler.pkl committed alongside model weights.
 - [ ] Hand off metrics.csv to Person B for LSTM training
 ---
 
-## Person C — Decision Engine + Actuator
+## Person C ï¿½ Decision Engine + Actuator
 
-### Week 9 — Sem 1 (Complete)
-- decision/engine.py — evaluate() with static threshold, anomaly bypass, cooldown
-- decision/hysteresis.py — extracted Hysteresis class, 3 min cooldown
-- actuator/docker_scaler.py — Docker SDK, min/max replica guards, pull guard, sorted scale_down
-- actuator/scaler_interface.py — abstract base class
-- main.py — orchestration loop, signal normaliser, dummy predictions
-- tests/test_decision.py — 5 pytest cases, Docker mocked
-- tests/test_integration.py — 9 smoke tests
+### Week 9 ï¿½ Sem 1 (Complete)
+- decision/engine.py ï¿½ evaluate() with static threshold, anomaly bypass, cooldown
+- decision/hysteresis.py ï¿½ extracted Hysteresis class, 3 min cooldown
+- actuator/docker_scaler.py ï¿½ Docker SDK, min/max replica guards, pull guard, scale_down selects the newest worker container (configurable via scale_down_strategy); selection is deterministic via Created timestamp sort.
+- actuator/scaler_interface.py ï¿½ abstract base class
+- main.py ï¿½ orchestration loop, signal normaliser, dummy predictions
+- tests/test_decision.py ï¿½ 5 pytest cases, Docker mocked
+- tests/test_integration.py ï¿½ 9 smoke tests
 
 ### Status
 Semester 1 complete. Pending: swap dummy predictions for Person B's predict(records) call in main.py.

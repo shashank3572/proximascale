@@ -25,15 +25,21 @@ class DockerActuator:
             pass
 
         self.container_prefix = flat.get("container_prefix", "proximascale-worker")
-        self.min_containers   = flat.get("min_containers", 1)
-        self.max_containers   = flat.get("max_containers", 10)
+        self.min_containers = flat.get("min_containers", 1)
+        self.max_containers = flat.get("max_containers", 10)
 
         # cgroup limits — locked in the plan
-        self.cpu_quota  = int(flat.get("cpu_quota", 50_000))   # 0.5 CPU
-        self.mem_limit  = flat.get("mem_limit", "256m")
+        self.cpu_quota = int(flat.get("cpu_quota", 50_000))   # 0.5 CPU
+        self.mem_limit = flat.get("mem_limit", "256m")
         self.cpu_period = int(flat.get("cpu_period", 100_000))
 
-        self.scale_down_strategy = flat.get("scale_down_strategy", "newest")
+        import os
+        self.scale_down_strategy = (
+            flat.get("scale_down_strategy")
+            or os.getenv("SCALE_DOWN_STRATEGY")
+            or "newest"
+        )
+
     # ------------------------------------------------------------------ helpers
     def _workers(self):
         """All running containers managed by this scaler, oldest → newest."""
@@ -79,14 +85,13 @@ class DockerActuator:
         return True
 
     def _pick_down_target(self, ordered):
-        strategy = self.cfg_strategy()
-        if strategy == "oldest":
+        """Select a container to stop.
+        `ordered` is oldest → newest (from _workers()).
+        Strategy precedence: config.yaml > env var > default 'newest'.
+        """
+        if self.scale_down_strategy == "oldest":
             return ordered[0]
-        return ordered[-1]                 # default: newest
+        return ordered[-1]      # 'newest' (default)
 
-    def cfg_strategy(self):
-        # read from env if you don't want a constructor arg; or store on self
-        import os
-        return os.getenv("SCALE_DOWN_STRATEGY", "newest")
 
 DockerScaler = DockerActuator
