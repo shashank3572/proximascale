@@ -62,3 +62,25 @@ scaler.pkl committed alongside model weights.
 
 ### Status
 Semester 1 complete. Pending: swap dummy predictions for Person B's predict(records) call in main.py.
+
+
+### Semester 2 — Person C (decision & actuator)
+
+- `decision/engine.py` — `evaluate(predicted_cpu, upper_bound=None, anomaly_flag=False)`.
+  Locked 3-arg interface. Risk-aware scale-up branch (`upper_bound > upper_thresh`)
+  inserted between anomaly and cooldown checks. Returns
+  `scale_up` / `scale_down` / `hold` / `hold_cooldown`.
+- `decision/adaptive_threshold.py` — rolling-window mean ± k·σ with static fallback
+  under `min_samples`, floor/ceil clamps, and `min_band` guard against zero-variance
+  collapse. Replaces static config thresholds inside the engine.
+- `decision/scaling_log.py` — atomic append to `data/scaling_events.json`
+  (temp-file + `.replace()`, thread lock, required-key validation). One entry per
+  `scale_up` / `scale_down`; consumed by Person B's counterfactual correction.
+- `actuator/docker_scaler.py` — `cpu_quota=50000`, `cpu_period=100000`,
+  `mem_limit="256m"` passed into `containers.run()`. Deterministic `scale_down`
+  selection via sort by `attrs["Created"]`; strategy configurable via
+  `scale_down_strategy` in `config.yaml` (or `SCALE_DOWN_STRATEGY` env var).
+- `config.yaml` — `max_containers` corrected 5 → 10 to match the locked spec.
+- Tests: `tests/test_adaptive_threshold.py` (3), `tests/test_scaling_log.py` (3),
+  3 new cases in `tests/test_decision.py` covering `upper_bound` branch and
+  event-log writing. **26/26 pass.**
