@@ -1,10 +1,11 @@
 # actuator/docker_scaler.py  (edited)
 import docker
 import time
+from actuator.scaler_interface import ScalerInterface
 
-
-class DockerActuator:
-    def __init__(self, config: dict):
+class DockerActuator(ScalerInterface):
+    def __init__(self, config):
+        super().__init__()
         # Flatten nested scaling_rules → same trick as engine
         flat = dict(config)
         flat.update(config.get("scaling_rules", {}))
@@ -92,6 +93,10 @@ class DockerActuator:
         if self.scale_down_strategy == "oldest":
             return ordered[0]
         return ordered[-1]      # 'newest' (default)
+
+    def hold(self) -> bool:
+        """No-op for Docker — nothing to do for a hold decision."""
+        return True
 
 
 DockerScaler = DockerActuator
