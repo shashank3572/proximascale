@@ -84,3 +84,22 @@ Semester 1 complete. Pending: swap dummy predictions for Person B's predict(reco
 - Tests: `tests/test_adaptive_threshold.py` (3), `tests/test_scaling_log.py` (3),
   3 new cases in `tests/test_decision.py` covering `upper_bound` branch and
   event-log writing. **26/26 pass.**
+  #### Scale-down target — spec conflict resolution
+
+`c.md` specifies "remove the most recently added container" (`containers[-1]`).
+`PROXIMASCALE_MASTER_PLAN_1.md` says "stops oldest extra container."
+These conflict.
+
+**Resolution (adopted):** default to **newest** (follows `c.md`, the stricter doc),
+configurable via `scale_down_strategy: newest|oldest` in `config.yaml`, or
+`SCALE_DOWN_STRATEGY` env var. Deterministic selection via sort on
+`container.attrs["Created"]`; `_pick_down_target()` respects the configured value.
+Team to formally reconcile the two documents before Week 5 handoff.
+
+#### Scope note — main.py and tests/test_integration.py
+
+Per the master plan, `main.py` and `tests/test_integration.py` are **Person D's
+files** ("DO NOT TOUCH" for Person C). I wrote them as temporary integration
+scaffolds so we could demonstrate the full pipeline end-to-end before
+Person D's actuator dispatch landed. Ownership remains Person D's; request
+sign-off / handoff before Week 5.
