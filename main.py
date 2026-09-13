@@ -70,16 +70,14 @@ if __name__ == "__main__":
     predictions = simulate_lstm_predictions()
 
     for predicted_cpu, upper_bound, anomaly_flag in predictions:
-    # Backward-compat: -inf means "no risk info" → branch skipped
-        ub = upper_bound
-
-        raw_signal = engine.evaluate(predicted_cpu, ub, anomaly_flag=anomaly_flag)
+        raw_signal = engine.evaluate(predicted_cpu, upper_bound,
+                                 anomaly_flag=anomaly_flag)
         logger.info(
-            f"cpu={predicted_cpu} upper={ub} anomaly={anomaly_flag} "
-            f"→ raw={raw_signal}"
+            f"cpu={predicted_cpu} upper={upper_bound} anomaly={anomaly_flag} "
+            f"→ {raw_signal} (reason={engine.last_reason})"
         )
 
-        signal = normalise_signal(raw_signal)
+        signal = normalise_signal(raw_signal)   # still fine — no-op on the new set
         execute(signal)
 
         time.sleep(2)
