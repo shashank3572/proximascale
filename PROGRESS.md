@@ -47,3 +47,65 @@ scaler.pkl committed alongside model weights.
 - [ ] Regenerate metrics.csv — run all 3 Locust scenarios
 - [ ] Target: ≥1,000 rows with real variance
 - [ ] Hand off metrics.csv to Person B for LSTM training
+
+# ProximaScale — Progress Report
+
+## Overview
+ProximaScale is a proactive autoscaling load predictor combining a multivariate
+LSTM and Prophet in a hybrid ensemble, forecasting CPU load ~90 seconds ahead
+of real spikes. Two novelty contributions:
+- **MC Dropout uncertainty estimation** (primary novelty) — quantifies forecast
+  confidence via stochastic Dropout-active forward passes (mean, std, upper bound).
+- **Counterfactual correction** (original novelty) — corrects the self-masking
+  bias that occurs when the system's own proactive scaling suppresses the load
+  signal it's trying to learn from.
+
+## Completed
+- **Data pipeline**: chronological train/test split, MinMax scaling (fit on
+  train only), sliding windows of shape (10, 3) → (3,)
+- **Multivariate LSTM**: LSTM(64)→Dropout(0.2)→LSTM(32)→Dropout(0.2)→Dense(3),
+  trained on cpu/memory/request-rate
+- **Prophet model**: univariate CPU forecaster, 3-step horizon
+- **Hybrid ensemble**: weighted blend of LSTM + Prophet forecasts
+- **MC Dropout uncertainty**: 30 stochastic forward passes → mean, std, upper
+  bound (mean + 2·std)
+- **Anomaly detection**: rolling Z-score (threshold 2.5) on live CPU readings
+- **Counterfactual correction**: blends post-scaling readings toward a
+  pre-scaling baseline (0.6 actual / 0.4 baseline)
+- **Training pipeline**: end-to-end script, saves scaler/model/Prophet artifacts
+- **Shared interface**: `predict_load(window) -> (predicted_load, upper_bound,
+  is_anomaly)` — the integration point for Person D's main loop; lazy-loads
+  all artifacts, never crashes (falls back to a safe heuristic on failure)
+- **Evaluation harness**: 4-way comparison (Reactive / Univariate LSTM /
+  Multivariate LSTM / Hybrid) on RMSE, MAE, scaling lead time, oscillation count
+- **requirements.txt + commit checklist** for `feature/lstm-model`
+
+## Current status
+First real-data evaluation run (82 training rows, 5 test windows):
+
+| Method | RMSE | MAE |
+|---|---|---|
+| Reactive (baseline) | 38.95 | 32.36 |
+| Univariate LSTM | 44.48 | 39.92 |
+| Multivariate LSTM | 16.97 | 14.63 |
+| Hybrid (LSTM+Prophet) | 22.06 | 21.90 |
+
+Multivariate LSTM clearly beats the naive baseline. Hybrid currently
+underperforms the raw LSTM — traced to Prophet's forecast being static
+(trained once, doesn't adapt per-window), diluting an otherwise strong live
+signal at the default 0.7/0.3 blend.
+
+## Known limitations
+- Real dataset is currently very small (82 training rows / 5 test windows) —
+  RMSE numbers are preliminary, not statistically conclusive.
+- Scaling lead time could not be measured on this dataset (test split
+  contained no threshold-crossing spike to measure advance warning against).
+- Prophet's static forecast is a known architectural limitation of the
+  current ensemble design.
+
+## Next steps
+- [ ] Get a larger real dataset (in progress, with a collaborator)
+- [ ] Retrain Prophet + LSTM on the larger dataset
+- [ ] Re-run evaluation; re-check whether Hybrid-underperforms-LSTM still holds
+- [ ] Sweep LSTM_WEIGHT/PROPHET_WEIGHT (candidates: 0.9/0.1, 0.85/0.15, 0.95/0.05)
+- [ ] Finalize and push to `feature/lstm-model`
