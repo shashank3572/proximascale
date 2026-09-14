@@ -1,0 +1,4 @@
+condition,avg_ms,p95_ms,replicas
+No scaling,1240,2180,1
+Reactive,780,1520,2
+ProximaScale,310,540,2
