@@ -1,4 +1,3 @@
-import csv
 import json
 import os
 import time
@@ -6,13 +5,12 @@ from datetime import datetime
 
 import docker
 
-from monitoring.metrics import get_request_count, reset_request_count
+from monitoring.metrics import reset_request_count
+from monitoring.schema import MetricRecord
+from monitoring.storage import append_row
 
 
 CONTAINER_NAME = "proximascale-app"
-FILE_PATH = "data/collected/metrics.csv"
-
-docker_client = docker.from_env()
 
 
 def get_container_cpu_percent():
@@ -67,40 +65,29 @@ def is_post_scaling():
         return False
 
 
-def ensure_csv_header():
-    os.makedirs(os.path.dirname(FILE_PATH), exist_ok=True)
-
-    if not os.path.exists(FILE_PATH) or os.path.getsize(FILE_PATH) == 0:
-        with open(FILE_PATH, "w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow([
-                "timestamp",
-                "cpu_percent",
-                "memory_percent",
-                "request_rate",
-                "post_scaling"
-            ])
+docker_client = docker.from_env()
 
 
 def collect_metrics():
-    ensure_csv_header()
-
     while True:
         cpu = get_container_cpu_percent()
         memory = get_container_memory_percent()
-        request_rate = get_request_count()
+        # reset_request_count() reads-and-clears the counter in a single
+        # transaction, so a request that arrives mid-poll is never lost
+        # or double-counted (unlike calling get_request_count() followed
+        # by a separate reset_request_count()).
+        request_rate = reset_request_count()
         post_scaling = is_post_scaling()
         timestamp = datetime.now().isoformat()
 
-        with open(FILE_PATH, "a", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow([
-                timestamp,
-                cpu,
-                memory,
-                request_rate,
-                post_scaling
-            ])
+        record = MetricRecord(
+            timestamp=timestamp,
+            cpu_percent=cpu,
+            memory_percent=memory,
+            request_rate=request_rate,
+            post_scaling=post_scaling,
+        )
+        append_row(record)
 
         print(
             f"{timestamp} | "
@@ -110,7 +97,6 @@ def collect_metrics():
             f"Post-scaling: {post_scaling}"
         )
 
-        reset_request_count()
         time.sleep(60)
 
 
