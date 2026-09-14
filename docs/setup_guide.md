@@ -77,7 +77,7 @@ In a **separate terminal** (with venv active):
 python -m monitoring.collector
 ```
 
-This polls CPU/memory/request_rate every 10 seconds and appends to `data/collected/metrics.csv`.
+This polls CPU/memory/request_rate every 30 seconds and appends to `data/collected/metrics.csv`.
 
 ---
 

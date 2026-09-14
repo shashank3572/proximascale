@@ -7,13 +7,18 @@ Modes:
   python main.py --simulate → simulation mode with hardcoded predictions (no GPU needed)
 
 Pipeline:
-  collect_metrics(window=10)   [Person A]
+  collect_metrics(window=10)                         [Person A]
        ↓
-  predict(records)             [Person B]
+  predict_load(records) -> (cpu, upper_bound, anomaly)[Person B, Semester-2]
        ↓
-  engine.evaluate(cpu, anomaly)[Person C]
+  engine.evaluate(cpu, anomaly)                       [Person C]
        ↓
-  execute(signal)              [Person D → DockerActuator]
+  execute(signal)                                     [Person D → DockerActuator]
+
+NOTE: upper_bound (MC-Dropout mean + 2*std) is returned by predict_load()
+but not yet consumed by DecisionEngine.evaluate() -- it's logged for now.
+Wiring it into the scaling decision (e.g. scale up preemptively when the
+upper bound alone crosses the threshold) is an open improvement, not a bug.
 """
 import os
 import sys
@@ -68,16 +73,22 @@ def simulate_lstm_predictions():
 
 
 # ── Real model loop ───────────────────────────────────────────────────────────
-def run_real_loop(poll_interval: int = 60):
+def run_real_loop(poll_interval: int = 30):
     """
     Production loop:
       1. Collect last 10 metric readings from monitoring CSV
-      2. Call Person B's predict() to get CPU forecast + anomaly flag
+      2. Call Person B's predict_load() to get CPU forecast + anomaly flag
       3. Evaluate with decision engine
       4. Execute scaling action
+
+    poll_interval defaults to 30s to match monitoring/collector.py's
+    POLL_INTERVAL and the model's trained sampling rate (SAMPLING_INTERVAL_SEC
+    in model/evaluate.py, DEFAULT_FREQ in model/prophet_model.py). Don't
+    change one without the others -- lead-time and Prophet's forecast horizon
+    are both computed assuming 30s between samples.
     """
     from monitoring.collector import collect_metrics
-    from model.predict import predict            # Person B's interface
+    from model.predict import predict_load        # Person B's Semester-2 interface
 
     logger.info(f"Real loop starting. Poll interval: {poll_interval}s")
 
@@ -92,13 +103,13 @@ def run_real_loop(poll_interval: int = 60):
             time.sleep(poll_interval)
             continue
 
-        result        = predict(records[-10:])   # always use the 10 most recent
-        predicted_cpu = result["predicted_cpu"][0]   # use 1-step-ahead value for decision
-        anomaly_flag  = result["anomaly"]
+        # Semester-2: predict_load() returns a 3-tuple, not the old
+        # {"predicted_cpu": [...], "anomaly": bool} dict.
+        predicted_cpu, upper_bound, anomaly_flag = predict_load(records[-10:])
 
         logger.info(
-            f"Predicted CPU (next 3 steps): {[round(v,1) for v in result['predicted_cpu']]} | "
-            f"Anomaly: {anomaly_flag}"
+            f"Predicted CPU (~90s ahead): {round(predicted_cpu, 1)} | "
+            f"Upper bound: {round(upper_bound, 1)} | Anomaly: {anomaly_flag}"
         )
 
         raw_signal = engine.evaluate(predicted_cpu, anomaly_flag=anomaly_flag)
@@ -137,7 +148,7 @@ def run_simulation():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ProximaScale orchestration loop")
     parser.add_argument("--simulate", action="store_true")
-    parser.add_argument("--interval", type=int, default=60)
+    parser.add_argument("--interval", type=int, default=30)
     args = parser.parse_args()
 
     logger.info("ProximaScale starting...")

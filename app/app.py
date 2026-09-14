@@ -24,7 +24,11 @@ app = Flask(__name__)
 # ── Thread-safe request counter ──────────────────────────────────────────────
 _lock = threading.Lock()
 _request_count = 0
-_request_rate  = 0          # updated every 60 s by the background thread
+_REQUEST_RATE_WINDOW = 30   # seconds -- must match monitoring/collector.py's
+                            # POLL_INTERVAL, or collector.py polls this
+                            # endpoint faster/slower than the window slides
+                            # and request_rate reads stale or double-counted.
+_request_rate  = 0          # updated every _REQUEST_RATE_WINDOW s by the background thread
 
 
 @app.before_request
@@ -35,10 +39,10 @@ def count_request():
 
 
 def _reset_counter():
-    """Background thread: slides the 60-second request-rate window."""
+    """Background thread: slides the request-rate window."""
     global _request_count, _request_rate
     while True:
-        time.sleep(60)
+        time.sleep(_REQUEST_RATE_WINDOW)
         with _lock:
             _request_rate  = _request_count
             _request_count = 0
