@@ -56,3 +56,29 @@ scaler.pkl committed alongside model weights. Ready for integration.
 
 ### Status
 Semester 1 complete. Pending: swap dummy predictions for Person B's predict(records) call in main.py.
+
+## Person D — Integration (Semester 2, interface merge)
+
+### Status (this branch: integration-fix, off dev)
+- Merged Person B's Semester-2 `model/predict_load()` (LSTM+MC Dropout+Prophet
+  ensemble, counterfactual correction, anomaly check) into `main.py`. The real
+  loop now calls `predict_load()` and unpacks `(predicted_cpu, upper_bound,
+  anomaly_flag)` instead of the old Semester-1 `predict()` dict.
+- `upper_bound` is logged but not yet consumed by `DecisionEngine.evaluate()`
+  — evaluate() still takes only `(predicted_cpu, anomaly_flag)`. Wiring the
+  uncertainty bound into the scaling decision is open, not done.
+- Renamed `model/saved/evaluation_chart.png` -> `evaluation_chart_DUMMY_DATA_semester1.png`
+  and added `model/saved/README.md` — that chart was generated from synthetic
+  data, not the real Semester-2 dataset, and was at risk of being cited in the
+  report as a real result.
+
+### Still open (blocked or not this integration's scope)
+- No real-data evaluation run/committed (`data/collected/metrics.csv` is 81
+  rows — blocked on Person A delivering >=1,000 rows per their own TODO below)
+- Experiment 4 (with/without counterfactual ablation) not implemented —
+  evaluate.py currently applies correction uniformly to all 4 methods
+  (Person B)
+- No pytest coverage for model/*.py — only `__main__` self-tests exist
+  (Person B)
+- Provenance of committed `model/saved/*.h5`/`.pkl` (real 81-row data vs.
+  `metrics_dummy_backup.csv`) is unrecorded (Person B)
