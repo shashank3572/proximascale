@@ -73,13 +73,19 @@ def simulate_lstm_predictions():
 
 
 # ── Real model loop ───────────────────────────────────────────────────────────
-def run_real_loop(poll_interval: int = 60):
+def run_real_loop(poll_interval: int = 30):
     """
     Production loop:
       1. Collect last 10 metric readings from monitoring CSV
-      2. Call Person B's predict() to get CPU forecast + anomaly flag
+      2. Call Person B's predict_load() to get CPU forecast + anomaly flag
       3. Evaluate with decision engine
       4. Execute scaling action
+
+    poll_interval defaults to 30s to match monitoring/collector.py's
+    POLL_INTERVAL and the model's trained sampling rate (SAMPLING_INTERVAL_SEC
+    in model/evaluate.py, DEFAULT_FREQ in model/prophet_model.py). Don't
+    change one without the others -- lead-time and Prophet's forecast horizon
+    are both computed assuming 30s between samples.
     """
     from monitoring.collector import collect_metrics
     from model.predict import predict_load        # Person B's Semester-2 interface
@@ -142,7 +148,7 @@ def run_simulation():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ProximaScale orchestration loop")
     parser.add_argument("--simulate", action="store_true")
-    parser.add_argument("--interval", type=int, default=60)
+    parser.add_argument("--interval", type=int, default=30)
     args = parser.parse_args()
 
     logger.info("ProximaScale starting...")
