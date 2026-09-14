@@ -1,4 +1,4 @@
-﻿# ProximaScale — all dependencies pinned
+# ProximaScale ? all dependencies pinned
 
 # LSTM model (Person B)
 tensorflow==2.21.0
@@ -21,3 +21,4 @@ pytest>=8.0.0
 # Integration (Person D)
 pyyaml==6.0.1
 docker==7.1.0
+
