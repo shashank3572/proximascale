@@ -36,7 +36,7 @@ timestamp,cpu_percent,memory_percent,request_rate
 ```
 
 - Header row always present (written by `monitoring/storage.py`)
-- One row per polling interval (default: every 10 seconds)
+- One row per polling interval (default: every 30 seconds)
 - Parsed by `monitoring/schema.py → MetricRecord.from_csv_row()`
 
 ---
