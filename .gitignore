@@ -27,3 +27,5 @@ data/locust_scenarios/__pycache__/
 data/collected/*.csv
 data/collected/*.db
 data/processed/
+
+.venv/
