@@ -1,92 +1,83 @@
-import os
-os.environ["TF_USE_LEGACY_KERAS"] = "1"
-import numpy as np
-import pandas as pd
-import sys
-import joblib
+"""
+ProximaScale - Phase 8: Training Pipeline
+------------------------------------------
+Ties Phase 1 (preprocessing) and Phase 2 (LSTM architecture) together into
+an actual training run: load CSV -> preprocess -> train -> save model.
 
-# Fix bare imports — works whether called from model/ or project root
-sys.path.insert(0, os.path.dirname(__file__))
+Produces model/saved/proximascale_lstm.h5, the file Phase 9's predict_load()
+will lazy-load.
+"""
 
-from lstm_model import build_model
-from preprocessing import scale_data, create_windows, train_test_split_data
+from pathlib import Path
 
-def generate_synthetic_data(n=500):
+from preprocessing import prepare_training_data
+from lstm_model import build_model, MODEL_PATH
+
+THIS_DIR = Path(__file__).parent
+DEFAULT_CSV = THIS_DIR.parent / "data" / "collected" / "metrics.csv"
+
+EPOCHS = 50
+BATCH_SIZE = 32
+EARLY_STOPPING_PATIENCE = 5
+
+
+def train_model(csv_path=DEFAULT_CSV, epochs=EPOCHS, batch_size=BATCH_SIZE,
+                 model_path=MODEL_PATH):
     """
-    Generates synthetic data that looks like real server metrics.
-    We use this to prototype before Person A gives us real data.
+    Runs the full training pipeline and saves the trained model to disk.
+    Returns (model, history, X_test, y_test, scaler) so evaluate.py
+    (Phase 10) can reuse the exact same test split without recomputing it.
     """
-    np.random.seed(42)
-    t = np.linspace(0, 50, n)
+    try:
+        from tensorflow.keras.callbacks import EarlyStopping
 
-    cpu_percent    = 50 + 40 * np.sin(t) + np.random.normal(0, 8, n)   # NEW: max ~100
-    memory_percent = 50 + 10 * np.sin(t + 1) + np.random.normal(0, 3, n)
-    request_rate   = 400 + 350 * np.sin(t + 2) + np.random.normal(0, 60, n) # NEW: max ~900
+        X_train, y_train, X_test, y_test, scaler = prepare_training_data(csv_path)
 
-    cpu_percent    = np.clip(cpu_percent, 0, 100)
-    memory_percent = np.clip(memory_percent, 0, 100)
-    request_rate   = np.clip(request_rate, 0, 1000)
+        model = build_model()
 
-    timestamps = pd.date_range(start='2024-01-15', periods=n, freq='1min')
+        early_stopping = EarlyStopping(
+            monitor="val_loss",
+            patience=EARLY_STOPPING_PATIENCE,
+            restore_best_weights=True,
+        )
 
-    df = pd.DataFrame({
-        'timestamp'     : timestamps,
-        'cpu_percent'   : cpu_percent,
-        'memory_percent': memory_percent,
-        'request_rate'  : request_rate
-    })
-    return df
+        print(f"🧠 [ProximaScale] Training on {X_train.shape[0]} windows, "
+              f"validating on {X_test.shape[0]} windows...")
 
-def train(data_path=None):
-    if data_path:
-        from preprocessing import load_data
-        print(f"Loading real data from {data_path}...")
-        df = load_data(data_path)
-    else:
-        print("Generating synthetic training data...")
-        df = generate_synthetic_data(n=500)
+        history = model.fit(
+            X_train, y_train,
+            validation_data=(X_test, y_test),
+            epochs=epochs,
+            batch_size=batch_size,
+            callbacks=[early_stopping],
+            verbose=1,
+        )
 
-    print("Scaling data...")
-    scaled, scaler = scale_data(df)
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        model.save(model_path)
+        print(f"🧠 [ProximaScale] Model saved -> {model_path}")
 
-    print("Creating windows...")
-    X, y = create_windows(scaled)
-    print(f"Dataset size — X: {X.shape}, y: {y.shape}")
+        final_train_loss = history.history["loss"][-1]
+        final_val_loss = history.history["val_loss"][-1]
+        print(f"🧠 [ProximaScale] Final train loss (MSE, scaled): {final_train_loss:.5f}")
+        print(f"🧠 [ProximaScale] Final val loss (MSE, scaled):   {final_val_loss:.5f}")
 
-    print("Splitting into train/test...")
-    X_train, X_test, y_train, y_test = train_test_split_data(X, y)
-    print(f"Train size: {X_train.shape}, Test size: {X_test.shape}")
+        return model, history, X_test, y_test, scaler
+    except Exception as e:
+        print(f"🧠 [ProximaScale] ERROR in train_model: {e}")
+        raise
 
-    print("Building model...")
-    model = build_model()
-
-    print("Training model...")
-    model.fit(
-        X_train, y_train,
-        epochs=20,
-        batch_size=32,
-        validation_data=(X_test, y_test),
-        verbose=1
-    )
-
-    # FIX: Use absolute path based on this file's location,
-    # so train.py works whether called from project root or model/ dir.
-    SAVE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'saved')
-    os.makedirs(SAVE_DIR, exist_ok=True)
-
-    scaler_path = os.path.join(SAVE_DIR, 'scaler.pkl')
-    model_path  = os.path.join(SAVE_DIR, 'proximascale_lstm.h5')
-
-    joblib.dump(scaler, scaler_path)
-    print(f"Scaler saved to {scaler_path}")
-
-    model.save(model_path)
-    print(f"Model saved to {model_path}")
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, default=None,
-                        help='Path to real CSV from Person A (optional)')
-    args = parser.parse_args()
-    train(data_path=args.data)
+    model, history, X_test, y_test, scaler = train_model()
+
+    assert MODEL_PATH.exists(), f"Expected saved model at {MODEL_PATH}, but it's missing"
+    print(f"🧠 [ProximaScale] Confirmed model file exists on disk: {MODEL_PATH}")
+
+    # Sanity: val_loss should be a real, finite number -- catches silent NaN
+    # blowups (common with LSTMs on unscaled or badly-shaped data).
+    final_val_loss = history.history["val_loss"][-1]
+    assert final_val_loss == final_val_loss, "val_loss is NaN -- training diverged"  # NaN != NaN
+    print(f"🧠 [ProximaScale] val_loss is finite ({final_val_loss:.5f}) -- training did not diverge")
+
+    print("🧠 [ProximaScale] Training pipeline self-test PASSED.")
