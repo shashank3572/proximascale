@@ -2,7 +2,7 @@
 
 # LSTM model (Person B)
 tensorflow==2.21.0
-tf-keras==2.16.0
+tf-keras==2.21.0
 scikit-learn==1.8.0
 pandas==3.0.2
 numpy==2.4.4
