@@ -15,3 +15,5 @@ venv/
 .vscode/
 .idea/
 app/.app.py.swp
+
+data/scaling_events.json
