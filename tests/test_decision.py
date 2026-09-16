@@ -57,17 +57,17 @@ def test_high_cpu_triggers_scale_up(engine):
 # Test 2: low CPU → scale_down
 # ---------------------------------------------------------------------------
 def test_low_cpu_triggers_scale_down(engine):
-    """cpu=10 is below lower_threshold (30) → must return scale_down"""
-    # Give the engine 2 fake running containers so min_containers (1) is not hit
+    """cpu=10 is below lower_threshold (30) → must return scale_down."""
+    # Need >min_containers workers so scale_down is actually allowed
+    engine.actuator._workers = lambda: [MagicMock(), MagicMock()]
+    engine.hysteresis.last_action_time = 0   # ensure no cooldown
 
-    c1, c2 = MagicMock(), MagicMock()
-    c1.name = "proximascale_1"
-    c2.name = "proximascale_2"
-    engine.actuator.client.containers.list.return_value = [c1, c2]
-    engine.hysteresis.last_action_time = 0
+    result = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=False)
 
-    result = engine.evaluate(predicted_cpu=10.0, anomaly_flag=False)
     assert result == "scale_down", f"Expected 'scale_down', got '{result}'"
+    assert engine.last_reason == "cpu_low"
+
+
 # ---------------------------------------------------------------------------
 # Test 3: mid-range CPU → hold
 # ---------------------------------------------------------------------------
@@ -94,13 +94,111 @@ def test_anomaly_flag_forces_scale_up_regardless_of_cpu(engine):
 # ---------------------------------------------------------------------------
 # Test 5 (bonus): cooldown is respected after an action
 # ---------------------------------------------------------------------------
-def test_cooldown_returns_hold_cooldown(engine):
-    """After a scale action, the next call within cooldown must return hold_cooldown"""
-    # First call — triggers scale_up and records time
-    engine.evaluate(predicted_cpu=90.0, anomaly_flag=False)
+def test_cooldown_returns_hold_with_reason(engine):
+    """After a real scale action, subsequent calls inside cooldown return
+    'hold' (locked 3-value contract) with last_reason == 'cooldown'."""
+    r1 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r1 == "scale_up"
+    assert engine.last_reason == "cpu_high"
 
-    # Immediately call again — should be inside cooldown window
-    result = engine.evaluate(predicted_cpu=90.0, anomaly_flag=False)
-    assert result == "hold_cooldown", (
-        f"Expected 'hold_cooldown' during cooldown window, got '{result}'"
-    )
+    r2 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r2 == "hold"
+    assert engine.last_reason == "cooldown"
+
+def test_upper_bound_triggers_scale_up_even_when_mean_is_safe(engine):
+    # mean 50 is below static upper 75, but upper_bound 85 > threshold
+    action = engine.evaluate(predicted_cpu=50.0, upper_bound=85.0, anomaly_flag=False)
+    assert action == "scale_up"
+
+
+def test_upper_bound_not_triggered_when_low(engine):
+    # warm the window so adaptive bounds are ~50 ± 5
+    for _ in range(15):
+        engine.evaluate(predicted_cpu=50.0, upper_bound=50.0, anomaly_flag=False)
+    engine.hysteresis.last_action_time = 0       # clear cooldown if any
+    action = engine.evaluate(predicted_cpu=50.0, upper_bound=60.0, anomaly_flag=False)
+    assert action == "hold"
+
+
+def test_scaling_event_written_on_action(tmp_path, monkeypatch, engine):
+    import json
+    import decision.scaling_log as slog
+    monkeypatch.setattr(slog, "_LOG_PATH", tmp_path / "events.json")
+
+    engine.evaluate(predicted_cpu=95.0, upper_bound=99.0, anomaly_flag=False)
+
+    events = json.loads((tmp_path / "events.json").read_text())
+    assert events[-1]["action"] == "scale_up"
+    assert {"action", "timestamp", "expires_after_steps"} <= events[-1].keys()
+
+def test_anomaly_bypasses_cooldown_then_starts_fresh_cooldown(engine):
+    """
+    Full sequence under the locked 3-value contract:
+      1. High CPU            → scale_up, starts cooldown
+      2. High CPU again      → hold (reason=cooldown)
+      3. Anomaly while cool  → scale_up (bypasses cooldown)
+      4. High CPU again      → hold (anomaly re-armed the clock)
+    """
+    # Step 1 — normal scale_up
+    r1 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r1 == "scale_up"
+    assert engine.last_reason == "cpu_high"
+
+    # Step 2 — cooldown is now armed
+    r2 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r2 == "hold"
+    assert engine.last_reason == "cooldown"
+
+    # Step 3 — anomaly ignores cooldown, fires scale_up, re-arms the clock
+    r3 = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
+    assert r3 == "scale_up"
+    assert engine.last_reason == "anomaly"
+
+    # Step 4 — must be cooling down again from step 3
+    r4 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r4 == "hold"
+    assert engine.last_reason == "cooldown"
+
+import json
+
+def test_no_event_logged_when_actuator_is_none(tmp_path, monkeypatch, engine):
+    """If actuator is unavailable, evaluate() returns 'hold' and does NOT log."""
+    import decision.scaling_log as slog
+    monkeypatch.setattr(slog, "_LOG_PATH", tmp_path / "events.json")
+
+    engine.actuator = None
+    result = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+
+    assert result == "hold"
+    assert engine.last_reason == "cpu_high_no_actuator"
+    assert not (tmp_path / "events.json").exists()
+
+
+def test_no_event_logged_when_at_max_replicas(tmp_path, monkeypatch, engine):
+    """If scale_up returns False (max reached), do NOT log, do NOT arm cooldown."""
+    import decision.scaling_log as slog
+    monkeypatch.setattr(slog, "_LOG_PATH", tmp_path / "events.json")
+
+    engine.actuator.scale_up = lambda: False
+    result = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+
+    assert result == "hold"
+    assert engine.last_reason == "max_reached"
+    assert not (tmp_path / "events.json").exists()
+    assert not engine.hysteresis.is_cooling_down()   # cooldown NOT armed
+
+
+def test_no_event_logged_when_actuator_raises(tmp_path, monkeypatch, engine):
+    """An SDK exception must be caught, treated as hold, and NOT logged."""
+    import decision.scaling_log as slog
+    monkeypatch.setattr(slog, "_LOG_PATH", tmp_path / "events.json")
+
+    def boom():
+        raise RuntimeError("docker daemon unreachable")
+    engine.actuator.scale_up = boom
+
+    result = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+
+    assert result == "hold"
+    assert engine.last_reason == "cpu_high_error"
+    assert not (tmp_path / "events.json").exists()

@@ -7,18 +7,18 @@ Modes:
   python main.py --simulate → simulation mode with hardcoded predictions (no GPU needed)
 
 Pipeline:
-  collect_metrics(window=10)                         [Person A]
+  collect_metrics(window=10)                                [Person A]
        ↓
-  predict_load(records) -> (cpu, upper_bound, anomaly)[Person B, Semester-2]
+  predict_load(records) -> (cpu, upper_bound, anomaly)       [Person B, Semester-2]
        ↓
-  engine.evaluate(cpu, anomaly)                       [Person C]
+  engine.evaluate(cpu, upper_bound, anomaly_flag=anomaly)    [Person C, Semester-2]
        ↓
-  execute(signal)                                     [Person D → DockerActuator]
+  execute(signal)                                            [Person D → DockerActuator]
 
-NOTE: upper_bound (MC-Dropout mean + 2*std) is returned by predict_load()
-but not yet consumed by DecisionEngine.evaluate() -- it's logged for now.
-Wiring it into the scaling decision (e.g. scale up preemptively when the
-upper bound alone crosses the threshold) is an open improvement, not a bug.
+upper_bound (MC-Dropout mean + 2*std) is now passed straight into
+DecisionEngine.evaluate(), which scales up preemptively if the upper bound
+alone crosses the risk threshold -- see decision/engine.py's upper_bound
+branch (Person C, Semester-2).
 """
 import os
 import sys
@@ -26,6 +26,7 @@ import time
 import logging
 import argparse
 
+from decision.scaling_log import clear_scaling_events
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,18 +58,20 @@ def execute(signal: str):
 
 # ── Simulation predictions (used with --simulate flag) ───────────────────────
 def simulate_lstm_predictions():
-    """
-    Hardcoded predictions standing in for Person B's model.
-    Use this when you don't want to load TensorFlow (e.g., quick demo).
-    Replace with real predict() call for actual deployment.
+    """Dummy predictions standing in for Person B's model output.
+
+    Each row: (predicted_cpu, upper_bound_or_None, anomaly_flag).
+    None = 'Person B hasn't shipped MC-Dropout yet' -> risk branch skipped.
+    Swap for: from model.predict import predict_load
     """
     return [
-        (45.0, False),   # normal    → hold
-        (80.0, False),   # high      → scale_up
-        (82.0, False),   # cooldown  → hold_cooldown
-        (88.0, True),    # anomaly   → scale_up (bypasses threshold)
-        (25.0, False),   # low       → scale_down (after cooldown)
-        (50.0, False),   # normal    → hold
+        (45.0, None, False),   # normal                 → hold
+        (80.0, None, False),   # high                    → scale_up
+        (82.0, None, False),   # high, in cooldown       → hold_cooldown
+        (88.0, None, True),    # anomaly                 → scale_up (bypasses cooldown)
+        (25.0, None, False),   # low                     → scale_down
+        (50.0, 85.0, False),   # safe mean, risky bound  → scale_up
+        (50.0, None, False),   # normal                  → hold
     ]
 
 
@@ -77,8 +80,8 @@ def run_real_loop(poll_interval: int = 30):
     """
     Production loop:
       1. Collect last 10 metric readings from monitoring CSV
-      2. Call Person B's predict_load() to get CPU forecast + anomaly flag
-      3. Evaluate with decision engine
+      2. Call Person B's predict_load() to get CPU forecast + upper bound + anomaly flag
+      3. Evaluate with decision engine (upper_bound-aware, Semester-2)
       4. Execute scaling action
 
     poll_interval defaults to 30s to match monitoring/collector.py's
@@ -112,8 +115,10 @@ def run_real_loop(poll_interval: int = 30):
             f"Upper bound: {round(upper_bound, 1)} | Anomaly: {anomaly_flag}"
         )
 
-        raw_signal = engine.evaluate(predicted_cpu, anomaly_flag=anomaly_flag)
-        signal     = normalise_signal(raw_signal)
+        raw_signal = engine.evaluate(predicted_cpu, upper_bound, anomaly_flag=anomaly_flag)
+        logger.info(f"→ {raw_signal} (reason={engine.last_reason})")
+
+        signal = normalise_signal(raw_signal)
         execute(signal)
 
         time.sleep(poll_interval)
@@ -127,7 +132,7 @@ def run_simulation():
 
     logger.info("Simulation mode — using hardcoded predictions.")
 
-    with patch("decision.engine.DockerActuator") as MockActuator:
+    with patch("actuator.docker_scaler.DockerActuator") as MockActuator:
         mock_actuator = MagicMock()
         mock_actuator.scale_up.return_value = True
         mock_actuator.scale_down.return_value = True
@@ -135,14 +140,19 @@ def run_simulation():
 
         sim_engine = DecisionEngine(config_path=CONFIG_PATH)
 
-        for predicted_cpu, anomaly_flag in simulate_lstm_predictions():
-            raw_signal = sim_engine.evaluate(predicted_cpu, anomaly_flag=anomaly_flag)
-            logger.info(f"Raw signal: {raw_signal}")
+        for predicted_cpu, upper_bound, anomaly_flag in simulate_lstm_predictions():
+            raw_signal = sim_engine.evaluate(predicted_cpu, upper_bound,
+                                              anomaly_flag=anomaly_flag)
+            logger.info(
+                f"cpu={predicted_cpu} upper={upper_bound} anomaly={anomaly_flag} "
+                f"→ {raw_signal} (reason={sim_engine.last_reason})"
+            )
             signal = normalise_signal(raw_signal)
             execute(signal)
             time.sleep(1)
 
     logger.info("Simulation complete.")
+
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
@@ -151,12 +161,13 @@ if __name__ == "__main__":
     parser.add_argument("--interval", type=int, default=30)
     args = parser.parse_args()
 
-    logger.info("ProximaScale starting...")
+    logger.info("🚀 ProximaScale starting...")
+    clear_scaling_events()
 
     if args.simulate:
         run_simulation()
     else:
-        from decision.engine import DecisionEngine   # ← add here
+        from decision.engine import DecisionEngine
         engine = DecisionEngine(config_path=CONFIG_PATH)
         try:
             run_real_loop(poll_interval=args.interval)
