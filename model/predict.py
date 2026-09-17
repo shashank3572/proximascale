@@ -86,6 +86,11 @@ def predict_load(window):
     (current_cpu * 1.15, current_cpu * 1.3, True) so Person D's main loop
     never dies because of us.
     """
+   # Accept MetricRecord objects from monitoring.storage
+# and dictionaries from tests/direct callers.
+    if window and hasattr(window[0], "to_dict"):
+        window = [record.to_dict() for record in window]
+
     current_cpu = float(window[-1].get("cpu_percent", 0.0)) if window else 0.0
 
     try:

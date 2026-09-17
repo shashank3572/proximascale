@@ -4,7 +4,7 @@ Person D — integration tests for main.py's orchestration glue.
 
 Tests ONLY:
   - Person D's normalise_signal() and execute()
-  - Person B's predict() return contract
+  - Person B's predict_load() return contract
   - Person C's DecisionEngine.evaluate(anomaly_flag=...) contract
 
 No sys.modules stubbing — main.py imports its dependencies lazily,
@@ -39,20 +39,32 @@ def test_execute_accepts_signal(signal):
     main.execute(signal)   # must not raise
 
 
-# ── Person B contract: predict() returns dict with the right keys ───────────
-# ── Person B contract: predict() returns dict with the right keys ───────────
-def test_predict_contract_shape():
+#Person B's predict_load() return contract
+def test_predict_load_contract_shape():
     """
-    Skips cleanly if Person B's ML stack (tf_keras / TF) isn't
-    installed in this environment. Runs when it is.
+    Person B Semester-2 contract:
+    predict_load() returns
+    (predicted_cpu, upper_bound, anomaly_flag).
     """
     pytest.importorskip("tf_keras", reason="Person B's TF stack not installed")
-    from model.predict import predict
-    result = predict([{"cpu": 40}] * 10)
-    assert "predicted_cpu" in result
-    assert "anomaly" in result
-    assert isinstance(result["predicted_cpu"], list)
-    assert isinstance(result["anomaly"], bool)
+
+    from model.predict import predict_load
+
+    window = [
+        {
+            "cpu_percent": 40.0,
+            "memory_percent": 40.0,
+            "request_rate": 10,
+            "post_scaling": False,
+        }
+        for _ in range(10)
+    ]
+
+    predicted_cpu, upper_bound, anomaly_flag = predict_load(window)
+
+    assert isinstance(predicted_cpu, float)
+    assert isinstance(upper_bound, float)
+    assert isinstance(anomaly_flag, bool)
 
 
 # ── Person C contract: engine.evaluate accepts anomaly_flag kwarg ───────────
