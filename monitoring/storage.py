@@ -7,8 +7,22 @@ import os
 import threading
 from monitoring.schema import MetricRecord
 
-CSV_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "collected", "metrics.csv")
-_HEADER = ["timestamp", "cpu_percent", "memory_percent", "request_rate"]
+CSV_PATH = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "data",
+    "collected",
+    "metrics.csv"
+)
+
+_HEADER = [
+    "timestamp",
+    "cpu_percent",
+    "memory_percent",
+    "request_rate",
+    "post_scaling"
+]
+
 _lock = threading.Lock()
 
 
@@ -30,6 +44,7 @@ def append_row(record: MetricRecord, path: str = CSV_PATH):
                 record.cpu_percent,
                 record.memory_percent,
                 record.request_rate,
+                record.post_scaling,
             ])
 
 
@@ -41,13 +56,14 @@ def read_last_n(n: int, path: str = CSV_PATH) -> list:
     with _lock:
         if not os.path.exists(path):
             return []
+
         with open(path, "r", newline="") as f:
             reader = csv.reader(f)
             rows = list(reader)
 
-    # rows[0] is header if file was created by append_row
     data_rows = [r for r in rows if r and r[0] != "timestamp"]
     tail = data_rows[-n:] if n < len(data_rows) else data_rows
+
     return [MetricRecord.from_csv_row(r) for r in tail]
 
 

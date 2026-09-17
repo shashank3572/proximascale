@@ -1,24 +1,28 @@
 # ProximaScale — Flask app container (Person A)
-# Build from PROJECT ROOT:
+# Build from the REPO ROOT (not from ./app), because the image needs both
+# this app's code and the shared monitoring/ package:
+#
 #   docker build -f app/Dockerfile -t proximascale-app .
+#
+# (A build context of just ./app cannot work here — monitoring/ lives
+# outside that folder and Docker cannot COPY files from outside its
+# build context.)
 #
 # Run:
 #   docker run -p 5000:5000 proximascale-app
 
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 WORKDIR /proximascale
 
-# Copy only what Flask needs (not the full ML stack)
-# requirements is at root; app source is in app/
-
-COPY app/app.py app/app.py
-COPY app/__init__.py app/__init__.py
-
-# Install only Flask + psutil (skip heavy ML deps for the app container)
+# Install only Flask + psutil + requests (skip the full ML stack —
+# this container only runs the Flask app + metrics collector)
 COPY app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY app/app.py .
+COPY monitoring ./monitoring
+
 EXPOSE 5000
 
-CMD ["python", "app/app.py"]
+CMD ["python", "app.py"]

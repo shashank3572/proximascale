@@ -18,36 +18,40 @@ import monitoring.storage as storage
 # ── MetricRecord schema ───────────────────────────────────────────────────────
 
 def test_metric_record_fields():
-    """MetricRecord must contain all 4 required fields."""
+    """MetricRecord must contain all 5 required fields."""
     record = MetricRecord(
         timestamp="2024-01-15T14:32:00",
         cpu_percent=67.4,
         memory_percent=52.1,
-        request_rate=143
+        request_rate=143,
+        post_scaling=False
     )
     assert record.timestamp == "2024-01-15T14:32:00"
     assert record.cpu_percent == 67.4
     assert record.memory_percent == 52.1
     assert record.request_rate == 143
+    assert record.post_scaling is False
 
 
 def test_metric_record_to_dict():
-    """to_dict() must return all 4 keys with correct types."""
+    """to_dict() must return all 5 keys with correct types."""
     record = MetricRecord(
         timestamp="2024-01-15T14:32:00",
         cpu_percent=67.4,
         memory_percent=52.1,
-        request_rate=143
+        request_rate=143,
+        post_scaling=True
     )
     d = record.to_dict()
-    assert set(d.keys()) == {"timestamp", "cpu_percent", "memory_percent", "request_rate"}
+    assert set(d.keys()) == {"timestamp", "cpu_percent", "memory_percent", "request_rate", "post_scaling"}
     assert isinstance(d["cpu_percent"], float)
     assert isinstance(d["request_rate"], int)
+    assert isinstance(d["post_scaling"], bool)
 
 
 def test_metric_record_from_csv_row():
     """from_csv_row() must parse a list of strings into a MetricRecord."""
-    row = ["2024-01-15T14:32:00", "67.4", "52.1", "143"]
+    row = ["2024-01-15T14:32:00", "67.4", "52.1", "143", "False"]
     record = MetricRecord.from_csv_row(row)
     assert record.cpu_percent == 67.4
     assert record.request_rate == 143
@@ -59,7 +63,8 @@ def test_metric_record_from_dict():
         "timestamp": "2024-01-15T14:32:00",
         "cpu_percent": 67.4,
         "memory_percent": 52.1,
-        "request_rate": 143
+        "request_rate": 143,
+        "post_scaling": False
     }
     record = MetricRecord.from_dict(d)
     assert record.cpu_percent == 67.4
@@ -72,7 +77,8 @@ def test_metric_record_round_trip():
         timestamp="2024-01-15T14:32:00",
         cpu_percent=55.0,
         memory_percent=40.0,
-        request_rate=200
+        request_rate=200,
+        post_scaling=True
     )
     recovered = MetricRecord.from_dict(original.to_dict())
     assert recovered.cpu_percent == original.cpu_percent
@@ -91,7 +97,8 @@ def test_storage_append_and_read():
             timestamp="2024-01-15T14:32:00",
             cpu_percent=72.1,
             memory_percent=54.3,
-            request_rate=201
+            request_rate=201,
+            post_scaling=False
         )
         storage.append_row(record, path=tmp_path)
         rows = storage.read_last_n(1, path=tmp_path)
@@ -113,7 +120,8 @@ def test_storage_read_last_n():
                 timestamp=f"2024-01-15T14:3{i}:00",
                 cpu_percent=float(10 + i),
                 memory_percent=50.0,
-                request_rate=100 + i
+                request_rate=100 + i,
+                post_scaling=(i % 2 == 0)
             ), path=tmp_path)
         rows = storage.read_last_n(3, path=tmp_path)
         assert len(rows) == 3

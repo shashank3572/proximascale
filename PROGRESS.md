@@ -8,29 +8,54 @@ ProximaScale is a proactive autoscaling load predictor combining a multivariate 
 ## Person A — App + Monitoring
 
 ### Week 1–2 (Environment + Schema)
-- Set up virtual environment, installed Flask, psutil, Locust
-- Agreed data schema with team: `{timestamp, cpu_percent, memory_percent, request_rate}`
-- Created initial `app/app.py` with CPU-load routes and request counter
+- Set up virtual environment, installed Flask, Locust, Docker SDK
+- Agreed data schema with team: `{timestamp, cpu_percent, memory_percent, request_rate, post_scaling}`
+- Created `app/app.py` with CPU-load routes and a request counter
 
-### Week 3–4 (Flask App + Collector skeleton)
-- Flask routes `/`, `/heavy` generating measurable CPU load via math loop
-- `before_request` hook incrementing `_request_count`
-- `monitoring/collector.py` skeleton — polls psutil every 5s, writes to CSV
-- **Issue found:** `request_rate` was hardcoded to `0` — `/metrics` endpoint missing
+### Week 3–4 (Flask app + monitoring)
+- Flask routes `/work/light`, `/work/heavy`, `/health` — measurable CPU load via math loop
+- `before_request` hook increments a SQLite-backed request counter (`monitoring/metrics.py`), not a hardcoded value
+- `monitoring/collector.py` polls **container** CPU/memory via the Docker SDK (cgroup deltas) — not host `psutil`
+- `monitoring/schema.py` — `MetricRecord` dataclass (`to_dict`/`from_csv_row`/`from_dict`)
+- `monitoring/storage.py` — `append_row()` / `read_last_n()`, thread-safe CSV persistence
 
-### Week 5 (Fixes + Full module completion)
-- Added `/metrics` JSON endpoint to `app.py` exposing live `request_rate`
-- Fixed `app.run(host='0.0.0.0')` so Flask is reachable inside Docker
-- Refactored `collector.py` — separated `collect_metrics(window)` from `run_collector()`
-- Added `monitoring/schema.py` — MetricRecord dataclass
-- Added `monitoring/storage.py` — append_row and read_last_n
-- Added `app/Dockerfile`
-- Added Locust scenarios: spike, gradual ramp, normal load
+### Week 5 (Sem 2: post_scaling + integration audit fixes)
+- [x] `post_scaling` field added to `MetricRecord` and wired through the collector
+- [x] `is_post_scaling()` reads `data/scaling_events.json` (guarded against malformed/missing JSON)
+- [fix] `collector.py` now calls `storage.append_row()` instead of duplicating CSV-writing logic — `storage.py` is no longer dead code
+- [fix] `collector.py` now calls `reset_request_count()` once per cycle (atomic read-and-reset) instead of a separate `get_request_count()` + `reset_request_count()`, which could drop a request that arrived in between
+- [fix] `requirements.txt` had an unresolved git merge conflict (unrelated `ml/` deps pasted in) — resolved to just this module's real dependencies (Flask, docker, locust, requests); unused `psutil` pin removed
+- [fix] `app/Dockerfile` referenced files (`requirements.txt`, `monitoring/`) outside its own build context — Dockerfile now documents the correct build command: `docker build -f app/Dockerfile -t proximascale-app .` run from the repo root
+- [removed] An unauthorized `ml/` shortcut pipeline (RandomForest predictor + a 14MB committed `.pkl`) and edits to `main.py` / `actuator/docker_scaler.py` were introduced by mistake in commit `06806fb`. These were outside this module's scope — real LSTM+Prophet work belongs to Person B, and `main.py`/the actuator belong to Person D/Person C. Removed; `main.py` and `actuator/docker_scaler.py` reverted to empty placeholders for their owners to fill in.
 
-### TODO
-- [ ] Regenerate metrics.csv — run all 3 Locust scenarios
-- [ ] Target: ≥1,000 rows with real variance
-- [ ] Hand off metrics.csv to Person B for LSTM training
+### TODO (Week 5–6) — still outstanding, needs a real run
+- [ ] Run the full collection cycle for real: `docker build`, `docker run --cpus=0.5 --memory=256m`, all three Locust scenarios, collector active — this needs an actual machine with Docker, which is why it isn't done here
+- [ ] Target: **≥1,500 rows**, spanning **≥3 days**, covering normal/spike/ramp/quiet periods, with genuine container CPU excursions into the 70–90%+ range and `post_scaling` populated
+- [ ] `data/collected/metrics.csv` currently has 121 real rows (correct 5-column schema, generated 2026-09-12) — a valid start, but well short of the 1,500-row / 3-day target. Do not treat this file as the final handoff dataset.
+- [ ] Multi-laptop Locust master/worker test — not yet evidenced anywhere in this repo
+- [ ] Hand off the final `metrics.csv` to Person B and get explicit confirmation it's usable for LSTM training
+
+### Commit log (this week)
+```
+[monitoring] add post-scaling field to metric schema
+[monitoring] update storage for post-scaling field
+[monitoring] align locust scenarios
+[monitoring] add collected metrics dataset (partial)
+[fix] resolve requirements.txt merge conflict
+[fix] correct Dockerfile build-context documentation
+[fix] wire collector.py to storage.append_row(), atomic request-count reset
+[fix] remove unauthorized ml/ pipeline; revert main.py and actuator/docker_scaler.py to placeholders
+[fix] update PROGRESS.md to match actual code
+```
+
+> **Person D note (integration merge):** `app.py`'s routes (`/work/light`, `/work/heavy`)
+> and SQLite-backed counter are the ones actually wired to `monitoring/collector.py` and
+> the Locust scenarios — an older `/`, `/heavy` + in-memory-counter + `/metrics`-endpoint
+> version that had drifted out of sync with the rest of the pipeline was removed during
+> the integration merge (it also had a latent duplicate `/health` route definition that
+> would have crashed Flask on startup). Also fixed: `collector.py`'s poll loop was
+> hardcoded to `time.sleep(60)` instead of using its own `POLL_INTERVAL = 30` constant —
+> now consistent with `main.py`'s assumed 30s cadence.
 
 ---
 
@@ -140,3 +165,4 @@ sign-off / handoff before Week 5.
 - Merged Person C's Semester-2 decision/actuator work (adaptive threshold, scaling event log, upper_bound-aware evaluate()) into main.py alongside it.
 - The real loop now calls predict_load() and unpacks (predicted_cpu, upper_bound, anomaly_flag), feeding all three into DecisionEngine.evaluate() so upper_bound is now consumed, not just logged.
 - Renamed model/saved/evaluation_chart.png to evaluation_chart_DUMMY_DATA_semester1.png and added model/saved/README.md.
+- Merged Person A's Semester-2 app-monitoring work: adopted their `/work/light`/`/work/heavy` routes and SQLite-backed request counter (the ones actually wired to collector.py and the Locust scenarios) over an older, disconnected in-memory-counter version; fixed a latent duplicate `/health` route definition; fixed `collector.py`'s hardcoded `time.sleep(60)` to use its own `POLL_INTERVAL` constant; fixed `app/Dockerfile`'s stale base image and an internal inconsistency between two different app.py copy strategies.
