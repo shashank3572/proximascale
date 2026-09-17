@@ -3,80 +3,52 @@ app.py — Flask load-generator + metrics endpoint for ProximaScale.
 Person A owns this file.
 
 Routes:
-  GET  /          → light CPU load (math loop)
-  GET  /heavy     → heavy CPU load
-  GET  /metrics   → exposes request_rate for collector.py to poll
-  GET  /health    → liveness check
-  POST /predict   → (optional) calls Person B's model directly
+  GET  /work/light  → light CPU load (used by Locust normal_load scenario)
+  GET  /work/heavy  → heavy CPU load (used by Locust spike scenario)
+  GET  /health      → liveness check
+  POST /predict     → (optional) calls Person B's model directly
+
+Request counting is done via monitoring.metrics (SQLite-backed counter),
+not an in-process counter -- monitoring/collector.py reads it directly
+with reset_request_count() rather than polling an HTTP endpoint, so it
+works correctly even if collector.py runs in a separate process/container
+from this Flask app.
 """
 from flask import Flask, request, jsonify
-import threading
-import time
 import math
 import sys
 import os
+from monitoring.metrics import increment_request_count
 
 # Allow imports from project root (needed for /predict route)
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 app = Flask(__name__)
 
-# ── Thread-safe request counter ──────────────────────────────────────────────
-_lock = threading.Lock()
-_request_count = 0
-_REQUEST_RATE_WINDOW = 30   # seconds -- must match monitoring/collector.py's
-                            # POLL_INTERVAL, or collector.py polls this
-                            # endpoint faster/slower than the window slides
-                            # and request_rate reads stale or double-counted.
-_request_rate  = 0          # updated every _REQUEST_RATE_WINDOW s by the background thread
-
 
 @app.before_request
 def count_request():
-    global _request_count
-    with _lock:
-        _request_count += 1
-
-
-def _reset_counter():
-    """Background thread: slides the request-rate window."""
-    global _request_count, _request_rate
-    while True:
-        time.sleep(_REQUEST_RATE_WINDOW)
-        with _lock:
-            _request_rate  = _request_count
-            _request_count = 0
-
-
-threading.Thread(target=_reset_counter, daemon=True).start()
+    increment_request_count()
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
 
-@app.route("/")
-def home():
+@app.route("/work/light")
+def light_work():
     """Light CPU load — used by Locust normal_load scenario."""
     result = 0
-    for i in range(1, 500_000):
+    for i in range(200_000):
         result += math.sqrt(i)
-    return "App is running"
+    return "Light work completed"
 
 
-@app.route("/heavy")
-def heavy():
+@app.route("/work/heavy")
+def heavy_work():
     """Heavy CPU load — used by Locust spike scenario."""
     result = 0
-    for i in range(1, 2_000_000):
+    for i in range(5_000_000):
         result += math.sqrt(i)
-    return "Heavy load complete"
-
-
-@app.route("/metrics")
-def metrics():
-    """Exposes current request_rate for monitoring/collector.py to poll."""
-    with _lock:
-        rate = _request_rate
-    return jsonify({"request_rate": rate})
+    return "Heavy work completed"
 
 
 @app.route("/health", methods=["GET"])
@@ -116,4 +88,4 @@ def get_prediction():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port=5000)
