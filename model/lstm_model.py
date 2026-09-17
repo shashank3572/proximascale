@@ -18,7 +18,7 @@ from tensorflow.keras import layers
 
 THIS_DIR = Path(__file__).parent
 SAVED_DIR = THIS_DIR / "saved"
-MODEL_PATH = SAVED_DIR / "proximascale_lstm.h5"
+MODEL_PATH = SAVED_DIR / "proximascale_lstm.keras"
 
 WINDOW_SIZE = 10
 N_FEATURES = 3
