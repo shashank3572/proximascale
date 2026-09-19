@@ -1,0 +1,6 @@
+scaling_rules:
+  cpu_upper_threshold: 75.0
+  cpu_lower_threshold: 30.0
+  max_containers: 5
+  min_containers: 1
+  target_service_image: "nginx:alpine" # Alpine is super lightweight

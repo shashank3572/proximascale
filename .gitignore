@@ -14,3 +14,4 @@ venv/
 # IDE
 .vscode/
 .idea/
+app/.app.py.swp
