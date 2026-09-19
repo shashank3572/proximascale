@@ -8,8 +8,8 @@ Both forecasts must already be in real CPU % (not scaled) and the same
 length/order (t+1, t+2, t+3) before being passed in here.
 """
 
-LSTM_WEIGHT = 0.7
-PROPHET_WEIGHT = 0.3
+LSTM_WEIGHT = 0.93
+PROPHET_WEIGHT = 0.07
 
 
 def ensemble_predict(lstm_forecast, prophet_forecast,

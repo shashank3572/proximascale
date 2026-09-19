@@ -23,16 +23,28 @@ STD_MULTIPLIER = 2.0
 
 def predict_with_uncertainty(model, window, scaler,
                               n_passes=N_PASSES, std_multiplier=STD_MULTIPLIER,
-                              target_col_idx=TARGET_COL_IDX):
+                              target_col_idx=TARGET_COL_IDX, inverse_transform_fn=None):
     """
     model:  a compiled Keras LSTM (ideally trained -- Phase 8).
     window: numpy array, shape (1, 10, 3) -- one scaled input window.
-    scaler: the fitted MinMaxScaler from Phase 1 (the one used to build `window`).
+    scaler: the fitted scaler used to build `window` (3-feature scaler for
+            the raw-CPU LSTM, or the 1-feature residual scaler for Phase 12's
+            residual LSTM).
+    inverse_transform_fn: optional. If None (default, unchanged behavior),
+            uses inverse_transform_cpu(scaler, values) -- the original
+            3-feature padding trick. Phase 12 passes a plain
+            `residual_scaler.inverse_transform` here instead, since the
+            residual scaler only has 1 column and doesn't need padding.
 
     Returns a dict with 'mean', 'std', 'upper_bound' -- each a list of
-    `horizon` native Python floats, in real CPU % units.
+    `horizon` native Python floats, in the SAME units as whatever
+    inverse_transform_fn produces (real CPU % normally, or real residual
+    units when called from the Phase 12 residual path).
     """
     try:
+        if inverse_transform_fn is None:
+            inverse_transform_fn = lambda values: inverse_transform_cpu(scaler, values)
+
         # training=True keeps Dropout ACTIVE -- this is what makes it MC Dropout
         # instead of one deterministic forward pass.
         passes = np.stack([
@@ -42,13 +54,12 @@ def predict_with_uncertainty(model, window, scaler,
         mean_scaled = passes.mean(axis=0)
         std_scaled = passes.std(axis=0)
 
-        mean_cpu = inverse_transform_cpu(scaler, mean_scaled)
+        mean_cpu = inverse_transform_fn(mean_scaled)
         # std is a spread, not a position -- undo the scaler's linear factor
         # but NOT its offset, or the bound would be shifted off.
         std_cpu = std_scaled / scaler.scale_[target_col_idx]
 
         upper_bound_cpu = mean_cpu + std_multiplier * std_cpu
-
         return {
             "mean": [float(v) for v in mean_cpu],
             "std": [float(v) for v in std_cpu],
