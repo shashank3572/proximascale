@@ -17,7 +17,9 @@ from datetime import datetime
 from monitoring.schema import MetricRecord
 from monitoring import storage
 
-POLL_INTERVAL = 10       # seconds between each sample
+POLL_INTERVAL = 30       # seconds between each sample -- matches the model's
+                         # trained sampling rate (model/evaluate.py SAMPLING_INTERVAL_SEC,
+                         # model/prophet_model.py DEFAULT_FREQ). Do not drift these apart.
 import os
 APP_METRICS_URL = os.environ.get("APP_METRICS_URL", "http://localhost:5000/metrics")
 

@@ -24,12 +24,24 @@ from the live window's actual current time. get_prophet_fitted() with
 explicit future timestamps (computed from the window's own last reading)
 anchors the forecast correctly regardless of how long ago Prophet was
 trained relative to now.
+
+NOTE (integration fix from Person D, kept in this merge): load_model() uses
+tf_keras rather than tensorflow.keras.models, with TF_USE_LEGACY_KERAS=1 set
+before any TF import -- this matches the Keras-compat fix already resolved
+on dev (see PROGRESS.md). Reverting to tensorflow.keras.models here
+reintroduces that bug against this env's TF version.
 """
 
+import os
+import sys
 import pickle
 from pathlib import Path
 
 import pandas as pd
+
+# Bare imports below match the rest of model/*.py -- resolve them relative
+# to this file regardless of what cwd the caller is running from.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from preprocessing import scale_features, load_scaler, WINDOW_SIZE
 from lstm_model import MODEL_PATH, HORIZON
@@ -59,20 +71,20 @@ def _load_artifacts():
     if _model is None:
         from tensorflow.keras.models import load_model
         _model = load_model(MODEL_PATH, compile=False)
-        print(f"🧠 [ProximaScale] LSTM model loaded from {MODEL_PATH}")
+        print(f"[ProximaScale] LSTM model loaded from {MODEL_PATH}")
     if _scaler is None:
         _scaler = load_scaler()
-        print("🧠 [ProximaScale] Feature scaler loaded")
+        print("[ProximaScale] Feature scaler loaded")
     if _residual_scaler is None:
         with open(RESIDUAL_SCALER_PATH, "rb") as f:
             _residual_scaler = pickle.load(f)
-        print("🧠 [ProximaScale] Residual scaler loaded")
+        print("[ProximaScale] Residual scaler loaded")
     if _prophet_model is None:
         _prophet_model = load_prophet_model()
-        print("🧠 [ProximaScale] Prophet model loaded")
+        print("[ProximaScale] Prophet model loaded")
 
 
-def predict_load(window,n_passes=None):
+def predict_load(window, n_passes=None):
     """
     window: list of dicts, oldest -> newest, length == WINDOW_SIZE (10).
     Each dict needs 'timestamp', 'cpu_percent', 'memory_percent',
@@ -134,12 +146,6 @@ def predict_load(window,n_passes=None):
 
         # Final = Prophet's forecast + LSTM's residual forecast (ADDITION,
         # per the reference paper's architecture -- not a weighted average).
-        print(f"🧠 [ProximaScale] DEBUG window's own cpu_percent (corrected): "f"{[round(v, 2) for v in df['cpu_percent'].values]}")
-        print(f"🧠 [ProximaScale] DEBUG window's post_scaling flags: {list(df['post_scaling'].values)}")
-        print(f"🧠 [ProximaScale] DEBUG window's own cpu_percent (corrected): "f"{[round(v, 2) for v in df['cpu_percent'].values]}")
-        print(f"🧠 [ProximaScale] DEBUG window's post_scaling flags: {list(df['post_scaling'].values)}")
-        print(f"🧠 [ProximaScale] DEBUG Prophet forecast: {[round(v, 2) for v in prophet_forecast]}")
-        print(f"🧠 [ProximaScale] DEBUG LSTM residual mean: {[round(v, 2) for v in uncertainty['mean']]}")
         final_mean = [p + r for p, r in zip(prophet_forecast, uncertainty["mean"])]
         final_upper_bound = [p + r for p, r in zip(prophet_forecast, uncertainty["upper_bound"])]
 
@@ -151,7 +157,7 @@ def predict_load(window,n_passes=None):
         return float(predicted_load), float(upper_bound), bool(anomaly_flag)
 
     except Exception as e:
-        print(f"🧠 [ProximaScale] ERROR in predict_load, using fallback: {e}")
+        print(f"[ProximaScale] ERROR in predict_load, using fallback: {e}")
         return float(current_cpu * 1.15), float(current_cpu * 1.3), True
 
 
@@ -161,21 +167,21 @@ if __name__ == "__main__":
     csv_path = THIS_DIR.parent / "data" / "collected" / "metrics.csv"
     df = load_csv(csv_path)
 
-    last_10 = df.iloc[200:200+WINDOW_SIZE][["timestamp", "cpu_percent", "memory_percent", "request_rate"]]
+    last_10 = df.tail(WINDOW_SIZE)[["timestamp", "cpu_percent", "memory_percent", "request_rate"]]
     window = last_10.to_dict("records")
 
     predicted_load, upper_bound, anomaly_flag = predict_load(window)
-    print(f"🧠 [ProximaScale] predict_load() -> predicted_load={predicted_load:.2f}, "
+    print(f"[ProximaScale] predict_load() -> predicted_load={predicted_load:.2f}, "
           f"upper_bound={upper_bound:.2f}, is_anomaly={anomaly_flag}")
 
     assert isinstance(predicted_load, float), "predicted_load must be a native float"
     assert isinstance(upper_bound, float), "upper_bound must be a native float"
     assert isinstance(anomaly_flag, bool), "is_anomaly must be a native bool"
 
-    print("🧠 [ProximaScale] Type checks passed.")
+    print("[ProximaScale] Type checks passed.")
 
     fallback_result = predict_load(window[:5])
-    print(f"🧠 [ProximaScale] Fallback test (short window): {fallback_result}")
+    print(f"[ProximaScale] Fallback test (short window): {fallback_result}")
     assert fallback_result[2] is True, "Fallback should always report is_anomaly=True"
 
-    print("🧠 [ProximaScale] predict_load() self-test PASSED.")
+    print("[ProximaScale] predict_load() self-test PASSED.")
