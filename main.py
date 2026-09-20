@@ -240,6 +240,7 @@ if __name__ == "__main__":
              "config_demo.yaml when generating numbers for the report.",
     )
     args = parser.parse_args()
+    os.environ["PROXIMASCALE_CONFIG_PATH"] = args.config
 
     logger.info("🚀 ProximaScale starting...")
     if args.config != DEFAULT_CONFIG_PATH:

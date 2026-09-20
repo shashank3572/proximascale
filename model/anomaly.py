@@ -17,19 +17,19 @@ import yaml
 THRESHOLD = 2.5   # fallback default if config.yaml has no override
 ROLLING_WINDOW = 10  # matches the LSTM's WINDOW_SIZE, for consistency
 
-_CONFIG_PATH = os.path.join(
+_DEFAULT_CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.yaml"
 )
 
+def _resolve_config_path() -> str:
+    return os.environ.get("PROXIMASCALE_CONFIG_PATH", _DEFAULT_CONFIG_PATH)
 
 def _configured_threshold(default: float = THRESHOLD) -> float:
-    """Read anomaly_z_threshold from config.yaml, falling back to `default`."""
     try:
-        with open(_CONFIG_PATH, "r") as f:
+        with open(_resolve_config_path(), "r") as f:
             return float(yaml.safe_load(f).get("anomaly_z_threshold", default))
     except (OSError, ValueError, AttributeError, yaml.YAMLError):
         return default
-
 
 def rolling_zscore(values):
     """
