@@ -68,6 +68,30 @@ def predict_prophet(model, periods=DEFAULT_PERIODS, freq=DEFAULT_FREQ):
         raise
 
 
+def get_prophet_fitted(model, timestamps):
+    """
+    Returns Prophet's fitted trend+seasonality+holiday value (g(t)+s(t)+h(t)
+    from Equation 1 in the reference paper) for ARBITRARY timestamps --
+    past (to compute training residuals in Phase 12's train.py) or future
+    (for live forecasting in predict.py). Unlike predict_prophet(), which
+    only walks forward from the end of training data via
+    make_future_dataframe(), this works for any timestamp because Prophet's
+    own model.predict() just needs a 'ds' column -- it doesn't care whether
+    those dates are in the future relative to training.
+
+    timestamps: any iterable of datetime-like values (pd.Timestamp, str, etc).
+    Returns a plain Python list of floats, same length/order as timestamps.
+    Note: 'yhat' IS g(t)+s(t)+h(t) -- Prophet doesn't (and can't) predict
+    the noise term ε_t, so yhat already is exactly the value we want here.
+    """
+    try:
+        future_df = pd.DataFrame({"ds": pd.to_datetime(list(timestamps))})
+        forecast = model.predict(future_df)
+        return [float(v) for v in forecast["yhat"].values]
+    except Exception as e:
+        print(f"🧠 [ProximaScale] ERROR in get_prophet_fitted: {e}")
+        raise
+
 def save_prophet_model(model, path=PROPHET_PATH):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "wb") as f:
@@ -102,5 +126,12 @@ if __name__ == "__main__":
     reloaded = load_prophet_model()
     reloaded_predictions = predict_prophet(reloaded, periods=DEFAULT_PERIODS)
     assert len(reloaded_predictions) == DEFAULT_PERIODS, "Reloaded model prediction length mismatch"
+
+    # Phase 12: verify get_prophet_fitted() works for arbitrary timestamps --
+    # both historical (used to compute training residuals) and future.
+    historical_fitted = get_prophet_fitted(model, train_df["timestamp"].iloc[:5])
+    assert len(historical_fitted) == 5, "get_prophet_fitted length mismatch on historical timestamps"
+    print(f"🧠 [ProximaScale] Prophet fitted (first 5 historical rows): "
+          f"{[round(v, 2) for v in historical_fitted]}")
 
     print("🧠 [ProximaScale] Prophet self-test PASSED.")
