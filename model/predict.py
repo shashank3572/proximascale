@@ -25,13 +25,13 @@ explicit future timestamps (computed from the window's own last reading)
 anchors the forecast correctly regardless of how long ago Prophet was
 trained relative to now.
 
-NOTE (integration fix from Person D, kept in this merge): load_model() uses
-tf_keras rather than tensorflow.keras.models, with TF_USE_LEGACY_KERAS=1 set
-before any TF import -- this matches the Keras-compat fix already resolved
-on dev (see PROGRESS.md). Reverting to tensorflow.keras.models here
-reintroduces that bug against this env's TF version.
+NOTE (model loading): load_model() comes from tensorflow.keras.models. An
+earlier tf_keras / TF_USE_LEGACY_KERAS approach was reverted because it
+cannot read Keras-3-saved models. MODEL_PATH (model/lstm_model.py) must point
+at the residual-stacking LSTM artifact; see model/saved/README.md.
 """
 
+import logging
 import os
 import sys
 import pickle
@@ -49,6 +49,8 @@ from prophet_model import load_prophet_model, get_prophet_fitted
 from uncertainty import predict_with_uncertainty
 from anomaly import is_anomaly
 from counterfactual import apply_counterfactual_correction
+
+logger = logging.getLogger(__name__)
 
 THIS_DIR = Path(__file__).parent
 SAVED_DIR = THIS_DIR / "saved"
@@ -162,6 +164,9 @@ def predict_load(window, n_passes=None):
         return float(predicted_load), float(upper_bound), bool(anomaly_flag)
 
     except Exception as e:
+        # Loud on purpose: a broken artifact/dependency makes EVERY call fall
+        # back, which reports is_anomaly=True and so forces scale-ups.
+        logger.error("predict_load FALLBACK (%s): %s", type(e).__name__, e)
         print(f"[ProximaScale] ERROR in predict_load, using fallback: {e}")
         return float(current_cpu * 1.15), float(current_cpu * 1.3), True
 

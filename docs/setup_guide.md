@@ -9,7 +9,7 @@
 
 | Tool           | Version  | Install                                 |
 |----------------|----------|-----------------------------------------|
-| Python         | 3.10.x   | python.org or `apt install python3.10`  |
+| Python         | 3.11-3.13 (tested: 3.12) | python.org |
 | Docker Desktop | latest   | docker.com/products/docker-desktop      |
 | Git            | any      | git-scm.com                             |
 | CUDA (GPU)     | 12.x     | For training only — inference works on CPU |
@@ -58,9 +58,13 @@ pip install -r requirements.txt
 python app/app.py
 
 # Option B: inside Docker (from project root)
-docker build -f app/Dockerfile -t proximascale-app .
-docker run -p 5000:5000 proximascale-app
+docker build -f app/Dockerfile -t proximascale-app -t proximascale-worker:latest .
+docker run -d --name proximascale-app -p 5000:5000 proximascale-app
 ```
+
+> The second tag matters: `config.yaml` tells the actuator to launch scaled workers from
+> `proximascale-worker:latest`, and the collector monitors the container named `proximascale-app`.
+> If that image does not exist locally, `scale_up` cannot start a worker.
 
 Test it:
 ```bash
@@ -78,6 +82,13 @@ python -m monitoring.collector
 ```
 
 This polls CPU/memory/request_rate every 30 seconds and appends to `data/collected/metrics.csv`.
+
+**Real mode (`python main.py`) reads this file**, so the collector must be running. `main.py` skips
+prediction and warns if the newest row is more than 3 poll intervals old.
+
+> The committed `metrics.csv` is a 90,000-row *synthetic* dataset (see `data/collected/README.md`).
+> Running the collector appends real rows to it; to collect a clean real dataset, point the
+> collector at a new file or back up/move the committed one first.
 
 ---
 
@@ -102,21 +113,23 @@ Run all three back-to-back to get >1,000 rows of varied data in the CSV.
 
 ---
 
-## 7. Train the LSTM Model (Person B)
+## 7. Train the Models (Person B)
+
+Training is a two-step residual-stacking pipeline and **overwrites the committed artifacts** in
+`model/saved/`. You do not need to retrain to run inference.
 
 ```bash
-# Train on synthetic data (no real CSV needed)
-python model/train.py
-
-# Train on real data from Person A
-python model/train.py --data data/collected/metrics.csv   # (add --data arg if needed)
+python model/prophet_model.py   # 1. fit Prophet, saves proximascale_prophet.pkl (must come first)
+python model/train.py           # 2. train the LSTM on Prophet's residuals
 ```
 
-Outputs:
-- `model/saved/proximascale_lstm.keras`
-- `model/saved/scaler.pkl`
+Both read `data/collected/metrics.csv` (there is no `--data` option). Outputs in `model/saved/`:
+- `proximascale_prophet.pkl`
+- `proximascale_lstm.h5`
+- `scaler.pkl`, `scaler_residual.pkl`
 
-> **The trained model is already committed** — you don't need to retrain to run inference.
+> **The trained models are already committed** — see `model/saved/README.md` for provenance.
+> Back up `model/saved/` before retraining.
 
 ---
 
@@ -124,8 +137,11 @@ Outputs:
 
 ```bash
 python model/evaluate.py
-# Chart saved to model/saved/evaluation_chart.png
 ```
+
+Prints a 4-way comparison table (Reactive / Univariate LSTM / Multivariate LSTM / Hybrid
+residual-stacking) on the chronological test split. It does not write a chart, and it can take
+several minutes. If the cached univariate baseline is missing it trains and saves one.
 
 ---
 
@@ -135,12 +151,22 @@ python model/evaluate.py
 # Simulation mode (no TensorFlow required — good for quick demo)
 python main.py --simulate
 
-# Real mode (requires Docker Desktop running + trained model)
+# Real mode (requires Docker Desktop running, the collector from step 5, and the worker image from step 4)
 python main.py
 
-# Real mode with custom poll interval
+# Real mode with custom poll interval (keep 30: the model is trained at a 30s sampling rate)
 python main.py --interval 30
 ```
+
+Each decision is appended to `logs/events.csv` (git-ignored). View it live:
+
+```bash
+streamlit run dashboard/live_plot.py            # live, reads logs/events.csv
+streamlit run dashboard/live_plot.py -- --demo  # synthetic demo data
+```
+
+The SHAP panel shows "No SHAP values recorded" in live mode: `ShapExplainer` is fixed and tested
+but not yet called from `main.py`.
 
 ---
 
@@ -174,15 +200,16 @@ proximascale/
 ├── app/                  # Flask app + Dockerfile (Person A)
 ├── monitoring/           # Collector, storage, schema (Person A)
 ├── model/                # LSTM, training, predict, evaluate (Person B)
-│   └── saved/            # Committed model weights + scaler
+│   └── saved/            # Committed Prophet + LSTM artifacts + scalers (see its README)
 ├── decision/             # Decision engine + hysteresis (Person C)
 ├── actuator/             # Docker scaler (Person C)
 ├── data/
-│   ├── collected/        # metrics.csv (auto-generated)
+│   ├── collected/        # metrics.csv (synthetic, 90k rows) + small real samples; see its README
 │   └── locust_scenarios/ # Load test scripts (Person A)
 ├── dashboard/            # Live plot — Semester 2 (Person D)
 ├── tests/                # Pytest suites (Person D)
-├── docs/                 # This file, data_schema.md
+├── docs/                 # This file, data_schema.md, scaling_events.md
+├── logs/                 # events.csv written by main.py (git-ignored)
 ├── main.py               # Orchestration loop (Person D)
 ├── cleanup.py            # Remove Docker containers
 ├── config.yaml           # Scaling thresholds

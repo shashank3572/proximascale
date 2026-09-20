@@ -7,7 +7,8 @@ Modes:
   python main.py --simulate → simulation mode with hardcoded predictions (no GPU needed)
 
 Pipeline:
-  collect_metrics(window=10)                                [Person A]
+  monitoring/collector.py (separate process) -> metrics.csv  [Person A]
+  storage.read_last_n(10)                                    [Person A]
        ↓
   predict_load(records) -> (cpu, upper_bound, anomaly)       [Person B, Semester-2]
        ↓
@@ -21,10 +22,12 @@ alone crosses the risk threshold -- see decision/engine.py's upper_bound
 branch (Person C, Semester-2).
 """
 import os
+import csv
 import sys
 import time
 import logging
 import argparse
+from datetime import datetime
 
 from decision.scaling_log import clear_scaling_events
 
@@ -35,6 +38,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+
+WINDOW_SIZE = 10          # readings per prediction (model/predict.py WINDOW_SIZE)
+STALE_AFTER_POLLS = 3     # skip prediction if newest CSV row is older than this many polls
+
+# Dashboard feed (dashboard/live_plot.py reads this file; keep columns in sync).
+EVENTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "events.csv")
+EVENT_COLUMNS = [
+    "timestamp", "actual_cpu", "predicted_cpu", "upper_bound", "anomaly_flag",
+    "signal", "replicas", "shap_cpu", "shap_memory", "shap_request",
+]
 
 
 # ── Signal normaliser ─────────────────────────────────────────────────────────
@@ -76,13 +89,51 @@ def simulate_lstm_predictions():
 
 
 # ── Real model loop ───────────────────────────────────────────────────────────
-def run_real_loop(poll_interval: int = 30):
+def log_event(row: dict, path: str = None) -> None:
+    """Append one decision row to logs/events.csv for the dashboard.
+    Never raises: a logging failure must not kill the control loop."""
+    path = path or EVENTS_PATH
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        new_file = not os.path.exists(path) or os.path.getsize(path) == 0
+        with open(path, "a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=EVENT_COLUMNS)
+            if new_file:
+                writer.writeheader()
+            writer.writerow({c: row.get(c, 0.0) for c in EVENT_COLUMNS})
+    except OSError as e:
+        logger.warning(f"Could not write dashboard event log: {e}")
+
+
+def _replica_count(engine) -> int:
+    """Current worker count, or 0 if the actuator is unavailable."""
+    try:
+        return int(engine.actuator.replica_count())
+    except Exception:
+        return 0
+
+
+def _is_stale(record, max_age_seconds: float) -> bool:
+    """True if the newest collected record is too old (collector not running)
+    or its timestamp cannot be parsed."""
+    try:
+        age = (datetime.now() - datetime.fromisoformat(record.timestamp)).total_seconds()
+    except (ValueError, TypeError):
+        return True
+    return age > max_age_seconds
+
+
+def run_real_loop(engine, poll_interval: int = 30):
     """
     Production loop:
-      1. Collect last 10 metric readings from monitoring CSV
+      1. Read the last 10 readings from metrics.csv (written by the separate
+         `python -m monitoring.collector` process)
       2. Call Person B's predict_load() to get CPU forecast + upper bound + anomaly flag
       3. Evaluate with decision engine (upper_bound-aware, Semester-2)
       4. Execute scaling action
+
+    The loop never scales on stale data: if the newest row is older than
+    STALE_AFTER_POLLS * poll_interval it warns and waits.
 
     poll_interval defaults to 30s to match monitoring/collector.py's
     POLL_INTERVAL and the model's trained sampling rate (SAMPLING_INTERVAL_SEC
@@ -90,25 +141,33 @@ def run_real_loop(poll_interval: int = 30):
     change one without the others -- lead-time and Prophet's forecast horizon
     are both computed assuming 30s between samples.
     """
-    from monitoring.collector import collect_metrics
+    from monitoring.storage import read_last_n
     from model.predict import predict_load        # Person B's Semester-2 interface
 
     logger.info(f"Real loop starting. Poll interval: {poll_interval}s")
 
     while True:
-        records = collect_metrics(window=10)
+        records = read_last_n(WINDOW_SIZE)
 
-        if len(records) < 10:
+        if len(records) < WINDOW_SIZE:
             logger.warning(
-                f"Only {len(records)} records in CSV — need 10. "
+                f"Only {len(records)} records in CSV — need {WINDOW_SIZE}. "
                 "Waiting for more data from collector..."
             )
             time.sleep(poll_interval)
             continue
 
-        # Semester-2: predict_load() returns a 3-tuple, not the old
-        # {"predicted_cpu": [...], "anomaly": bool} dict.
-        predicted_cpu, upper_bound, anomaly_flag = predict_load(records[-10:])
+        if _is_stale(records[-1], STALE_AFTER_POLLS * poll_interval):
+            logger.warning(
+                f"Newest record ({records[-1].timestamp}) is stale — "
+                "is `python -m monitoring.collector` running? Skipping this cycle."
+            )
+            time.sleep(poll_interval)
+            continue
+
+        # predict_load() accepts MetricRecord objects directly and returns
+        # (predicted_cpu, upper_bound, anomaly_flag).
+        predicted_cpu, upper_bound, anomaly_flag = predict_load(records)
 
         logger.info(
             f"Predicted CPU (~90s ahead): {round(predicted_cpu, 1)} | "
@@ -120,6 +179,19 @@ def run_real_loop(poll_interval: int = 30):
 
         signal = normalise_signal(raw_signal)
         execute(signal)
+
+        log_event({
+            "timestamp": datetime.now().isoformat(),
+            "actual_cpu": records[-1].cpu_percent,
+            "predicted_cpu": predicted_cpu,
+            "upper_bound": upper_bound,
+            "anomaly_flag": anomaly_flag,
+            "signal": signal,
+            "replicas": _replica_count(engine),
+            # SHAP attribution is not wired into the live loop yet; the
+            # dashboard shows "No SHAP values recorded" for zero rows.
+            "shap_cpu": 0.0, "shap_memory": 0.0, "shap_request": 0.0,
+        })
 
         time.sleep(poll_interval)
 
@@ -170,7 +242,7 @@ if __name__ == "__main__":
         from decision.engine import DecisionEngine
         engine = DecisionEngine(config_path=CONFIG_PATH)
         try:
-            run_real_loop(poll_interval=args.interval)
+            run_real_loop(engine, poll_interval=args.interval)
         except ImportError as e:
             logger.error(f"Could not load ML model: {e}")
             sys.exit(1)

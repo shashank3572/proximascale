@@ -65,16 +65,15 @@ Person A (monitoring/collector.py)
     produces → MetricRecord objects → stored as CSV
 
 Person B (model/predict.py)
-    consumes → list of 10 MetricRecord dicts (last 10 readings)
-    call:   predict(records)   # records = [dict, dict, ... x10]
-    returns:
-        {
-          "predicted_cpu": [float, float, float],  # next 3 timesteps
-          "anomaly":       bool                    # True = spike detected
-        }
+    consumes → list of 10 MetricRecord dicts / objects (last 10 readings, each with a 'timestamp')
+    call:   predict_load(records)
+    returns: (predicted_cpu: float, upper_bound: float, anomaly_flag: bool)
+        predicted_cpu — final residual-stacked forecast (Prophet + LSTM residual), farthest horizon step (~90s ahead)
+        upper_bound   — Prophet forecast + LSTM residual upper bound (MC-Dropout), same horizon step
+        anomaly_flag  — True = spike detected
 Person C (decision/engine.py)
-    consumes → predicted_cpu (float), anomaly (bool)
-    call:   engine.evaluate(predicted_cpu, anomaly_flag)
+    consumes → predicted_cpu (float), upper_bound (float), anomaly_flag (bool)
+    call:   engine.evaluate(predicted_cpu, upper_bound=None, anomaly_flag=False)
     returns: "scale_up" | "scale_down" | "hold" | "hold_cooldown"
              | "hold_max_reached" | "hold_min_reached"
 
@@ -97,5 +96,5 @@ Person C (decision/engine.py)
 
 1. `request_rate` is always an **integer** (cast with `int()`).
 2. `timestamp` is a **string** (not a datetime object) when stored in CSV or JSON.
-3. Person B's `predict()` always expects **exactly 10 records** — collector must buffer.
+3. Person B's `predict_load()` always expects **exactly 10 records** — `main.py` reads them with `storage.read_last_n(10)`.
 4. Any change to this schema requires agreement from all four team members.

@@ -9,7 +9,6 @@ once Person B's model is integrated.
 Run with:  pytest tests/test_integration.py -v
 """
 import os
-import pytest
 from unittest.mock import patch, MagicMock
 
 
@@ -82,20 +81,3 @@ def test_hysteresis_is_cooling_after_action():
     h = Hysteresis(cooldown_seconds=180)
     h.record_action()
     assert h.is_cooling_down() is True
-
-
-# ---------------------------------------------------------------------------
-# Test 3: Signal normaliser (Person D's main.py logic)
-# ---------------------------------------------------------------------------
-@pytest.mark.parametrize("raw,expected", [
-    ("scale_up",         "scale_up"),
-    ("scale_down",       "scale_down"),
-    ("hold",             "hold"),
-    ("hold_cooldown",    "hold"),
-    ("hold_max_reached", "hold"),
-    ("hold_min_reached", "hold"),
-])
-def test_signal_normaliser(raw, expected):
-    """All hold_* variants must collapse to 'hold' without crashing."""
-    signal = "hold" if raw.startswith("hold") else raw
-    assert signal == expected

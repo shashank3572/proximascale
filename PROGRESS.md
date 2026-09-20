@@ -1,7 +1,7 @@
 # ProximaScale — Progress Report
 
 ## Overview
-ProximaScale is a proactive autoscaling load predictor combining a multivariate LSTM and Prophet in a hybrid ensemble, forecasting CPU load ~90 seconds ahead of real spikes.
+ProximaScale is a proactive autoscaling load predictor combining Prophet (base forecast) and a multivariate LSTM that predicts Prophet's residual (residual stacking), forecasting CPU load ~90 seconds ahead of real spikes.
 
 ---
 
@@ -31,7 +31,7 @@ ProximaScale is a proactive autoscaling load predictor combining a multivariate 
 ### TODO (Week 5–6) — still outstanding, needs a real run
 - [ ] Run the full collection cycle for real: `docker build`, `docker run --cpus=0.5 --memory=256m`, all three Locust scenarios, collector active — this needs an actual machine with Docker, which is why it isn't done here
 - [ ] Target: **≥1,500 rows**, spanning **≥3 days**, covering normal/spike/ramp/quiet periods, with genuine container CPU excursions into the 70–90%+ range and `post_scaling` populated
-- [ ] `data/collected/metrics.csv` currently has 121 real rows (correct 5-column schema, generated 2026-09-12) — a valid start, but well short of the 1,500-row / 3-day target. Do not treat this file as the final handoff dataset.
+- [ ] Real dataset still short of target. The 121 real rows (5-column schema, collected 2026-09-12 to 09-14) now live in `data/collected/metrics_real_dev.csv`. `data/collected/metrics.csv` was replaced in commit 2da9d70e by a 90,000-row **synthetic** dataset from `model/generate_dataset.py` — see `data/collected/README.md`. Do not present it as measured data.
 - [ ] Multi-laptop Locust master/worker test — not yet evidenced anywhere in this repo
 - [ ] Hand off the final `metrics.csv` to Person B and get explicit confirmation it's usable for LSTM training
 
@@ -64,7 +64,7 @@ ProximaScale is a proactive autoscaling load predictor combining a multivariate 
 ### Completed
 - Data pipeline: chronological train/test split, MinMax scaling, sliding windows.
 - Multivariate LSTM trained on CPU, memory and request rate.
-- Prophet model and hybrid ensemble.
+- Prophet base model and residual stacking (LSTM predicts Prophet's residual; final = Prophet + LSTM residual). The earlier fixed-weight LSTM/Prophet ensemble is kept in `model/ensemble.py` as a deprecated record of the approach that was tried first.
 - MC Dropout uncertainty estimation.
 - Anomaly detection.
 - Counterfactual correction.
@@ -72,7 +72,9 @@ ProximaScale is a proactive autoscaling load predictor combining a multivariate 
 - Shared predict_load(window) interface.
 - Evaluation harness comparing Reactive, Univariate LSTM, Multivariate LSTM and Hybrid.
 
-### Current status
+### Status at first real-data evaluation (HISTORICAL)
+> Measured on the 121 real rows with the **old fixed-weight ensemble**, before the switch to residual stacking. These numbers are superseded and must not be cited as current results; re-run `python model/evaluate.py` for the current comparison.
+
 First real-data evaluation showed Multivariate LSTM outperforming the naive baseline.
 
 | Method | RMSE | MAE |
@@ -161,8 +163,30 @@ sign-off / handoff before Week 5.
 ## Person D — Integration (Semester 2, interface merge)
 
 ### Status
-- Merged Person B's Semester-2 model/predict_load() (LSTM + MC Dropout + Prophet ensemble, counterfactual correction, anomaly check) into main.py.
+- Merged Person B's Semester-2 model/predict_load() (Prophet + LSTM residual stacking, MC Dropout, counterfactual correction, anomaly check) into main.py.
 - Merged Person C's Semester-2 decision/actuator work (adaptive threshold, scaling event log, upper_bound-aware evaluate()) into main.py alongside it.
 - The real loop now calls predict_load() and unpacks (predicted_cpu, upper_bound, anomaly_flag), feeding all three into DecisionEngine.evaluate() so upper_bound is now consumed, not just logged.
 - Renamed model/saved/evaluation_chart.png to evaluation_chart_DUMMY_DATA_semester1.png and added model/saved/README.md.
 - Merged Person A's Semester-2 app-monitoring work: adopted their `/work/light`/`/work/heavy` routes and SQLite-backed request counter (the ones actually wired to collector.py and the Locust scenarios) over an older, disconnected in-memory-counter version; fixed a latent duplicate `/health` route definition; fixed `collector.py`'s hardcoded `time.sleep(60)` to use its own `POLL_INTERVAL` constant; fixed `app/Dockerfile`'s stale base image and an internal inconsistency between two different app.py copy strategies.
+
+---
+
+## Repair pass — audit fixes (2026-09-20)
+
+Each item was reproduced against the `dev` branch before fixing; every fix has tests (full suite: 95 passed in a fresh venv built from `requirements.txt`).
+
+| # | Problem (verified) | Fix |
+|---|---|---|
+| 1 | `is_post_scaling()` read a single JSON object but the log is an array (error swallowed → always `False`); window also hard-coded ×60 (would be 1 h) | reads the array via `scaling_log`, window = `expires_after_steps × tick_seconds` (180 s) |
+| 2 | `main.py` real loop called `collect_metrics(window=10)` (takes no args; TypeError) and used an out-of-scope `engine` global | reads `storage.read_last_n(10)`; collector runs as its own process; engine passed in; skips stale/short data |
+| 3 | `docker.from_env()` at import time in the collector | lazy client |
+| 4/5 | `MODEL_PATH` pointed at the stale pre-residual `.keras` model (unloadable, legacy Keras 2 config) so every prediction fell back; the residual-stacking model is the `.h5`; `predict.py` docstring contradicted the code | `MODEL_PATH` → `proximascale_lstm.h5`; fallback now logged loudly; docstring fixed; `pyarrow` added (needed to unpickle the Prophet artifact) |
+| 6 | dashboard read `logs/events.csv` but nothing wrote it | `main.py` `log_event()` writes it each decision |
+| 7 | `/predict` route imported a nonexistent `predict` | uses `predict_load` (works from a full checkout; the Docker image excludes `model/`) |
+| 8 | tests could not tell a broken model from a working one (fallback also returns floats), wrong skip guard, a tautological test, no test of residual stacking or counterfactual correction | tests strengthened/added, incl. held-out "stacked beats Prophet-only" |
+| 9 | setup guide required Python 3.10 (pinned numpy/pandas/sklearn need ≥3.11); unused `tf-keras`; unpinned pytest | requirements/docs corrected; verified in a fresh venv |
+| 10 | `model/ensemble.py` docstring/self-test disagreed with its weights | kept as a deprecated historical record; unused by the pipeline (test enforces) |
+| 12 | `shap.DeepExplainer` fails on Keras 3 models | `KernelExplainer` |
+| 11 | `cleanup.py` filtered `proximascale_worker_` but containers are named `proximascale-worker-…` (removed nothing); README had pasted-in text; docs described the old architecture, `--data` and chart options that do not exist, and no worker-image tag | fixed (the worker-image tag is untested without a Docker daemon) |
+
+Still open: SHAP is not called from the live loop; `evaluate.py` has not been re-run since the architecture switch (the historical table above is stale); real container data is limited to 121 rows; CI does not run the TensorFlow/Prophet tests; no end-to-end run against a live Docker daemon has been done in this pass.

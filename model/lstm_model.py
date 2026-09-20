@@ -1,7 +1,8 @@
 """
 ProximaScale - Phase 2: LSTM Architecture
 --------------------------------------------
-Defines the LSTM backbone used by the hybrid ensemble:
+Defines the LSTM backbone of the residual-stacking hybrid (it predicts the
+Prophet residual; final = Prophet forecast + LSTM residual):
     LSTM(64, return_sequences=True) -> Dropout(0.2) -> LSTM(32) -> Dropout(0.2) -> Dense(3)
 
 Input:  (batch, 10, 3)  -- 10 timesteps of [cpu_percent, memory_percent, request_rate]
@@ -18,7 +19,10 @@ from tensorflow.keras import layers
 
 THIS_DIR = Path(__file__).parent
 SAVED_DIR = THIS_DIR / "saved"
-MODEL_PATH = SAVED_DIR / "proximascale_lstm.keras"
+# The residual-stacking LSTM (trained on the Prophet residual, commit 2da9d70e)
+# is saved as .h5. The old proximascale_lstm.keras is a pre-residual-stacking
+# model in an incompatible legacy format -- do not point this back at it.
+MODEL_PATH = SAVED_DIR / "proximascale_lstm.h5"
 
 WINDOW_SIZE = 10
 N_FEATURES = 3

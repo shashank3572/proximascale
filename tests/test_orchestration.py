@@ -46,18 +46,20 @@ def test_predict_load_contract_shape():
     predict_load() returns
     (predicted_cpu, upper_bound, anomaly_flag).
     """
-    pytest.importorskip("tf_keras", reason="Person B's TF stack not installed")
+    pytest.importorskip("tensorflow", reason="TF stack not installed")
+    pytest.importorskip("prophet", reason="Prophet not installed")
 
     from model.predict import predict_load
 
     window = [
         {
+            "timestamp": f"2026-09-20T10:{i // 2:02d}:{(i % 2) * 30:02d}",
             "cpu_percent": 40.0,
             "memory_percent": 40.0,
             "request_rate": 10,
             "post_scaling": False,
         }
-        for _ in range(10)
+        for i in range(10)
     ]
 
     predicted_cpu, upper_bound, anomaly_flag = predict_load(window)

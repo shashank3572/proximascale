@@ -1,10 +1,13 @@
 import json
+import logging
 import os
 import time
 from datetime import datetime
 
 import docker
+import yaml
 
+from decision.scaling_log import read_scaling_events
 from monitoring.metrics import reset_request_count
 from monitoring.schema import MetricRecord
 from monitoring.storage import append_row
@@ -16,9 +19,20 @@ POLL_INTERVAL = 30       # seconds between each sample -- matches the model's
 
 CONTAINER_NAME = "proximascale-app"
 
+_docker_client = None
+
+
+def _get_docker_client():
+    """Create the Docker client on first use so importing this module
+    does not require a running Docker daemon."""
+    global _docker_client
+    if _docker_client is None:
+        _docker_client = docker.from_env()
+    return _docker_client
+
 
 def get_container_cpu_percent():
-    container = docker_client.containers.get(CONTAINER_NAME)
+    container = _get_docker_client().containers.get(CONTAINER_NAME)
     stats = container.stats(stream=False)
 
     cpu_delta = (
@@ -43,7 +57,7 @@ def get_container_cpu_percent():
 
 
 def get_container_memory_percent():
-    container = docker_client.containers.get(CONTAINER_NAME)
+    container = _get_docker_client().containers.get(CONTAINER_NAME)
     stats = container.stats(stream=False)
 
     usage = stats["memory_stats"]["usage"]
@@ -52,24 +66,40 @@ def get_container_memory_percent():
     return round((usage / limit) * 100, 2)
 
 
-def is_post_scaling():
-    event_path = "data/scaling_events.json"
+_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.yaml"
+)
 
-    if not os.path.exists(event_path):
-        return False
 
+def _tick_seconds(default: float = 3.0) -> float:
+    """Engine tick length; expires_after_steps is counted in these."""
     try:
-        with open(event_path, "r") as file:
-            event = json.load(file)
+        with open(_CONFIG_PATH, "r") as f:
+            return float(yaml.safe_load(f).get("tick_seconds", default))
+    except (OSError, ValueError, AttributeError, yaml.YAMLError):
+        return default
 
-        elapsed = time.time() - event["timestamp"]
-        return elapsed < (event["expires_after_steps"] * 60)
 
-    except (json.JSONDecodeError, KeyError, TypeError):
+def is_post_scaling() -> bool:
+    """True while the latest scale event's cooldown window is still active.
+
+    Reads the JSON array written by decision/scaling_log.py.
+    Window (s) = expires_after_steps * tick_seconds (== cooldown_seconds).
+    """
+    try:
+        events = read_scaling_events()
+    except (OSError, json.JSONDecodeError):
         return False
-
-
-docker_client = docker.from_env()
+    if not events:
+        return False
+    try:
+        last = max(events, key=lambda e: e["timestamp"])
+        window = last["expires_after_steps"] * _tick_seconds()
+        return (time.time() - last["timestamp"]) < window
+    except (KeyError, TypeError):
+        logging.warning("scaling_events.json has malformed entries; "
+                        "treating as not post-scaling")
+        return False
 
 
 def collect_metrics():

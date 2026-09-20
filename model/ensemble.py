@@ -1,8 +1,21 @@
 """
-ProximaScale - Phase 4: Hybrid Ensemble
--------------------------------------------
-Combines the LSTM's 3-step CPU forecast with Prophet's 3-step CPU forecast
-via a fixed weighted average: 0.7 * LSTM + 0.3 * Prophet.
+ProximaScale - Phase 4: Hybrid Ensemble  [DEPRECATED - historical record]
+--------------------------------------------------------------------------
+NOT USED by the live pipeline. ProximaScale moved from this fixed-weight
+blend to RESIDUAL STACKING (Phase 12):
+
+    old (this file):  final = w_lstm * LSTM_forecast + w_prophet * Prophet_forecast
+    now (predict.py): final = Prophet_forecast + LSTM_residual_forecast
+
+The blend had a hard ceiling -- it could never beat the LSTM alone (see the
+train.py docstring). We keep this module, and its tests, to document that a
+weighted ensemble was tried and evaluated before residual stacking replaced it.
+Nothing in model/predict.py, main.py or train.py imports it
+(tests/test_ensemble_deprecated.py enforces that).
+
+Original behaviour: combines the LSTM's 3-step CPU forecast with Prophet's
+3-step forecast via a fixed weighted average. The weights below are the last
+tuned values (the first version used 0.7 / 0.3).
 
 Both forecasts must already be in real CPU % (not scaled) and the same
 length/order (t+1, t+2, t+3) before being passed in here.
@@ -72,12 +85,12 @@ if __name__ == "__main__":
     print(f"🧠 [ProximaScale] Prophet forecast: {[round(v, 2) for v in prophet_forecast]}")
 
     blended = ensemble_predict(lstm_forecast, prophet_forecast)
-    print(f"🧠 [ProximaScale] Ensemble forecast (0.7*LSTM + 0.3*Prophet): "
+    print(f"🧠 [ProximaScale] Ensemble forecast ({LSTM_WEIGHT}*LSTM + {PROPHET_WEIGHT}*Prophet): "
           f"{[round(v, 2) for v in blended]}")
 
     assert len(blended) == 3, "Ensemble output should have 3 values"
     for l, p, b in zip(lstm_forecast, prophet_forecast, blended):
-        expected = 0.7 * l + 0.3 * p
+        expected = LSTM_WEIGHT * l + PROPHET_WEIGHT * p
         assert abs(b - expected) < 1e-6, "Weighted average math is wrong"
 
     print("🧠 [ProximaScale] Ensemble self-test PASSED.")
