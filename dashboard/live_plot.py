@@ -19,13 +19,26 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
+import yaml
 
-LOG_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "logs", "events.csv"
-)
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_PATH = os.path.join(ROOT_DIR, "logs", "events.csv")
+DEFAULT_CONFIG_PATH = os.path.join(ROOT_DIR, "config.yaml")
 REFRESH_SECONDS = 5
-THRESHOLD = 70.0
+FALLBACK_THRESHOLD = 75.0  # only used if the config file can't be read at all
+
+
+def load_threshold(config_path: str) -> float:
+    """cpu_upper_threshold from whichever config.yaml/config_demo.yaml the
+    controller was actually run with -- was previously a hardcoded 70.0 here,
+    silently out of sync with config.yaml's real 75.0 (or config_demo.yaml's
+    own value), so the chart's threshold line could visually disagree with
+    the line main.py's decision engine was actually using."""
+    try:
+        with open(config_path, "r") as f:
+            return float(yaml.safe_load(f).get("cpu_upper_threshold", FALLBACK_THRESHOLD))
+    except (OSError, ValueError, AttributeError, yaml.YAMLError):
+        return FALLBACK_THRESHOLD
 
 
 # ── Data loading ──────────────────────────────────────────────────────────────
@@ -77,7 +90,7 @@ def generate_demo(n: int = 40) -> pd.DataFrame:
 
 
 # ── Charts ────────────────────────────────────────────────────────────────────
-def cpu_chart(df: pd.DataFrame):
+def cpu_chart(df: pd.DataFrame, threshold: float = FALLBACK_THRESHOLD):
     fig = go.Figure()
 
     # Confidence band
@@ -106,9 +119,9 @@ def cpu_chart(df: pd.DataFrame):
     ))
 
     # Threshold line
-    fig.add_hline(y=THRESHOLD, line_dash="dot",
+    fig.add_hline(y=threshold, line_dash="dot",
                   line_color="red",
-                  annotation_text=f"Threshold {THRESHOLD}%",
+                  annotation_text=f"Threshold {threshold:g}%",
                   annotation_position="top left")
 
     # Anomaly markers
@@ -158,21 +171,21 @@ def shap_chart(pct: dict):
     return fig
 
 
-def lead_time(df: pd.DataFrame) -> float:
+def lead_time(df: pd.DataFrame, threshold: float = FALLBACK_THRESHOLD) -> float:
     """Seconds between last scale_up and the next threshold breach."""
     ups = df[df["signal"] == "scale_up"]
     if ups.empty:
         return 0.0
     t_scale = ups.iloc[-1]["timestamp"]
     after = df[(df["timestamp"] > t_scale) &
-               (df["actual_cpu"] >= THRESHOLD)]
+               (df["actual_cpu"] >= threshold)]
     if after.empty:
         return 0.0
     return (after.iloc[0]["timestamp"] - t_scale).total_seconds()
 
 
 # ── Render ────────────────────────────────────────────────────────────────────
-def render(df: pd.DataFrame):
+def render(df: pd.DataFrame, threshold: float = FALLBACK_THRESHOLD, is_live: bool = False):
     st.set_page_config(page_title="ProximaScale", layout="wide")
     st.title("ProximaScale — Live Auto-Scaling Dashboard")
 
@@ -187,11 +200,11 @@ def render(df: pd.DataFrame):
     c1.metric("Current replicas", int(df.iloc[-1]["replicas"]))
     c2.metric("Actual CPU%", f"{df.iloc[-1]['actual_cpu']:.1f}")
     c3.metric("Predicted CPU%", f"{df.iloc[-1]['predicted_cpu']:.1f}")
-    c4.metric("Lead time (s)", f"{lead_time(df):.0f}")
+    c4.metric("Lead time (s)", f"{lead_time(df, threshold):.0f}")
 
     # ── Main chart ────────────────────────────────────────────────────────
     st.subheader("CPU — actual vs predicted (with confidence band)")
-    st.plotly_chart(cpu_chart(df), use_container_width=True)
+    st.plotly_chart(cpu_chart(df, threshold), use_container_width=True)
 
     # ── SHAP + info ───────────────────────────────────────────────────────
     left, right = st.columns([1, 1])
@@ -211,6 +224,13 @@ def render(df: pd.DataFrame):
                     f"Last scale_up driven by: "
                     + ", ".join(f"{k} {v:.0f}%" for k, v in pct.items())
                 )
+            elif is_live:
+                st.info(
+                    "SHAP explainability isn't wired into the live control "
+                    "loop yet (dashboard/shap_explain.py exists and is "
+                    "tested, but main.py doesn't call it during run_real_loop). "
+                    "Run with `--demo` to see sample attribution output."
+                )
             else:
                 st.info("No SHAP values recorded for the last scale_up.")
         else:
@@ -227,16 +247,23 @@ def render(df: pd.DataFrame):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--demo", action="store_true")
+    parser.add_argument(
+        "--config", type=str, default=DEFAULT_CONFIG_PATH,
+        help="Path to the same scaling-rules config main.py was run with, "
+             "so the chart's threshold line matches what the decision "
+             "engine actually used (default: config.yaml).",
+    )
     args, _ = parser.parse_known_args()
+    threshold = load_threshold(args.config)
 
     if args.demo:
         df = generate_demo()
-        render(df)
+        render(df, threshold, is_live=False)
         time.sleep(REFRESH_SECONDS)
         st.rerun()
     else:
         df = load_live()
-        render(df)
+        render(df, threshold, is_live=True)
         time.sleep(REFRESH_SECONDS)
         st.rerun()
 

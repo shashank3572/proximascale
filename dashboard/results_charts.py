@@ -33,6 +33,27 @@ def _load(name: str) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def _finish(ax, fig, out_path: str) -> None:
+    """Shared report-figure polish: value labels on every bar + a light
+    y-gridline behind the bars, applied the same way to all four charts so
+    they read as one consistent set in the report rather than four
+    independently-styled figures. Colors/data/titles are untouched."""
+    ax.set_axisbelow(True)
+    ax.grid(axis="y", color="#000000", alpha=0.08)
+    for spine in ("top", "right"):
+        ax.spines[spine].set_visible(False)
+    for container in ax.containers:
+        ax.bar_label(
+            container,
+            labels=[f"{v:g}" for v in container.datavalues],
+            padding=2, fontsize=8,
+        )
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+    print(f"[ok] {out_path}")
+
+
 # ── Experiment 1 — Prediction accuracy ────────────────────────────────────────
 def exp1_accuracy():
     df = _load("exp1_accuracy.csv")
@@ -48,11 +69,7 @@ def exp1_accuracy():
     ax.set_ylabel("Error")
     ax.set_title("Exp 1 — Prediction accuracy (lower is better)")
     ax.legend()
-    fig.tight_layout()
-    out = os.path.join(OUT_DIR, "exp1_accuracy.png")
-    fig.savefig(out, dpi=150)
-    plt.close(fig)
-    print(f"[ok] {out}")
+    _finish(ax, fig, os.path.join(OUT_DIR, "exp1_accuracy.png"))
 
 
 # ── Experiment 2 — Lead time ──────────────────────────────────────────────────
@@ -69,11 +86,7 @@ def exp2_lead_time():
     ax.set_ylabel("Lead time (s)")
     ax.set_title("Exp 2 — Proactive scaling lead time")
     ax.legend()
-    fig.tight_layout()
-    out = os.path.join(OUT_DIR, "exp2_lead_time.png")
-    fig.savefig(out, dpi=150)
-    plt.close(fig)
-    print(f"[ok] {out}")
+    _finish(ax, fig, os.path.join(OUT_DIR, "exp2_lead_time.png"))
 
 
 # ── Experiment 3 — Response latency ───────────────────────────────────────────
@@ -93,11 +106,7 @@ def exp3_latency():
     ax.set_ylabel("Latency (ms)")
     ax.set_title("Exp 3 — Response latency under spike")
     ax.legend()
-    fig.tight_layout()
-    out = os.path.join(OUT_DIR, "exp3_latency.png")
-    fig.savefig(out, dpi=150)
-    plt.close(fig)
-    print(f"[ok] {out}")
+    _finish(ax, fig, os.path.join(OUT_DIR, "exp3_latency.png"))
 
 
 # ── Experiment 4 — Oscillation ────────────────────────────────────────────────
@@ -110,11 +119,7 @@ def exp4_oscillation():
            color=["#d62728", "#2ca02c"])
     ax.set_ylabel("Oscillations in 5-min window")
     ax.set_title("Exp 4 — Counterfactual correction effect")
-    fig.tight_layout()
-    out = os.path.join(OUT_DIR, "exp4_oscillation.png")
-    fig.savefig(out, dpi=150)
-    plt.close(fig)
-    print(f"[ok] {out}")
+    _finish(ax, fig, os.path.join(OUT_DIR, "exp4_oscillation.png"))
 
 
 if __name__ == "__main__":
