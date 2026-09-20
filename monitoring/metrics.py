@@ -43,8 +43,11 @@ def reset_request_count():
         row = connection.execute(
             "SELECT count FROM request_counter WHERE id = 1"
         ).fetchone()
+
         count = row[0]
+
         connection.execute(
             "UPDATE request_counter SET count = 0 WHERE id = 1"
         )
+
         return count
