@@ -44,6 +44,8 @@ class DecisionEngine:
             min_samples=self.cfg.get("adaptive_min_samples", 10),
             static_upper=self.cfg.get("cpu_upper_threshold", 75.0),
             static_lower=self.cfg.get("cpu_lower_threshold", 30.0),
+            floor_lower=self.cfg.get("adaptive_floor_lower", 15.0),
+            ceil_lower=self.cfg.get("adaptive_ceil_lower", 45.0),
             min_band=self.cfg.get("adaptive_min_band", 10.0),
         )
 

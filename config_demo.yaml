@@ -1,0 +1,44 @@
+# config_demo.yaml — DEMO ONLY. Do not use for real evaluation numbers.
+#
+# Identical to config.yaml except adaptive_window and cooldown_seconds are
+# shortened so a scale_down is visible within a ~10-15 minute panel demo
+# instead of the ~15-20 minutes the real config.yaml needs.
+#
+# Why: decision/adaptive_threshold.py's lower threshold is computed from a
+# rolling window of the last `adaptive_window` predictions. Right after a
+# spike, that window is still full of high readings, which keeps the mean
+# and variance elevated and the lower threshold suppressed near its floor
+# -- so scale_down won't fire until the window has "forgotten" the spike,
+# which takes adaptive_window polls (30 * 30s poll_interval = ~15 min with
+# the real config). Shrinking the window here makes it forget faster.
+# Shortening cooldown_seconds removes the second, smaller delay from the
+# post-scale-up hysteresis lock.
+#
+# Usage:
+#   python main.py --config config_demo.yaml
+#
+# Run model/evaluate.py and any numbers you cite in the report against the
+# real config.yaml, never this file -- it exists purely to make one
+# behavior visible on stage faster, not to represent real tuning.
+
+image: proximascale-worker:latest
+container_prefix: proximascale-worker
+
+min_containers: 1
+max_containers: 10
+
+cpu_quota: 50000
+mem_limit: "256m"
+cpu_period: 100000
+
+cpu_upper_threshold: 75.0
+cpu_lower_threshold: 40.0
+
+cooldown_seconds: 60      # was 180 -- shorter hysteresis lock after a scale action
+tick_seconds: 3
+
+adaptive_window: 8        # was 30 -- forgets a spike in ~4 min instead of ~15
+adaptive_k: 1.5
+adaptive_min_samples: 5   # was 10 -- reaches "adaptive" mode sooner with a smaller window
+
+scale_down_strategy: newest

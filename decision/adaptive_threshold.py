@@ -45,7 +45,7 @@ class AdaptiveThreshold:
             lower = mu - self.min_band / 2.0
 
         upper = max(self.floor_upper, min(self.ceil_upper, upper))
-        lower = max(self.floor_lower, min(self.ceil_lower, lower))
+        lower = max(self.static_lower, min(self.ceil_lower, lower))
         return upper, lower
 
     def reset(self) -> None:
