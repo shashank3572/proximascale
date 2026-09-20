@@ -33,7 +33,8 @@ def make_records(cpu=50.0, n=10):
 
 def test_predict_load_returns_three_values():
     """predict_load() must return (predicted_cpu, upper_bound, anomaly)."""
-    pytest.importorskip("tf_keras", reason="Person B's TF stack not installed")
+    pytest.importorskip("tensorflow", reason="TF stack not installed")
+    pytest.importorskip("prophet", reason="Prophet not installed")
 
     from model.predict import predict_load
 
@@ -46,7 +47,8 @@ def test_predict_load_returns_three_values():
 
 def test_predict_load_values_are_finite():
     """predict_load() outputs must be finite numeric values."""
-    pytest.importorskip("tf_keras", reason="Person B's TF stack not installed")
+    pytest.importorskip("tensorflow", reason="TF stack not installed")
+    pytest.importorskip("prophet", reason="Prophet not installed")
 
     from model.predict import predict_load
 
@@ -59,7 +61,8 @@ def test_predict_load_values_are_finite():
 
 def test_predict_load_stable_cpu_no_anomaly():
     """Stable CPU at 50% should not trigger anomaly."""
-    pytest.importorskip("tf_keras", reason="Person B's TF stack not installed")
+    pytest.importorskip("tensorflow", reason="TF stack not installed")
+    pytest.importorskip("prophet", reason="Prophet not installed")
 
     from model.predict import predict_load
 
@@ -68,9 +71,24 @@ def test_predict_load_stable_cpu_no_anomaly():
     assert anomaly is False
 
 
+def test_predict_load_does_not_silently_fall_back(caplog):
+    """A valid window must go through the real Prophet+LSTM path. The fallback
+    also returns floats, so type-only checks cannot tell the difference."""
+    pytest.importorskip("tensorflow", reason="TF stack not installed")
+    pytest.importorskip("prophet", reason="Prophet not installed")
+
+    from model.predict import predict_load
+
+    with caplog.at_level("ERROR"):
+        predict_load(make_records(cpu=50.0))
+
+    assert not any("FALLBACK" in r.getMessage() for r in caplog.records)
+
+
 def test_predict_load_short_window_uses_fallback():
     """An invalid window should use predict_load()'s documented fallback."""
-    pytest.importorskip("tf_keras", reason="Person B's TF stack not installed")
+    pytest.importorskip("tensorflow", reason="TF stack not installed")
+    pytest.importorskip("prophet", reason="Prophet not installed")
 
     from model.predict import predict_load
 

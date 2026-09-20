@@ -1,8 +1,24 @@
+import os
+
 import docker
+import yaml
+
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+
+
+def worker_prefix(default: str = "proximascale-worker") -> str:
+    """Name prefix of scaled worker containers -- same source as the actuator
+    (config.yaml `container_prefix`)."""
+    try:
+        with open(CONFIG_PATH, "r") as f:
+            return yaml.safe_load(f).get("container_prefix", default)
+    except (OSError, AttributeError, yaml.YAMLError):
+        return default
+
 
 def cleanup_environment():
     client = docker.from_env()
-    prefix = "proximascale_worker_"
+    prefix = worker_prefix()
     
     # Find all containers (even stopped ones) with our project prefix
     containers = client.containers.list(all=True, filters={"name": prefix})

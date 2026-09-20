@@ -3,7 +3,7 @@ ProximaScale - Phase 0: Dummy Data Generator
 ---------------------------------------------
 Generates synthetic system metrics (cpu_percent, memory_percent, request_rate)
 as a bounded random walk with 3 injected sharp spikes, so the pipeline
-(preprocessing -> LSTM -> Prophet -> ensemble -> uncertainty) can be built and
+(preprocessing -> Prophet -> LSTM residual -> stacking -> uncertainty) can be built and
 tested before real collected data exists.
 
 Usage:

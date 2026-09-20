@@ -59,8 +59,10 @@ def health():
 @app.route("/predict", methods=["POST"])
 def get_prediction():
     """
-    (Optional - Semester 1 bonus) Accepts 10 metric records and returns
-    CPU predictions + anomaly flag by calling Person B's model directly.
+    (Optional) Accepts 10 metric records (each with a 'timestamp') and returns
+    {predicted_cpu, upper_bound, anomaly} from model.predict.predict_load().
+    Only works from a full repo checkout with the ML stack installed; the
+    Docker image deliberately excludes model/, so it answers 503 there.
 
     FIX: Import is lazy (inside the function) so Flask starts even if
     TensorFlow or the .keras file are not available in this environment.
@@ -68,7 +70,7 @@ def get_prediction():
     (model/ directory is not copied into the container).
     """
     try:
-        from model.predict import predict          # lazy import — safe
+        from model.predict import predict_load     # lazy import — safe
     except ImportError as e:
         return jsonify({
             "error": "ML model not available in this environment.",
@@ -83,8 +85,12 @@ def get_prediction():
     if len(data["records"]) != 10:
         return jsonify({"error": "Exactly 10 records required"}), 400
 
-    result = predict(data["records"])
-    return jsonify(result)
+    predicted_cpu, upper_bound, anomaly = predict_load(data["records"])
+    return jsonify({
+        "predicted_cpu": predicted_cpu,
+        "upper_bound": upper_bound,
+        "anomaly": anomaly,
+    })
 
 
 if __name__ == "__main__":

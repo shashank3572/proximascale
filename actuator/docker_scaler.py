@@ -50,6 +50,10 @@ class DockerActuator(ScalerInterface):
         # sort by creation time — Docker list order is not guaranteed
         return sorted(containers, key=lambda c: c.attrs["Created"])
 
+    def replica_count(self) -> int:
+        """Number of running worker containers (used by the dashboard log)."""
+        return len(self._workers())
+
     # ------------------------------------------------------------------ actions
     def scale_up(self) -> bool:
         current = self._workers()

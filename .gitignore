@@ -32,3 +32,6 @@ data/collected/*.db
 data/processed/
 
 .venv/
+
+# Dashboard feed written by main.py
+logs/events.csv

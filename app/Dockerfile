@@ -16,7 +16,7 @@ FROM python:3.11-slim
 WORKDIR /proximascale
 
 # Install only Flask + psutil + requests (skip the full ML stack —
-# this container only runs the Flask app + metrics collector)
+# this container only runs the Flask app; the metrics collector runs on the host)
 COPY app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
