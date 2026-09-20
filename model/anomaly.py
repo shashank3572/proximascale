@@ -10,10 +10,25 @@ way a surge is, so it isn't flagged here. If you want both directions later,
 swap `z > threshold` for `abs(z) > threshold` in is_anomaly().
 """
 
+import os
 import numpy as np
+import yaml
 
-THRESHOLD = 2.5
+THRESHOLD = 2.5   # fallback default if config.yaml has no override
 ROLLING_WINDOW = 10  # matches the LSTM's WINDOW_SIZE, for consistency
+
+_CONFIG_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.yaml"
+)
+
+
+def _configured_threshold(default: float = THRESHOLD) -> float:
+    """Read anomaly_z_threshold from config.yaml, falling back to `default`."""
+    try:
+        with open(_CONFIG_PATH, "r") as f:
+            return float(yaml.safe_load(f).get("anomaly_z_threshold", default))
+    except (OSError, ValueError, AttributeError, yaml.YAMLError):
+        return default
 
 
 def rolling_zscore(values):
@@ -33,11 +48,15 @@ def rolling_zscore(values):
     return float((latest - mean) / std)
 
 
-def is_anomaly(cpu_values, threshold=THRESHOLD):
+def is_anomaly(cpu_values, threshold=None):
     """
     cpu_values: array-like of raw cpu_percent readings, latest LAST.
+    threshold: explicit override; if None, reads anomaly_z_threshold from
+               config.yaml (falling back to THRESHOLD).
     Returns True if the latest reading is an upward spike (z > threshold).
     """
+    if threshold is None:
+        threshold = _configured_threshold()
     try:
         z = rolling_zscore(cpu_values)
         return bool(z > threshold)
@@ -46,14 +65,17 @@ def is_anomaly(cpu_values, threshold=THRESHOLD):
         return False  # never let a bad anomaly check crash the caller
 
 
-def detect_anomalies_series(cpu_series, window_size=ROLLING_WINDOW, threshold=THRESHOLD):
+def detect_anomalies_series(cpu_series, window_size=ROLLING_WINDOW, threshold=None):
     """
     Batch version for offline evaluation (Phase 10): slides a window_size-long
     baseline across a full series and flags each point as anomalous or not.
     cpu_series: 1D array-like of raw cpu_percent values, in time order.
+    threshold:  explicit override; if None, resolved from config.yaml once.
     Returns a numpy bool array, same length as cpu_series (the first
     window_size points are always False -- not enough history yet to judge).
     """
+    if threshold is None:
+        threshold = _configured_threshold()
     cpu_series = np.asarray(cpu_series, dtype=float)
     flags = np.zeros(len(cpu_series), dtype=bool)
     for i in range(window_size, len(cpu_series)):

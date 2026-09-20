@@ -20,3 +20,9 @@ adaptive_k: 1.5
 adaptive_min_samples: 10
 
 scale_down_strategy: newest           # or "oldest" — pick one and update both docs
+
+anomaly_z_threshold: 2.5              # model/anomaly.py's z-score cutoff.
+                                       # 2.5 = current/production behavior (unchanged).
+                                       # Bump to ~3.5 for a demo run so idle-load
+                                       # jitter doesn't fire false "anomaly" scale-ups
+                                       # that reset the cooldown timer.

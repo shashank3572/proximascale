@@ -37,7 +37,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
 WINDOW_SIZE = 10          # readings per prediction (model/predict.py WINDOW_SIZE)
 STALE_AFTER_POLLS = 3     # skip prediction if newest CSV row is older than this many polls
@@ -210,7 +210,7 @@ def run_simulation():
         mock_actuator.scale_down.return_value = True
         MockActuator.return_value = mock_actuator
 
-        sim_engine = DecisionEngine(config_path=CONFIG_PATH)
+        sim_engine = DecisionEngine(config_path=DEFAULT_CONFIG_PATH)
 
         for predicted_cpu, upper_bound, anomaly_flag in simulate_lstm_predictions():
             raw_signal = sim_engine.evaluate(predicted_cpu, upper_bound,
@@ -231,16 +231,26 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ProximaScale orchestration loop")
     parser.add_argument("--simulate", action="store_true")
     parser.add_argument("--interval", type=int, default=30)
+    parser.add_argument(
+        "--config", type=str, default=DEFAULT_CONFIG_PATH,
+        help="Path to a scaling-rules config (default: config.yaml). "
+             "Use config_demo.yaml for a faster-converging scale_down during "
+             "a live demo -- see that file's header for why the real "
+             "config.yaml needs ~15 min of idle time to show one. Never use "
+             "config_demo.yaml when generating numbers for the report.",
+    )
     args = parser.parse_args()
 
     logger.info("🚀 ProximaScale starting...")
+    if args.config != DEFAULT_CONFIG_PATH:
+        logger.warning(f"Using non-default config: {args.config} (demo settings, not for report numbers)")
     clear_scaling_events()
 
     if args.simulate:
         run_simulation()
     else:
         from decision.engine import DecisionEngine
-        engine = DecisionEngine(config_path=CONFIG_PATH)
+        engine = DecisionEngine(config_path=args.config)
         try:
             run_real_loop(engine, poll_interval=args.interval)
         except ImportError as e:
