@@ -35,3 +35,5 @@ data/processed/
 
 # Dashboard feed written by main.py
 logs/events.csv
+
+.freebuff/
