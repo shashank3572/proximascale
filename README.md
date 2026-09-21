@@ -98,7 +98,7 @@ group), `python cleanup.py` (remove scaled worker containers).
 ## Data and model artifacts
 
 - `data/collected/README.md` — which CSV is which. **`metrics.csv` is a
-  synthetic dataset** produced by `model/generate_dataset.py`, not container
+  synthetic dataset** produced by `model/generate_realistic_data.py`, not container
   measurements. The small real collection is `metrics_real_dev.csv`.
 - `model/saved/README.md` — which artifacts are current. The pickles and the
   LSTM were produced with the pinned versions in `requirements.txt`; changing

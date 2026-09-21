@@ -190,3 +190,21 @@ Each item was reproduced against the `dev` branch before fixing; every fix has t
 | 11 | `cleanup.py` filtered `proximascale_worker_` but containers are named `proximascale-worker-…` (removed nothing); README had pasted-in text; docs described the old architecture, `--data` and chart options that do not exist, and no worker-image tag | fixed (the worker-image tag is untested without a Docker daemon) |
 
 Still open: SHAP is not called from the live loop; `evaluate.py` has not been re-run since the architecture switch (the historical table above is stale); real container data is limited to 121 rows; CI does not run the TensorFlow/Prophet tests; no end-to-end run against a live Docker daemon has been done in this pass.
+
+## Current 4-Way Evaluation (Residual Stacking) — Verified <21/09/2026>
+
+Run on clean 90k synthetic CSV. Command: `python model/evaluate.py`
+Windows evaluated: 17990
+
+| Method | RMSE | MAE | Avg Lead Time (s) | Oscillations |
+|---|---|---|---|---|
+| Reactive | 6.64 | 3.92 | 0.0 | 72 |
+| Univariate LSTM | 5.13 | 3.03 | 38.3 | 102 |
+| Prophet Alone | 10.15 | 4.67 | 0.0 | 0 |
+| **Hybrid (Full)** | **5.09** | **3.06** | **57.5** | **96** |
+
+Target Scaling Lead Time: >= 60s
+Hybrid RMSE improves on Prophet Alone (10.15) — LSTM's residual correction is adding value.
+
+Limitation (Live-mode predictions): The Prophet base model is anchored to the synthetic training timeline. During live-container demos with real workloads, predicted CPU may temporarily diverge from actual CPU, particularly during severe spikes. The LSTM residual model partially compensates for this, but the system is best demonstrated via --simulate mode or with pre-recorded synthetic data for the dashboard.
+

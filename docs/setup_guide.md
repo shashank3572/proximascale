@@ -2,7 +2,7 @@
 
 > How to run the entire project on a fresh machine.
 > All teammates have RTX gaming laptops. All steps tested on Windows + WSL2 / Ubuntu 22.04.
-
+> **Windows Users:** If running model scripts via pipes or redirects, set `$env:PYTHONUTF8=1` in PowerShell to avoid emoji-encoding crashes. Interactive terminals are unaffected.
 ---
 
 ## Prerequisites
