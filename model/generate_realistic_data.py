@@ -37,8 +37,7 @@ SPIKE_DECAY = 3
 SPIKE_LEN = SPIKE_RAMP + SPIKE_HOLD + SPIKE_DECAY  # 20 rows = 10 minutes
 POST_SCALING_LEN = 10  # rows (5 minutes)
 
-OUTPUT_PATH = Path(__file__).parent / "data" / "collected" / "metrics.csv"
-
+OUTPUT_PATH = Path(__file__).parent.parent / "data" / "collected" / "metrics.csv"
 
 def generate():
     rng = np.random.default_rng(SEED)
