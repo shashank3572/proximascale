@@ -72,7 +72,7 @@ python main.py --simulate           # demo loop, no Docker, no TensorFlow
 streamlit run dashboard/live_plot.py -- --demo
 ```
 
-Real mode needs three things running (see `docs/setup_guide.md`):
+Real mode needs four things running (see `docs/setup_guide.md`):
 
 ```powershell
 # 1. the app image, tagged for both the monitored app and the scaled workers
@@ -85,12 +85,27 @@ python -m monitoring.collector
 # 3. the control loop (own terminal) -- also writes logs/events.csv
 python main.py
 
+# 4. generate real load, or the loop just holds -- e.g. the Flask page's
+#    /work/heavy button or the Locust scenarios in step 6 of the setup guide
+
 # optional: live dashboard reads logs/events.csv
 streamlit run dashboard/live_plot.py
 ```
 
+> The `proximascale-worker-<n>-<ts>` containers are extra replicas the actuator
+> creates and removes; `min_containers: 1` (config.yaml) keeps one alive at idle
+> by design. `config_demo.yaml` sets `min_containers: 0` so a demo can scale all
+> the way down — it is for demos only, never for report numbers.
+>
+> Request counting works across the container boundary via `POST
+> /request-rate/reset`: the collector reads-and-resets the app's counter once per
+> 30 s poll, so `request_rate` in the CSV is the number of workload requests that
+> arrived during that specific window (not a cumulative daily count).
+
 `main.py` skips a cycle (and warns) if the newest collected row is older than
-three poll intervals, so it never scales on stale data.
+three poll intervals, so it never scales on stale data. Decision logs
+(`logs/events.csv`) include the engine's `reason` and SHAP per-feature
+attribution on every scale-up.
 
 Other commands: `python -m baseline.reactive_scaler` (reactive comparison
 group), `python cleanup.py` (remove scaled worker containers).

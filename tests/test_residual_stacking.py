@@ -82,9 +82,22 @@ def test_final_prediction_is_prophet_plus_residual(monkeypatch):
 # ── Held-out regression: stacking must beat Prophet alone ───────────────────
 def test_stacked_beats_prophet_only_on_held_out_tail():
     """Guards against a stale/mismatched artifact or a broken residual path.
-    Uses the chronological last 10% of metrics.csv (training used the first 80%)."""
+    Uses the chronological last 10% of metrics.csv (training used the first 80%).
+
+    Needs the full 90k synthetic dataset: a short live-collection CSV (the
+    collector overwrites/appends to metrics.csv during real runs) cannot fill
+    20 spaced evaluation windows, and the committed model artifacts were
+    trained on the synthetic set anyway -- compare against what they know.
+    """
     df = pd.read_csv(ROOT / "data" / "collected" / "metrics.csv")
     n = len(df)
+    if n < 200:
+        pytest.skip(
+            f"metrics.csv has only {n} rows (live collection in progress) -- "
+            "this check needs the 90k synthetic dataset the artifacts were "
+            "trained on. Restore it (e.g. copy data/collected/metrics_archived.csv "
+            "back over metrics.csv) to run."
+        )
     start = int(n * 0.9)
     idx = list(range(start, n - P.HORIZON - 1, max(1, (n - start) // 20)))[:20]
 

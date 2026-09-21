@@ -86,6 +86,45 @@ def _load_artifacts():
         print("[ProximaScale] Prophet model loaded")
 
 
+def prepare_scaled_window(window):
+    """Shared window preprocessing: counterfactual correction (cpu_percent
+    only) + feature scaling with the trained scaler. predict_load() uses this
+    to build its LSTM input, and main.py's SHAP wiring uses it to rebuild the
+    EXACT same input for attribution -- one source of truth for both.
+
+    window: dicts (or MetricRecord objects with .to_dict()), oldest -> newest,
+    length == WINDOW_SIZE. Returns (scaled, corrected_cpu):
+        scaled        : np.ndarray shape (WINDOW_SIZE, 3) -- the LSTM input
+        corrected_cpu : np.ndarray of the counterfactual-corrected cpu series
+                        (predict_load's anomaly check consumes this)
+    Requires _load_artifacts() to have run (needs the fitted feature scaler).
+    """
+    if window and hasattr(window[0], "to_dict"):
+        window = [record.to_dict() for record in window]
+
+    df = pd.DataFrame(window)
+    if "timestamp" not in df.columns:
+        raise ValueError("window dicts must include 'timestamp' for Phase 12's Prophet lookup")
+    if "post_scaling" not in df.columns:
+        df["post_scaling"] = False
+
+    # Counterfactual correction FIRST (cpu_percent only), matching how
+    # the model was trained.
+    df = apply_counterfactual_correction(df)
+    df["cpu_percent"] = df["cpu_percent_corrected"]
+
+    # Preprocess with the SAME feature scaler fit during training.
+    return scale_features(df, _scaler), df["cpu_percent"].values
+
+
+def get_shap_artifacts():
+    """(keras_model, feature_scaler) after ensuring artifacts are loaded.
+    Lets main.py's SHAP wiring reuse the cached model instead of loading the
+    .h5 a second time."""
+    _load_artifacts()
+    return _model, _scaler
+
+
 def predict_load(window, n_passes=None):
     """
     window: list of dicts, oldest -> newest, length == WINDOW_SIZE (10).
@@ -99,6 +138,8 @@ def predict_load(window, n_passes=None):
                          + 2*std of the LSTM's residual uncertainty, for
                          that same step
         is_anomaly_flag: bool, whether the latest (corrected) reading is a spike
+
+    Both load values are clamped to the physical 0–100 CPU% range.
 
     Never raises -- on any internal failure, falls back to
     (current_cpu * 1.15, current_cpu * 1.3, True) so Person D's main loop
@@ -117,26 +158,16 @@ def predict_load(window, n_passes=None):
         if len(window) != WINDOW_SIZE:
             raise ValueError(f"window must have exactly {WINDOW_SIZE} readings, got {len(window)}")
 
-        df = pd.DataFrame(window)
-        if "timestamp" not in df.columns:
-            raise ValueError("window dicts must include 'timestamp' for Phase 12's Prophet lookup")
-        if "post_scaling" not in df.columns:
-            df["post_scaling"] = False
-
-        # Counterfactual correction FIRST (cpu_percent only), matching how
-        # the model was trained.
-        df = apply_counterfactual_correction(df)
-        df["cpu_percent"] = df["cpu_percent_corrected"]
-
         # Prophet forecast, anchored to THIS window's own last timestamp --
         # not to wherever Prophet's training data happened to end.
-        last_ts = pd.Timestamp(df["timestamp"].iloc[-1])
+        last_ts = pd.Timestamp(window[-1]["timestamp"])
         step = pd.Timedelta(seconds=SAMPLING_INTERVAL_SECONDS)
         future_timestamps = [last_ts + step * i for i in range(1, HORIZON + 1)]
         prophet_forecast = get_prophet_fitted(_prophet_model, future_timestamps)
 
-        # Preprocess with the SAME feature scaler fit during training.
-        scaled = scale_features(df, _scaler)
+        # Counterfactual correction + feature scaling (shared helper so the
+        # SHAP attribution in main.py sees the identical LSTM input).
+        scaled, corrected_cpu = prepare_scaled_window(window)
         window_scaled = scaled.reshape(1, WINDOW_SIZE, -1)
 
         # LSTM forecast of the RESIDUAL + MC Dropout uncertainty (Phase 5),
@@ -159,7 +190,15 @@ def predict_load(window, n_passes=None):
         predicted_load = final_mean[-1]            # farthest step, ~90s ahead
         upper_bound = final_upper_bound[-1]
 
-        anomaly_flag = is_anomaly(df["cpu_percent"].values)
+        # CPU% is physically bounded at 0–100. Prophet + residual + 2σ can
+        # overshoot (observed live: upper bounds of 102–156 while the
+        # container was pegged at 100); clamping keeps the decision engine's
+        # thresholds meaningful. The clamp preserves ORDER, so a bound above
+        # 100 still reads as "very high risk" to the engine.
+        predicted_load = min(100.0, max(0.0, predicted_load))
+        upper_bound = min(100.0, max(0.0, upper_bound))
+
+        anomaly_flag = is_anomaly(corrected_cpu)
 
         return float(predicted_load), float(upper_bound), bool(anomaly_flag)
 
@@ -168,7 +207,9 @@ def predict_load(window, n_passes=None):
         # back, which reports is_anomaly=True and so forces scale-ups.
         logger.error("predict_load FALLBACK (%s): %s", type(e).__name__, e)
         print(f"[ProximaScale] ERROR in predict_load, using fallback: {e}")
-        return float(current_cpu * 1.15), float(current_cpu * 1.3), True
+        fallback_mean = min(100.0, max(0.0, current_cpu * 1.15))
+        fallback_upper = min(100.0, max(0.0, current_cpu * 1.3))
+        return float(fallback_mean), float(fallback_upper), True
 
 
 if __name__ == "__main__":

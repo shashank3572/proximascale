@@ -73,6 +73,11 @@ def generate_demo(n: int = 40) -> pd.DataFrame:
         shap_cpu, shap_mem, shap_req = 0.0, 0.0, 0.0
         if signal == "scale_up":
             shap_cpu, shap_mem, shap_req = 45.0, 32.0, 23.0
+        reason = "in_band"
+        if signal == "scale_up":
+            reason = "upper_bound_risk" if anomaly is False else "anomaly"
+        elif signal == "scale_down":
+            reason = "cpu_low"
         rows.append({
             "timestamp": t,
             "actual_cpu": cpu,
@@ -85,6 +90,7 @@ def generate_demo(n: int = 40) -> pd.DataFrame:
             "shap_cpu": shap_cpu,
             "shap_memory": shap_mem,
             "shap_request": shap_req,
+            "reason": reason,
         })
     return pd.DataFrame(rows)
 
@@ -226,10 +232,11 @@ def render(df: pd.DataFrame, threshold: float = FALLBACK_THRESHOLD, is_live: boo
                 )
             elif is_live:
                 st.info(
-                    "SHAP explainability isn't wired into the live control "
-                    "loop yet (dashboard/shap_explain.py exists and is "
-                    "tested, but main.py doesn't call it during run_real_loop). "
-                    "Run with `--demo` to see sample attribution output."
+                    "No SHAP attribution recorded for the last scale_up. "
+                    "main.py computes it on every scale-up since the "
+                    "explainability wiring; if you just upgraded, the newest "
+                    "scale_up in logs/events.csv may predate it. Trigger "
+                    "another scale-up to populate this panel."
                 )
             else:
                 st.info("No SHAP values recorded for the last scale_up.")
@@ -238,9 +245,9 @@ def render(df: pd.DataFrame, threshold: float = FALLBACK_THRESHOLD, is_live: boo
 
     with right:
         st.subheader("Recent events")
-        ev = df[df["signal"] != "hold"][
-            ["timestamp", "signal", "actual_cpu", "predicted_cpu", "replicas"]
-        ]
+        cols = ["timestamp", "signal", "reason", "actual_cpu", "predicted_cpu", "replicas"]
+        cols = [c for c in cols if c in df.columns]   # tolerate pre-reason logs
+        ev = df[df["signal"] != "hold"][cols]
         st.dataframe(ev.tail(10), use_container_width=True)
 
 

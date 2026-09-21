@@ -63,6 +63,19 @@ class DecisionEngine:
             "<reason>_no_actuator" — actuator unavailable (Docker down / not wired)
              "<reason>_error"       — SDK call raised
           "anomaly" | "upper_bound_risk" | "cpu_high" | "cpu_low"  — on success
+
+        Ordering (and why the cooldown gate sits where it does):
+          1. anomaly                — genuine emergencies bypass EVERYTHING
+          2. cooldown               — gates upper_bound_risk too. The upper bound
+              is a *statistical* risk signal, not a measured emergency; without
+              this gate a decaying spike re-fires scale_up on every poll because
+              the bound lags the mean downward (observed as the scale-up storm
+              followed by scale_down/cooldown oscillation). One scale_up per
+              cooldown window is the correct response to one spike.
+          3. upper_bound_risk       — preemptive scale-up, cooldown-free only
+          4. cpu_high               — measured mean above the upper threshold
+          5. cpu_low                — mean below the lower threshold
+          6. in_band                — nothing to do
          """
         self.last_reason = "in_band"
 
@@ -79,7 +92,12 @@ class DecisionEngine:
                 upper_thresh=upper_thresh,
             )
 
-    # 2. Risk-aware scale-up (mean safe, upper bound risky)
+    # 2. Cooldown gates EVERY remaining branch (risk, high, low)
+        if self.hysteresis.is_cooling_down():
+            self.last_reason = "cooldown"
+            return "hold"
+
+    # 3. Risk-aware scale-up (mean safe, upper bound risky)
         if upper_bound is not None and upper_bound > upper_thresh:
             return self._do(
                 "scale_up",
@@ -88,11 +106,6 @@ class DecisionEngine:
                 reason="upper_bound_risk",
                 upper_thresh=upper_thresh,
             )
-
-    # 3. Cooldown gates only plain threshold-driven actions
-        if self.hysteresis.is_cooling_down():
-            self.last_reason = "cooldown"
-            return "hold"
 
     # 4. Mean above upper bound
         if predicted_cpu > upper_thresh:

@@ -29,7 +29,7 @@ jobs:
           # Install only lightweight deps for CI so TensorFlow doesn't
           # blow the 6-minute budget. Model tests skip cleanly.
           pip install pandas numpy pyyaml psutil docker scikit-learn \
-                      joblib pytest flake8 streamlit plotly matplotlib
+                      joblib pytest flake8 streamlit plotly matplotlib requests
 
       - name: Lint with flake8
         run: |

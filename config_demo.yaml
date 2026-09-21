@@ -14,6 +14,12 @@
 # Shortening cooldown_seconds removes the second, smaller delay from the
 # post-scale-up hysteresis lock.
 #
+# min_containers is 0 here (1 in the real config): a demo should be able to
+# scale all the way down to zero workers so the audience can watch the fleet
+# collapse after the spike, instead of stalling at one container. The main
+# proximascale-app container keeps serving traffic on :5000 regardless --
+# workers are separate containers the actuator creates/removes.
+#
 # Usage:
 #   python main.py --config config_demo.yaml
 #
@@ -24,7 +30,7 @@
 image: proximascale-worker:latest
 container_prefix: proximascale-worker
 
-min_containers: 1
+min_containers: 0        # was 1 -- full collapse for the demo (see above)
 max_containers: 10
 
 cpu_quota: 50000
