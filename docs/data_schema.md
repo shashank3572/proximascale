@@ -23,7 +23,7 @@
 | `timestamp`      | string  | ISO-8601         | `YYYY-MM-DDTHH:MM:SS`, no timezone                                      |
 | `cpu_percent`    | float   | 0.0–100.0        | Container CPU utilisation from Docker SDK / cgroup metrics              |
 | `memory_percent` | float   | 0.0–100.0        | Container memory utilisation from Docker SDK                            |
-| `request_rate`   | integer | 0–∞              | HTTP request count/rate measured over the 30-second monitoring interval |
+| `request_rate`   | integer | 0–∞ (−1 = unavailable) | Workload HTTP requests that arrived during the immediately preceding 30-second window; read-and-reset by the collector via `POST /request-rate/reset` (SQLite fallback when the app runs on the host) |
 | `post_scaling`   | bool    | `true` / `false` | Counterfactual tag marking observations collected after a scaling event |
 
 ---
@@ -99,10 +99,13 @@ Person B — LSTM + ML
           (Prophet + LSTM residual)
           for the configured forecast horizon
           (approximately 90 seconds ahead)
+          clamped to the physical 0–100% range
 
     upper_bound
         → upper prediction bound for the same
           forecast horizon
+          (MC-Dropout mean + 2σ, clamped to
+          0–100%)
 
     anomaly_flag
         → True when the prediction pipeline
@@ -199,7 +202,7 @@ recent scaling intervention
 
 ## Rules
 
-1. `request_rate` is always an **integer** and must be cast using `int()` where required.
+1. `request_rate` is always an **integer** and must be cast using `int()` where required. `-1` means the collector could not reach the app's reset endpoint or the SQLite fallback during that poll — it is an error marker, not a load measurement, and should be excluded from training or cleaned before use.
 2. `timestamp` is stored as a **string**, not a `datetime` object, when persisted to CSV or exchanged through JSON/dictionaries.
 3. Metric records must remain in **chronological order** when passed to the prediction pipeline.
 4. `predict_load()` expects **exactly 10 metric records** for the current Phase 2 prediction pipeline.

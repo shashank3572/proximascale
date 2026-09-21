@@ -10,6 +10,7 @@ Routes:
     GET  /work/heavy    → heavy CPU workload
     GET  /metrics       → current request metrics
     GET  /request-rate  → current request count for monitoring window
+    POST /request-rate/reset → read-and-reset (used by the monitoring collector)
     GET  /health        → health check
     POST /predict       → optional direct ML prediction API
 
@@ -26,7 +27,7 @@ import os
 # Project-root imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from monitoring.metrics import increment_request_count, get_request_count
+from monitoring.metrics import increment_request_count, get_request_count, reset_request_count
 
 
 app = Flask(__name__)
@@ -34,10 +35,14 @@ app = Flask(__name__)
 
 # Routes that should NOT contribute to workload request metrics.
 # Otherwise refreshing the Flask page would affect the monitoring data.
+# /request-rate/reset must be excluded too: it is the monitoring collector's
+# read-and-reset channel, and counting it would add +1 to every poll
+# (increment fires in before_request BEFORE the view reads the count).
 _EXCLUDED_FROM_COUNT = {
     "/",
     "/health",
     "/request-rate",
+    "/request-rate/reset",
     "/metrics",
     "/predict",
     "/favicon.ico",
@@ -327,7 +332,8 @@ def landing_page():
                 </div>
 
                 <div class="request-label">
-                    requests since last monitoring reset
+                    requests in the current monitoring window
+                    (the collector resets this counter every 30 s)
                 </div>
             </div>
 
@@ -410,6 +416,17 @@ def landing_page():
             <span class="description">
                 — current request counter
             </span>
+        </div>
+
+        <div class="endpoint">
+            <span class="method">POST</span>
+            <span>
+                <code>/request-rate/reset</code>
+            </span>
+            <span class="description">
+                — read-and-reset for the monitoring collector
+            </span>
+
         </div>
 
         <div class="endpoint">
@@ -523,6 +540,22 @@ def request_rate():
 
     return jsonify({
         "request_count": get_request_count()
+    })
+
+
+@app.route("/request-rate/reset", methods=["POST"])
+def request_rate_reset():
+    """
+    Monitoring collector's channel: return the count of requests that arrived
+    since the previous poll and reset it to zero, atomically.
+
+    Why an endpoint at all: the app runs inside a container, so the collector
+    (on the host) cannot share its SQLite file -- the old file-based read
+    always returned 0 across that boundary. Returns the count observed just
+    before the reset, i.e. the request volume of exactly one polling window.
+    """
+    return jsonify({
+        "request_count": reset_request_count()
     })
 
 

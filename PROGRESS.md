@@ -189,7 +189,24 @@ Each item was reproduced against the `dev` branch before fixing; every fix has t
 | 12 | `shap.DeepExplainer` fails on Keras 3 models | `KernelExplainer` |
 | 11 | `cleanup.py` filtered `proximascale_worker_` but containers are named `proximascale-worker-…` (removed nothing); README had pasted-in text; docs described the old architecture, `--data` and chart options that do not exist, and no worker-image tag | fixed (the worker-image tag is untested without a Docker daemon) |
 
-Still open: SHAP is not called from the live loop; `evaluate.py` has not been re-run since the architecture switch (the historical table above is stale); real container data is limited to 121 rows; CI does not run the TensorFlow/Prophet tests; no end-to-end run against a live Docker daemon has been done in this pass.
+Still open: `evaluate.py` has not been re-run since the architecture switch (the historical table above is stale); real container data is limited to 121 rows; CI does not run the TensorFlow/Prophet tests; no end-to-end run against a live Docker daemon has been done in this pass.
+
+## Live-demo fixes (2026-09-21)
+
+Found during a real `python main.py --config config_demo.yaml` demo run (spike via `/work/heavy`). Every item reproduced from live logs before fixing; full suite now 113 passed.
+
+| # | Symptom (observed live) | Root cause | Fix |
+|---|---|---|---|
+| 1 | After a spike, `scale_up` fired on 6 consecutive polls even while predicted CPU was *falling*, then `scale_down`/`cooldown` alternated | `engine.evaluate()` checked the `upper_bound_risk` branch BEFORE the cooldown gate; the MC-Dropout bound (mean + 2σ) stays above threshold for many polls after the mean has turned, so every poll re-scaled | cooldown now gates every branch except `anomaly` (one scale-up per cooldown window per spike); regression-tested in `tests/test_live_demo_fixes.py` |
+| 2 | Predicted CPU logged as 124.8 / upper bound 156.7 | Prophet + LSTM residual + 2σ is unbounded; container CPU is physically ≤100% | `predict_load()` clamps mean and upper bound to 0–100 (fallback path too); ordering preserved so a pegged bound still reads as high risk |
+| 3 | Fleet stalled at 1 extra container through multiple `scale_down`s | Not a bug: `min_containers: 1` (correct per spec). The demo just couldn't show full collapse | `config_demo.yaml` sets `min_containers: 0` (demo-only; real `config.yaml` unchanged) |
+| 4 | Collector `Requests: 0` forever, even under load | Collector read the SQLite file directly; the Flask app runs in a container, so the host and container see *different* `metrics.db` files — the host copy is never written | app gains `POST /request-rate/reset` (read-and-reset, atomic); collector calls it over HTTP first, SQLite stays as the fallback for a host-run app; returns −1 (not a fake 0) when neither channel works |
+| 5 | Collector CPU flapped 0.01% ↔ 100.0% | A single `stats(stream=False)` diffs against `precpu_stats` — Docker's cached snapshot of the previous call, which is stale on the first call and after idle periods | two fresh snapshots 2 s apart are diffed (`_cpu_percent_from_stats`); still clamped to 100 |
+| 6 | Flask page showed a day-long cumulative count ("1271 requests since last monitoring reset") | It rendered the raw counter, which the collector only resets every 30 s | label now says "requests in the current monitoring window"; the page polls every 3 s so it tracks the live window; `/request-rate/reset` added to the endpoint list |
+| 7 | Dashboard SHAP panel permanently showed the "isn't wired into the live control loop" notice | `main.py` never called `dashboard/shap_explain.py` | `run_real_loop` computes attribution on every scale-up via `_compute_shap()`: reuses `prepare_scaled_window()` + the cached model (identical input to prediction), KernelExplainer nsamples=256, window + neutral baseline as background; failures log a warning and record zeros — never kill the loop |
+| 8 | Dashboard "Recent events" gave no reason for each action | events.csv carried no reason | events rows gain a `reason` column (engine's `last_reason`); dashboard table shows it; `generate_demo()` supplies it too |
+
+Note: `logs/events.csv` from runs before this pass lack `reason` and the dashboard tolerates both formats. `config_demo.yaml` is still demo-only — run evaluation numbers against the real `config.yaml`.
 
 ## Current 4-Way Evaluation (Residual Stacking) — Verified <21/09/2026>
 

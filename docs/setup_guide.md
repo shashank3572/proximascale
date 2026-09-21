@@ -165,8 +165,24 @@ streamlit run dashboard/live_plot.py            # live, reads logs/events.csv
 streamlit run dashboard/live_plot.py -- --demo  # synthetic demo data
 ```
 
-The SHAP panel shows "No SHAP values recorded" in live mode: `ShapExplainer` is fixed and tested
-but not yet called from `main.py`.
+SHAP attribution is computed automatically on every scale-up and appears in the dashboard's
+"SHAP — why did we scale?" panel after the next scale-up event.
+
+### Reading the demo output
+
+- **One scale-up per spike is correct.** After a scale-up the engine cools down
+  (`cooldown_seconds`); a decaying spike can keep the uncertainty (upper) bound elevated for a
+  few polls, but that no longer re-triggers scale-ups — only a genuine anomaly flag bypasses the
+  cooldown.
+- **Predicted CPU is always within 0–100.** Forecasts are clamped to the physical range; the
+  confidence band may sit at 100 while the container is pegged.
+- **One worker container always remains** with `config.yaml` (`min_containers: 1`). Use
+  `--config config_demo.yaml` to let the demo collapse to zero workers — demo only.
+- **`Requests: 0` with no load is expected.** The collector reads-and-resets the app's counter
+  each 30 s poll via `POST /request-rate/reset`; with no traffic in the window, 0 is the true
+  count. If you see `-1`, neither the HTTP endpoint nor the SQLite fallback was reachable.
+- **Container CPU flapping 0% ↔ 100% is fixed**: the collector now diffs two fresh Docker stat
+  snapshots 2 s apart instead of trusting Docker's cached `precpu` snapshot.
 
 ---
 

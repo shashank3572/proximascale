@@ -55,7 +55,7 @@ class ShapExplainer:
         background = shap.kmeans(bg.reshape(len(bg), -1),
                                  min(n_background_clusters, len(bg)))
         self.explainer = shap.KernelExplainer(predict_last_step, background)
-        logger.info(f"ShapExplainer initialised with {len(bg)} background samples.")
+        logger.debug(f"ShapExplainer initialised with {len(bg)} background samples.")
 
     def explain(self, X_input: np.ndarray) -> dict:
         """
