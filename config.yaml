@@ -26,3 +26,12 @@ anomaly_z_threshold: 2.5              # model/anomaly.py's z-score cutoff.
                                        # Bump to ~3.5 for a demo run so idle-load
                                        # jitter doesn't fire false "anomaly" scale-ups
                                        # that reset the cooldown timer.
+anomaly_min_cpu_percent: 5.0           # absolute floor for anomaly detection:
+                                       # a z-score is RELATIVE, so on an idle
+                                       # container one jittery 0.35% reading among
+                                       # 0.00-0.05% neighbors is 20+ stds and used
+                                       # to fire "anomaly" scale-ups on a machine
+                                       # doing no work. Readings below this floor
+                                       # can never be a spike, whatever the z-score
+                                       # says. Spike handling is unaffected: real
+                                       # spikes are far above 5% in absolute terms.

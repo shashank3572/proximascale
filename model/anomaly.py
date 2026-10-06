@@ -16,6 +16,7 @@ import yaml
 
 THRESHOLD = 2.5   # fallback default if config.yaml has no override
 ROLLING_WINDOW = 10  # matches the LSTM's WINDOW_SIZE, for consistency
+MIN_CPU_PERCENT = 5.0  # absolute floor: below this, no z-score can be a spike
 
 _DEFAULT_CONFIG_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config.yaml"
@@ -24,41 +25,64 @@ _DEFAULT_CONFIG_PATH = os.path.join(
 def _resolve_config_path() -> str:
     return os.environ.get("PROXIMASCALE_CONFIG_PATH", _DEFAULT_CONFIG_PATH)
 
-def _configured_threshold(default: float = THRESHOLD) -> float:
+def _configured_value(key: str, default: float) -> float:
     try:
         with open(_resolve_config_path(), "r") as f:
-            return float(yaml.safe_load(f).get("anomaly_z_threshold", default))
+            return float(yaml.safe_load(f).get(key, default))
     except (OSError, ValueError, AttributeError, yaml.YAMLError):
         return default
+
+def _configured_threshold(default: float = THRESHOLD) -> float:
+    return _configured_value("anomaly_z_threshold", default)
+
+def _configured_min_cpu(default: float = MIN_CPU_PERCENT) -> float:
+    return _configured_value("anomaly_min_cpu_percent", default)
 
 def rolling_zscore(values):
     """
     values: array-like of raw (unscaled) cpu_percent readings, latest LAST.
     Baseline = all but the latest reading. Returns the z-score of the latest
     reading relative to that baseline, or 0.0 if there isn't enough history
-    or the baseline has zero variance (can't divide by a zero std).
+    or the baseline has (near-)zero variance (can't divide by a zero std).
+
+    A tiny std floor (1e-3) keeps measurement jitter -- 0.00 vs 0.02 on an
+    idle container -- from computing a z-score in the hundreds.
     """
     values = np.asarray(values, dtype=float)
     if len(values) < 2:
         return 0.0
     baseline, latest = values[:-1], values[-1]
     mean, std = baseline.mean(), baseline.std()
-    if std == 0:
+    if std < 1e-3:
         return 0.0
     return float((latest - mean) / std)
 
 
-def is_anomaly(cpu_values, threshold=None):
+def is_anomaly(cpu_values, threshold=None, min_cpu_percent=None):
     """
     cpu_values: array-like of raw cpu_percent readings, latest LAST.
     threshold: explicit override; if None, reads anomaly_z_threshold from
                config.yaml (falling back to THRESHOLD).
+    min_cpu_percent: explicit override; if None, reads
+               anomaly_min_cpu_percent from config.yaml (default 5.0).
     Returns True if the latest reading is an upward spike (z > threshold).
+
+    The absolute floor exists because a z-score alone is RELATIVE: on an idle
+    container the last 9 readings can sit at 0.00-0.05% CPU, and one jittery
+    0.35% reading is 20+ baseline stds -- an 'anomaly' scale-up on a machine
+    doing no work at all (observed live, repeatedly). A real spike lands far
+    above idle noise in ABSOLUTE terms too, so readings below the floor can
+    never be one.
     """
     if threshold is None:
         threshold = _configured_threshold()
+    if min_cpu_percent is None:
+        min_cpu_percent = _configured_min_cpu()
     try:
-        z = rolling_zscore(cpu_values)
+        values = np.asarray(cpu_values, dtype=float)
+        if len(values) == 0 or values[-1] < min_cpu_percent:
+            return False
+        z = rolling_zscore(values)
         return bool(z > threshold)
     except Exception as e:
         print(f"🧠 [ProximaScale] ERROR in is_anomaly: {e}")

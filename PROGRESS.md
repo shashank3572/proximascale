@@ -32,6 +32,7 @@ ProximaScale is a proactive autoscaling load predictor combining Prophet (base f
 - [ ] Run the full collection cycle for real: `docker build`, `docker run --cpus=0.5 --memory=256m`, all three Locust scenarios, collector active — this needs an actual machine with Docker, which is why it isn't done here
 - [ ] Target: **≥1,500 rows**, spanning **≥3 days**, covering normal/spike/ramp/quiet periods, with genuine container CPU excursions into the 70–90%+ range and `post_scaling` populated
 - [ ] Real dataset still short of target. The 121 real rows (5-column schema, collected 2026-09-12 to 09-14) now live in `data/collected/metrics_real_dev.csv`. `data/collected/metrics.csv` was replaced in commit 2da9d70e by a 90,000-row **synthetic** dataset from `model/generate_dataset.py` — see `data/collected/README.md`. Do not present it as measured data.
+- [x] **[2026-09-22 fix]** Live collection now goes to `data/collected/metrics_live.csv`; the frozen 90k `metrics.csv` is never appended to. Earlier runs appended live idle rows after the synthetic history, so model windows crossed a synthetic→live discontinuity (predicted ~57% while the container idled at 0.02%) and idle jitter fired false "anomaly" scale-ups. Override the live path with `PROXIMASCALE_LIVE_METRICS_PATH`.
 - [ ] Multi-laptop Locust master/worker test — not yet evidenced anywhere in this repo
 - [ ] Hand off the final `metrics.csv` to Person B and get explicit confirmation it's usable for LSTM training
 

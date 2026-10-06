@@ -7,6 +7,8 @@ Run:
     streamlit run dashboard/live_plot.py -- --demo
 
 Live mode reads logs/events.csv (written by main.py's log_event).
+The collector appends live metrics to data/collected/metrics_live.csv --
+data/collected/metrics.csv stays the frozen 90k synthetic training dataset.
 Demo mode generates synthetic data so the UI can be built/tested
 before the full pipeline is running.
 """
@@ -178,16 +180,31 @@ def shap_chart(pct: dict):
 
 
 def lead_time(df: pd.DataFrame, threshold: float = FALLBACK_THRESHOLD) -> float:
-    """Seconds between last scale_up and the next threshold breach."""
+    """Seconds between a scale_up and the threshold breach it preempted.
+
+    A proactive scale-up fires BEFORE the breach, so the primary reading is
+    the next breach after the newest scale_up. But a healthy proactive
+    response can hold the container below the threshold for the whole visible
+    window -- which used to display as lead time 0, indistinguishable from
+    having scaled too late. Fallback: measure from the newest scale_up
+    BACKWARD to the most recent breach (how long ago we reacted to the last
+    one), which stays positive while the fleet holds steady.
+    """
     ups = df[df["signal"] == "scale_up"]
     if ups.empty:
         return 0.0
     t_scale = ups.iloc[-1]["timestamp"]
+
     after = df[(df["timestamp"] > t_scale) &
                (df["actual_cpu"] >= threshold)]
-    if after.empty:
+    if not after.empty:
+        return (after.iloc[0]["timestamp"] - t_scale).total_seconds()
+
+    before = df[(df["timestamp"] < t_scale) &
+                (df["actual_cpu"] >= threshold)]
+    if before.empty:
         return 0.0
-    return (after.iloc[0]["timestamp"] - t_scale).total_seconds()
+    return (t_scale - before.iloc[-1]["timestamp"]).total_seconds()
 
 
 # ── Render ────────────────────────────────────────────────────────────────────

@@ -56,6 +56,11 @@ THIS_DIR = Path(__file__).parent
 SAVED_DIR = THIS_DIR / "saved"
 RESIDUAL_SCALER_PATH = SAVED_DIR / "scaler_residual.pkl"   # must match train.py exactly
 
+# Frozen 90k synthetic training dataset the saved artifacts were fit on.
+# Exported as a hint so main.py's SHAP background can sample the TRAINING
+# distribution instead of inventing ad-hoc reference points.
+TRAINING_DATA_HINT_PATH = THIS_DIR.parent / "data" / "collected" / "metrics.csv"
+
 SAMPLING_INTERVAL_SECONDS = 30   # must match prophet_model.py's DEFAULT_FREQ ("30s")
 
 # Lazy-loaded, module-level cache -- populated on first call, reused after.
@@ -197,6 +202,24 @@ def predict_load(window, n_passes=None):
         # 100 still reads as "very high risk" to the engine.
         predicted_load = min(100.0, max(0.0, predicted_load))
         upper_bound = min(100.0, max(0.0, upper_bound))
+
+        # Sanity check against the TRAINING scaler's fitted range: a MinMax
+        # scaler projects anything outside [min, max] outside [0, 1] too, so
+        # a fully-saturated input window (min==max) quietly degrades to all
+        # zeros and the LSTM's "forecast" is whatever the bias terms give.
+        # Observed live: real ~100% CPU fed into a scaler fit on data capped
+        # at 93.5% produced predicted=upper=100.0 with no spread at all.
+        try:
+            lo, hi = float(_scaler.data_min_[0]), float(_scaler.data_max_[0])
+            if lo >= hi:
+                logger.warning(
+                    "Feature scaler has a degenerate CPU range "
+                    f"[{lo}, {hi}] -- saturated windows will produce flat, "
+                    "uninformative forecasts. Retrain on data that includes "
+                    "saturated samples."
+                )
+        except Exception:
+            pass
 
         anomaly_flag = is_anomaly(corrected_cpu)
 

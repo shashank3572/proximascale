@@ -230,6 +230,12 @@ def test_readonly_request_rate_endpoint_still_get_only(flask_client):
 # ── 5. main._compute_shap wiring ─────────────────────────────────────────────
 from monitoring.schema import MetricRecord  # noqa: E402
 
+# Points at a path that never exists so the fallback [window, neutral]
+# background branch runs and the test stays independent of the 90k CSV.
+_no_such_training_csv = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "no", "such", "metrics.csv"
+)
+
 
 def _records(n=10):
     return [MetricRecord(
@@ -247,9 +253,11 @@ def test_compute_shap_uses_scaled_window_and_returns_attribution(monkeypatch):
 
     def fake_prepare(window):
         captured["window_len"] = len(window)
-        return np.zeros((10, 3), dtype="float32"), np.zeros(10)
+        # Mimic the real scaler's row output shape (n_rows, 3).
+        return np.zeros((len(window), 3), dtype="float32"), np.zeros(len(window))
 
     import model.predict as P
+    monkeypatch.setattr(P, "TRAINING_DATA_HINT_PATH", _no_such_training_csv)
     monkeypatch.setattr(P, "prepare_scaled_window", fake_prepare)
     monkeypatch.setattr(P, "get_shap_artifacts", lambda: ("fake-model", None))
 
@@ -267,7 +275,10 @@ def test_compute_shap_uses_scaled_window_and_returns_attribution(monkeypatch):
     out = main._compute_shap(_records())
     assert out == {"CPU%": 70.0, "Memory%": 20.0, "Request Rate": 10.0}
     assert captured["window_len"] == 10
-    assert captured["background_shape"] == (2, 10, 3)   # window + neutral baseline
+    # Fallback branch (training CSV unavailable in the test env):
+    # background = [current window, neutral flat-50% reference] == 2 points,
+    # each a full (10, 3) window.
+    assert captured["background_shape"] == (2, 10, 3)
     assert captured["input_shape"] == (1, 10, 3)
     assert captured["nsamples"] == 256
 
@@ -280,6 +291,7 @@ def test_compute_shap_never_raises(monkeypatch):
     def boom(window):
         raise RuntimeError("scaler exploded")
     monkeypatch.setattr(P, "prepare_scaled_window", boom)
+    monkeypatch.setattr(P, "TRAINING_DATA_HINT_PATH", _no_such_training_csv)
 
     assert main._compute_shap(_records()) is None
 

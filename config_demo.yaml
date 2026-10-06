@@ -1,8 +1,9 @@
 # config_demo.yaml — DEMO ONLY. Do not use for real evaluation numbers.
 #
-# Identical to config.yaml except adaptive_window and cooldown_seconds are
-# shortened so a scale_down is visible within a ~10-15 minute panel demo
-# instead of the ~15-20 minutes the real config.yaml needs.
+# Identical to config.yaml except: adaptive_window and cooldown_seconds are
+# shortened, the lower threshold is raised for afternoon reviews, and
+# min_containers is 0 -- all so both scaling directions are visible within a
+# ~10-15 minute panel demo (see the per-key comments below).
 #
 # Why: decision/adaptive_threshold.py's lower threshold is computed from a
 # rolling window of the last `adaptive_window` predictions. Right after a
@@ -38,7 +39,28 @@ mem_limit: "256m"
 cpu_period: 100000
 
 cpu_upper_threshold: 75.0
-cpu_lower_threshold: 40.0
+
+# Demo-time lower threshold, raised above Prophet's afternoon baseline.
+# WHY: the hybrid's mean on idle afternoons is NOT ~0 -- Prophet's fitted daily
+# curve peaks at ~55% around 15:00 (training data is diurnal, trough 17% at
+# 03:00). The real config's lower threshold (40) is therefore unreachable at
+# 10:00-17:00: the adaptive lower is clamped by ceil_lower, then floored by
+# static_lower, so scale_down can never fire exactly when a panel is watching.
+# With static_lower=78 the adaptive lower pins at 78 during any steady idle
+# period, so scale_down (cpu_low) fires on the very first eligible poll and
+# keeps firing until min_containers=0. Spike handling is unaffected: with a
+# full-spike window (all ~100) the adaptive lower still lands at 78, and the
+# mixed post-spike window (100x3 + 56x5) sits at 72.5 -- in_band -- so the
+# scale-down sweep only starts once the window has actually flushed the spike.
+# Live idle probes verified: 13:50 -> 47%, 14:30 -> 49%, 21:30 -> 32%.
+cpu_lower_threshold: 78.0
+# Optional overrides (defaults 15.0 / 45.0 kept for every non-demo run):
+adaptive_floor_lower: 60.0
+adaptive_ceil_lower: 78.0
+
+anomaly_min_cpu_percent: 5.0           # shared with config.yaml: idle-jitter readings
+                                       # (0.00-0.35%) can never be spikes, so demo
+                                       # scale-ups come from real traffic only
 
 cooldown_seconds: 60      # was 180 -- shorter hysteresis lock after a scale action
 tick_seconds: 3

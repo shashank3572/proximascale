@@ -10,7 +10,7 @@ import yaml
 from decision.scaling_log import read_scaling_events
 from monitoring.metrics import reset_request_count
 from monitoring.schema import MetricRecord
-from monitoring.storage import append_row
+from monitoring.storage import append_row, csv_path
 
 POLL_INTERVAL = 30       # seconds between each sample -- matches the model's
                          # trained sampling rate (model/evaluate.py SAMPLING_INTERVAL_SEC,
@@ -126,10 +126,20 @@ _CONFIG_PATH = os.path.join(
 )
 
 
-def _tick_seconds(default: float = 3.0) -> float:
+def _resolve_tick_config_path() -> str:
+    """Same config the engine was actually run with. main.py exports
+    PROXIMASCALE_CONFIG_PATH before starting the loop; without it the
+    collector would read config.yaml even during a --config config_demo.yaml
+    run, so a 60s demo cooldown would be treated as 180s and post_scaling
+    stayed True for 3x too long."""
+    return os.environ.get("PROXIMASCALE_CONFIG_PATH", _CONFIG_PATH)
+
+
+def _tick_seconds(default: float = 3.0, path: str = None) -> float:
     """Engine tick length; expires_after_steps is counted in these."""
+    path = path or _resolve_tick_config_path()
     try:
-        with open(_CONFIG_PATH, "r") as f:
+        with open(path, "r") as f:
             return float(yaml.safe_load(f).get("tick_seconds", default))
     except (OSError, ValueError, AttributeError, yaml.YAMLError):
         return default
@@ -149,7 +159,7 @@ def is_post_scaling() -> bool:
         return False
     try:
         last = max(events, key=lambda e: e["timestamp"])
-        window = last["expires_after_steps"] * _tick_seconds()
+        window = last["expires_after_steps"] * _tick_seconds(_resolve_tick_config_path())
         return (time.time() - last["timestamp"]) < window
     except (KeyError, TypeError):
         logging.warning("scaling_events.json has malformed entries; "
@@ -175,7 +185,13 @@ def collect_metrics():
             request_rate=request_rate,
             post_scaling=post_scaling,
         )
-        append_row(record)
+        # Live rows go to metrics_live.csv. NEVER append to metrics.csv:
+        # that file is the frozen 90k synthetic training dataset -- the saved
+        # Prophet/LSTM/scaler artifacts were fit on it, and appending real
+        # idle rows after the synthetic history makes every window the model
+        # sees cross a synthetic-to-live discontinuity (predicted CPU jumping
+        # to ~57% while the container idles at 0.02%).
+        append_row(record, path=csv_path())
 
         print(
             f"{timestamp} | "
