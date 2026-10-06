@@ -188,7 +188,7 @@ def _compute_shap(window_records):
     try:
         import numpy as np
         import pandas as pd
-        from model.predict import prepare_scaled_window, get_shap_artifacts
+        from model.predict import prepare_scaled_window, get_shap_artifacts, TRAINING_DATA_HINT_PATH
         from dashboard.shap_explain import ShapExplainer
 
         # Accept MetricRecord objects from the monitoring loop.
@@ -198,24 +198,61 @@ def _compute_shap(window_records):
         scaled, _ = prepare_scaled_window(window_records)
         model, _feature_scaler = get_shap_artifacts()
 
-        # Background = the current window itself, PLUS a neutral flat-50%
-        # reference window scaled through the real feature scaler. kmeans on
-        # the two points keeps KernelExplainer cheap (nsamples=256) while
-        # giving it low/high baselines to attribute against -- with only one
-        # background point equal to the input, every attribution would
-        # degenerate to ~0.
-        neutral = pd.DataFrame({
-            "timestamp": [r["timestamp"] for r in window_records],
-            "cpu_percent": [50.0] * len(window_records),
-            "memory_percent": [50.0] * len(window_records),
-            "request_rate": [0] * len(window_records),
-            "post_scaling": [False] * len(window_records),
-        })
-        neutral_scaled, _ = prepare_scaled_window(neutral.to_dict("records"))
-        background = np.stack([scaled, neutral_scaled]).astype(np.float32)
+        # Background set = training distribution, NOT the live window.
+        # KernelExplainer's "importance" is distance from the background
+        # members it averages over; with the window itself in the set the
+        # explainer could trivially copy the input (attribution collapsed to
+        # ~77/23/0 regardless of what actually drove the decision). Sampled
+        # from the FROZEN training dataset through the real scaler, the
+        # background spans Prophet's full diurnal cycle, so a feature only
+        # gets credit when moving the input away from it changes the output.
+        # The current window stays in as an anchor: with only one background
+        # point equal to the input, every attribution would degenerate to ~0.
+        rng = np.random.default_rng(20260922)
+        bg_windows = None
+        try:
+            hint = pd.read_csv(TRAINING_DATA_HINT_PATH)
+            hint = hint.sort_values("timestamp").reset_index(drop=True)
+            n = len(hint)
+            if n >= WINDOW_SIZE:
+                # Sample contiguous WINDOW_SIZE-long segments so every
+                # background window has realistic within-window dynamics
+                # (the LSTM was trained on contiguous windows). KernelExplainer
+                # consumes flattened (10, 3) windows, so the background must
+                # be a stack of windows, not loose rows.
+                n_windows = min(64, n // WINDOW_SIZE)
+                starts = sorted(rng.choice(n - WINDOW_SIZE,
+                                           size=n_windows, replace=False))
+                stacked = []
+                for s in starts:
+                    seg = hint.iloc[s:s + WINDOW_SIZE]
+                    seg_scaled, _ = prepare_scaled_window(seg.to_dict("records"))
+                    stacked.append(seg_scaled)
+                bg_windows = np.stack(stacked)
+        except Exception as bg_err:
+            logger.warning(f"SHAP training-distribution background unavailable: {bg_err}")
+
+        window_3d = scaled.reshape(1, WINDOW_SIZE, -1).astype(np.float32)
+        if bg_windows is not None and len(bg_windows) >= 2:
+            background = np.vstack([bg_windows, window_3d]).astype(np.float32)
+        else:
+            # Fallback: neutral flat-50% reference window + current window
+            # (old behaviour -- attribution quality degraded, but the loop
+            # still gets numbers when the training CSV is unavailable).
+            neutral = pd.DataFrame({
+                "timestamp": [r["timestamp"] for r in window_records],
+                "cpu_percent": [50.0] * len(window_records),
+                "memory_percent": [50.0] * len(window_records),
+                "request_rate": [0] * len(window_records),
+                "post_scaling": [False] * len(window_records),
+            })
+            neutral_scaled, _ = prepare_scaled_window(neutral.to_dict("records"))
+            background = np.concatenate(
+                [window_3d, neutral_scaled.reshape(1, WINDOW_SIZE, -1)]
+            ).astype(np.float32)
 
         explainer = ShapExplainer(model, background, nsamples=256)
-        return explainer.explain(scaled.reshape(1, 10, 3).astype(np.float32))
+        return explainer.explain(window_3d)
     except Exception as e:
         logger.warning(f"SHAP attribution unavailable this cycle: {e}")
         return None

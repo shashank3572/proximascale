@@ -81,14 +81,22 @@ In a **separate terminal** (with venv active):
 python -m monitoring.collector
 ```
 
-This polls CPU/memory/request_rate every 30 seconds and appends to `data/collected/metrics.csv`.
+This polls CPU/memory/request_rate every 30 seconds and appends to `data/collected/metrics_live.csv`.
+
+> `data/collected/metrics.csv` is the **frozen 90k synthetic training dataset** the
+> Prophet/LSTM artifacts and both scalers were fit on — the collector never writes
+> to it. Live samples land in `metrics_live.csv` (override with the
+> `PROXIMASCALE_LIVE_METRICS_PATH` env var), and the real loop reads the last 10
+> rows of that file. Mixing live rows into the training file makes every model
+> window cross a synthetic→live discontinuity and silently invalidates retraining.
+> To retrain, point training at `metrics.csv` as before — nothing else changes.
 
 **Real mode (`python main.py`) reads this file**, so the collector must be running. `main.py` skips
 prediction and warns if the newest row is more than 3 poll intervals old.
 
 > The committed `metrics.csv` is a 90,000-row *synthetic* dataset (see `data/collected/README.md`).
-> Running the collector appends real rows to it; to collect a clean real dataset, point the
-> collector at a new file or back up/move the committed one first.
+> It stays frozen — the collector's live rows go to `metrics_live.csv`, so a clean real dataset
+> is simply the live file itself; no manual backup needed.
 
 ---
 
@@ -166,7 +174,9 @@ streamlit run dashboard/live_plot.py -- --demo  # synthetic demo data
 ```
 
 SHAP attribution is computed automatically on every scale-up and appears in the dashboard's
-"SHAP — why did we scale?" panel after the next scale-up event.
+"SHAP — why did we scale?" panel after the next scale-up event. The attribution uses a
+background set sampled from the training distribution (plus the current window), so a
+feature only gets credit when moving the input away from it actually changes the forecast.
 
 ### Reading the demo output
 

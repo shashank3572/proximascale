@@ -79,7 +79,8 @@ Real mode needs four things running (see `docs/setup_guide.md`):
 docker build -f app/Dockerfile -t proximascale-app -t proximascale-worker:latest .
 docker run -d --name proximascale-app -p 5000:5000 proximascale-app
 
-# 2. the collector (own terminal) -- writes data/collected/metrics.csv
+# 2. the collector (own terminal) -- writes data/collected/metrics_live.csv
+#    (metrics.csv stays the frozen 90k synthetic training dataset)
 python -m monitoring.collector
 
 # 3. the control loop (own terminal) -- also writes logs/events.csv

@@ -1,4 +1,5 @@
 """Tests for main.run_real_loop wiring (storage -> predict_load -> engine)."""
+import os
 import sys
 import types
 from datetime import datetime, timedelta
@@ -8,6 +9,7 @@ import pytest
 
 import main
 from monitoring.schema import MetricRecord
+from monitoring.storage import csv_path
 
 
 class _StopLoop(Exception):
@@ -35,7 +37,18 @@ def harness(monkeypatch, tmp_path):
 
     import monitoring.storage as storage
     reader = MagicMock()
+    reader.return_value = _records()
     monkeypatch.setattr(storage, "read_last_n", reader)
+
+    # The real loop must read the LIVE metrics file, never the frozen 90k
+    # training dataset. Track the path each read resolves to.
+    read_paths = []
+
+    def tracking_read(n, path=None):
+        read_paths.append(path or csv_path())
+        return reader.return_value
+
+    reader.side_effect = tracking_read
 
     def _stop(_):
         raise _StopLoop
@@ -49,7 +62,8 @@ def harness(monkeypatch, tmp_path):
     engine.last_reason = "in_band"
     engine.actuator.replica_count.return_value = 2
     return types.SimpleNamespace(predict=fake_predict.predict_load,
-                                 reader=reader, engine=engine, events=events)
+                                 reader=reader, engine=engine, events=events,
+                                 read_paths=read_paths)
 
 
 def test_fresh_window_calls_predict_and_engine(harness):
@@ -59,6 +73,15 @@ def test_fresh_window_calls_predict_and_engine(harness):
     harness.reader.assert_called_once_with(10)
     harness.predict.assert_called_once()
     harness.engine.evaluate.assert_called_once_with(60.0, 70.0, anomaly_flag=False)
+
+
+def test_real_loop_reads_live_metrics_file(harness):
+    """Regression: read_last_n() must resolve to metrics_live.csv, not the
+    frozen training metrics.csv the artifacts were fit on."""
+    harness.reader.return_value = _records()
+    with pytest.raises(_StopLoop):
+        main.run_real_loop(harness.engine, poll_interval=30)
+    assert os.path.basename(harness.read_paths[0]) == "metrics_live.csv"
 
 
 def test_short_window_skips_prediction(harness):
