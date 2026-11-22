@@ -6,6 +6,8 @@ Docker is fully mocked — these tests run without Docker Desktop.
 Run with:  pytest tests/test_decision.py -v
 """
 import os
+import time
+
 import pytest
 from unittest.mock import patch, MagicMock
 
@@ -138,8 +140,10 @@ def test_anomaly_bypasses_cooldown_then_starts_fresh_cooldown(engine):
     Full sequence under the locked 3-value contract:
       1. High CPU            → scale_up, starts cooldown
       2. High CPU again      → hold (reason=cooldown)
-      3. Anomaly while cool  → scale_up (bypasses cooldown)
-      4. High CPU again      → hold (anomaly re-armed the clock)
+      3. Anomaly while cool  → hold (inside the anomaly minimum interval;
+                                 the interval counts from any scale_up)
+      4. Interval elapsed    → anomaly → scale_up (bypasses still-armed cooldown)
+      5. High CPU again      → hold (anomaly re-armed the clock)
     """
     # Step 1 — normal scale_up
     r1 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
@@ -151,14 +155,22 @@ def test_anomaly_bypasses_cooldown_then_starts_fresh_cooldown(engine):
     assert r2 == "hold"
     assert engine.last_reason == "cooldown"
 
-    # Step 3 — anomaly ignores cooldown, fires scale_up, re-arms the clock
+    # Step 3 — inside the minimum interval from step 1's scale_up: no worker
     r3 = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
-    assert r3 == "scale_up"
+    assert r3 == "hold"
+    assert engine.last_reason == "anomaly_min_interval"
+
+    # Step 4 — interval elapsed, cooldown still armed → anomaly bypasses cooldown
+    engine.last_scale_up_time = time.time() - (
+        engine.anomaly_scale_up_min_interval + 1
+    )
+    r4 = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
+    assert r4 == "scale_up"
     assert engine.last_reason == "anomaly"
 
-    # Step 4 — must be cooling down again from step 3
-    r4 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
-    assert r4 == "hold"
+    # Step 5 — must be cooling down again from step 4
+    r5 = engine.evaluate(predicted_cpu=90.0, upper_bound=None, anomaly_flag=False)
+    assert r5 == "hold"
     assert engine.last_reason == "cooldown"
 
 import json

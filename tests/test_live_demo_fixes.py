@@ -1,7 +1,8 @@
 """Regression tests for the 2026-09-21 live-demo fixes.
 
 Covers:
-  1. Engine: upper_bound_risk must respect cooldown (the scale-up storm fix)
+  1. Engine: upper_bound_risk must respect cooldown (the scale-up storm fix),
+     and the anomaly branch must respect its own minimum interval
   2. predict_load: clamps forecasts to the physical 0-100 CPU% range
   3. Collector: two-sample CPU math + HTTP-first request reset channel
   4. App: POST /request-rate/reset contract (and that it never self-counts)
@@ -59,8 +60,18 @@ def test_upper_bound_risk_fires_again_after_cooldown_expires(engine):
     assert engine.last_reason == "upper_bound_risk"
 
 
-def test_anomaly_still_bypasses_cooldown(engine):
+def test_anomaly_bypasses_cooldown_once_interval_has_passed(engine):
+    """The anomaly branch still beats cooldown_seconds, but only after the
+    anomaly minimum interval from the previous scale_up has elapsed."""
     engine.evaluate(predicted_cpu=90.0, upper_bound=95.0, anomaly_flag=False)
+
+    # 30 s later: inside the 120 s interval -- one spike, one worker.
+    r_within = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
+    assert r_within == "hold"
+    assert engine.last_reason == "anomaly_min_interval"
+
+    # Past the interval but still inside the 180 s cooldown -> anomaly wins.
+    engine.last_scale_up_time = time.time() - 121
     r = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
     assert r == "scale_up"
     assert engine.last_reason == "anomaly"

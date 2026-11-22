@@ -78,7 +78,7 @@ def test_anomaly_scale_up_respects_min_interval():
 def test_anomaly_scale_up_fires_again_after_min_interval():
     engine = _engine(anomaly_scale_up_min_interval=120)
     engine.evaluate(50.0, anomaly_flag=True)
-    engine.last_anomaly_scale_up = time.time() - 121
+    engine.last_scale_up_time = time.time() - 121
 
     assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
     assert engine.last_reason == "anomaly"
@@ -88,6 +88,35 @@ def test_anomaly_scale_up_fires_again_after_min_interval():
 def test_anomaly_min_interval_zero_disables_the_gate():
     engine = _engine(anomaly_scale_up_min_interval=0)
     assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.last_reason == "anomaly"
+
+
+def test_anomaly_interval_counts_from_a_cpu_high_scale_up():
+    """Regression: cpu_high adds a worker, then an anomaly 30 s later used to
+    add a second one inside the window; the interval must span both branches."""
+    engine = _engine(anomaly_scale_up_min_interval=120)
+    assert engine.evaluate(95.0, anomaly_flag=False) == "scale_up"
+    assert engine.last_reason == "cpu_high"
+    assert engine.actuator.replicas == 4
+
+    assert engine.evaluate(95.0, anomaly_flag=True) == "hold"
+    assert engine.last_reason == "anomaly_min_interval"
+    assert engine.actuator.replicas == 4
+
+    # Once the window from the cpu_high scale-up has passed, anomaly may fire.
+    engine.last_scale_up_time = time.time() - 121
+    assert engine.evaluate(95.0, anomaly_flag=True) == "scale_up"
+    assert engine.last_reason == "anomaly"
+    assert engine.actuator.replicas == 5
+
+
+def test_scale_down_does_not_arm_the_anomaly_interval():
+    """Only scale_ups arm the window; a scale_down then an anomaly is allowed."""
+    engine = _engine(anomaly_scale_up_min_interval=120)
+    engine.actuator.replicas = 5
+    engine.evaluate(10.0, anomaly_flag=False)
+    assert engine.last_reason == "cpu_low"
     assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
     assert engine.last_reason == "anomaly"
 

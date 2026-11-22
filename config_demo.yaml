@@ -69,10 +69,13 @@ anomaly_min_cpu_percent: 5.0           # shared with config.yaml: idle-jitter re
                                        # scale-ups come from real traffic only
 
 cooldown_seconds: 60      # was 180 -- shorter hysteresis lock after a scale action
-anomaly_scale_up_min_interval: 120  # min seconds between anomaly scale-ups; the
-                                    # anomaly branch bypasses cooldown_seconds, so
-                                    # without this one spike scaled up every poll
-                                    # (a demo run fired two 34 s apart)
+anomaly_scale_up_min_interval: 120  # min seconds before an anomaly scale-up,
+                                    # counted from the last scale_up of ANY branch.
+                                    # The anomaly branch bypasses cooldown_seconds,
+                                    # so without this one spike scaled up every poll
+                                    # (a demo run fired two 34 s apart) and an
+                                    # anomaly right after a cpu_high scale-up
+                                    # added a second worker inside the window
 tick_seconds: 3
 
 adaptive_window: 8        # was 30 -- forgets a spike in ~4 min instead of ~15
