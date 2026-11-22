@@ -37,7 +37,7 @@ data/processed/
 logs/events.csv
 
 # Demo/rehearsal run logs (collector, loop, Locust, fleet timeline)
-logs/demo_*.log
+logs/demo*.log
 
 # Archived one-off data artifacts (stale runs kept off the tracked tree)
 data/archive/
