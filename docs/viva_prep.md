@@ -48,8 +48,8 @@ data/collected/metrics_live.csv  {timestamp, cpu_percent, memory_percent,
     synthetic→live discontinuity)
         v
 main.py control loop (every 30 s):
-   1. storage.read_last_n(10)          -- last 10 readings = 5 min of history
-      (skips the cycle if data is stale > 3 polls, or fewer than 10 rows)
+   1. storage.read_last_n(30)          -- last 30 readings = 15 min of history
+      (skips the cycle if data is stale > 3 polls, or fewer than 30 rows)
    2. predict_load(window)  [model/predict.py]:
         a. counterfactual correction on cpu_percent
         b. MinMax scaling (scaler fit on TRAIN data only)
@@ -364,7 +364,8 @@ It's marked HISTORICAL in PROGRESS.md and superseded.
 
 > "I own integration — making four people's modules actually run as one
 > system — plus the dashboard and explainability. The control loop in
-> main.py reads the last 10 readings, calls predict_load(), feeds all three
+> main.py reads the last 30 readings (a full 15-minute window), calls
+> predict_load(), feeds all three
 > outputs into evaluate(), executes the signal, and logs every decision to
 > logs/events.csv with the predicted value, upper bound, replica count, the
 > engine's *reason string*, and SHAP attributions. Stale-data guard: if the
