@@ -30,6 +30,8 @@ def engine():
 
         from decision.engine import DecisionEngine
         eng = DecisionEngine(config_path=config_path)
+        # these tests exercise the anomaly and upper-bound branches, which config.yaml now switches off
+        eng.cfg.update(use_anomaly_bypass=True, use_upper_bound_risk=True)
         eng.hysteresis.last_action_time = 0
         yield eng
 

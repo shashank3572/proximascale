@@ -1,0 +1,17 @@
+rows,n,method,vs,rmse_on,rmse_off,d_rmse,d_rmse_sd,bias_on,bias_off
+all,17988,ProximaScale (hybrid mean),recorded,5.0870,5.0879,-0.0009,0.0000,-0.1822,-0.1827
+all,17988,ProximaScale (hybrid mean),true load,5.1104,5.1101,0.0002,0.0000,-0.3125,-0.3130
+all,17988,Univariate LSTM,recorded,5.1313,5.1313,0.0000,0.0000,0.3956,0.3547
+all,17988,Univariate LSTM,true load,5.1232,5.1722,-0.0490,0.0000,0.2653,0.2244
+post-scaling in window,684,ProximaScale (hybrid mean),recorded,3.5412,3.5755,-0.0343,0.0004,0.6595,0.6463
+post-scaling in window,684,ProximaScale (hybrid mean),true load,4.3366,4.3300,0.0066,0.0013,-1.7438,-1.7569
+post-scaling in window,684,Univariate LSTM,recorded,4.5675,4.5673,0.0003,0.0000,0.1206,-0.9556
+post-scaling in window,684,Univariate LSTM,true load,4.7663,5.9977,-1.2314,0.0000,-2.2826,-3.3588
+target is post-scaling,360,ProximaScale (hybrid mean),recorded,4.5485,4.5711,-0.0226,0.0007,2.5163,2.5463
+target is post-scaling,360,ProximaScale (hybrid mean),true load,5.7102,5.6780,0.0322,0.0016,-3.9945,-3.9645
+target is post-scaling,360,Univariate LSTM,recorded,5.7943,5.2868,0.5075,0.0000,3.9905,2.4643
+target is post-scaling,360,Univariate LSTM,true load,5.4249,6.9996,-1.5747,0.0000,-2.5203,-4.0465
+"post-scaling in window, target not",432,ProximaScale (hybrid mean),recorded,3.3731,3.4048,-0.0317,0.0008,-0.2765,-0.3222
+"post-scaling in window, target not",432,ProximaScale (hybrid mean),true load,3.3731,3.4048,-0.0317,0.0008,-0.2765,-0.3222
+"post-scaling in window, target not",432,Univariate LSTM,recorded,4.5201,5.0114,-0.4913,0.0000,-1.6767,-2.1088
+"post-scaling in window, target not",432,Univariate LSTM,true load,4.5201,5.0114,-0.4913,0.0000,-1.6767,-2.1088

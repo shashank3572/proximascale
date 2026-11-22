@@ -13,6 +13,14 @@ cpu_upper_threshold: 75.0             # static fallback for adaptive
 cpu_lower_threshold: 30.0
 
 cooldown_seconds: 180
+
+# Tuned for the v2 model on the VALIDATION period (model/tune_decisions.py,
+# results/tuning/): the forecast mean alone anticipated every spike there with
+# no false scale-ups, while the anomaly bypass and the upper-bound branch both
+# added false or early scale-ups. Set either back to true to restore it.
+use_anomaly_bypass: false             # anomaly flag no longer forces a scale-up
+use_upper_bound_risk: false           # upper bound no longer triggers scale-ups
+scale_down_max_current_cpu: 75.0      # no scale-down while current CPU is above this
 tick_seconds: 3
 
 adaptive_window: 30

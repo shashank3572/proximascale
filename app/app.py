@@ -612,7 +612,8 @@ def get_prediction():
             "records": [...]
         }
 
-    Exactly 10 records are required.
+    At least 10 records are required; send 30 so the v2 model serves the
+    forecast (10-29 records use the original 10-reading model).
     """
 
     try:
@@ -630,9 +631,9 @@ def get_prediction():
             "error": "JSON body must contain 'records'."
         }), 400
 
-    if len(data["records"]) != 10:
+    if len(data["records"]) < 10:
         return jsonify({
-            "error": "Exactly 10 records required"
+            "error": "At least 10 records required"
         }), 400
 
     try:

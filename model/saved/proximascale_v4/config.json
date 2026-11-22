@@ -1,0 +1,42 @@
+{
+  "name": "ProximaScale v4: v3's model (30-step window, Prophet forecast as input, dropout 0.1) trained on original + varied-spike data",
+  "variant": "hx3_drop10",
+  "inputs": [
+    "cpu_percent",
+    "memory_percent",
+    "request_rate",
+    "yhat",
+    "yhat_f3"
+  ],
+  "window": 30,
+  "target": "residual",
+  "correct": true,
+  "prophet": "model/saved/proximascale_prophet.pkl",
+  "horizon": 3,
+  "members": [
+    "seed0",
+    "seed1",
+    "seed2"
+  ],
+  "default_passes": 30,
+  "trained_by": "model/train_variants.py --variants hx3_drop10 --data data/collected/metrics.csv data/collected/metrics_varied.csv (fair protocol, early stopping on both validation periods)",
+  "selected_by": "model/unseen_eval.py, rule fixed before training: original validation RMSE within 2% of v3 (4.058 vs 4.023) and lower varied validation RMSE (3.984 vs 5.038)",
+  "upper_bound": {
+    "method": "binned",
+    "level": 0.95,
+    "edges": [
+      0.22192157086852823,
+      0.2563357747674179,
+      0.29471023409393615,
+      0.3602121869840686
+    ],
+    "q": [
+      5.546403123096911,
+      5.223965909693275,
+      5.192937136726688,
+      4.981523822610977,
+      5.384296830016954
+    ],
+    "fit_on": "validation period, rows 64800-71999 (model/tune_decisions.py --bundle model/saved/proximascale_v4)"
+  }
+}

@@ -33,6 +33,7 @@ def harness(monkeypatch, tmp_path):
     """Patch storage.read_last_n, model.predict.predict_load, time.sleep."""
     fake_predict = types.ModuleType("model.predict")
     fake_predict.predict_load = MagicMock(return_value=(60.0, 70.0, False))
+    fake_predict.HISTORY_SIZE = 30        # readings the v2 model needs
     monkeypatch.setitem(sys.modules, "model.predict", fake_predict)
 
     import monitoring.storage as storage
@@ -70,9 +71,10 @@ def test_fresh_window_calls_predict_and_engine(harness):
     harness.reader.return_value = _records()
     with pytest.raises(_StopLoop):
         main.run_real_loop(harness.engine, poll_interval=30)
-    harness.reader.assert_called_once_with(10)
+    harness.reader.assert_called_once_with(30)
     harness.predict.assert_called_once()
-    harness.engine.evaluate.assert_called_once_with(60.0, 70.0, anomaly_flag=False)
+    harness.engine.evaluate.assert_called_once_with(
+        60.0, 70.0, anomaly_flag=False, current_cpu=harness.reader.return_value[-1].cpu_percent)
 
 
 def test_real_loop_reads_live_metrics_file(harness):

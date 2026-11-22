@@ -23,26 +23,49 @@ only act after a threshold is breached.
 ```text
 Monitoring (monitoring/collector.py, separate process)
     -> Data collection / storage (data/collected/metrics.csv)
-    -> Preprocessing (10-step window, scaling, counterfactual correction)
-    -> Base forecast: Prophet
+    -> Preprocessing (30-step window = 15 min, scaling, counterfactual correction)
+    -> Base forecast: Prophet (also given to the LSTM as an input channel)
     -> Residual = actual - Prophet fitted
-    -> Residual model: LSTM (predicts the next 3 residuals)
+    -> Residual model: 3 LSTMs (seed ensemble), predict the next 3 residuals
     -> Residual stacking: final = Prophet forecast + LSTM residual forecast
-    -> Anomaly detection + MC-Dropout uncertainty (upper bound)
+    -> Anomaly detection + MC-Dropout uncertainty (calibrated 95% upper bound)
     -> Decision engine (decision/engine.py)
     -> Docker actuator (actuator/docker_scaler.py)
     -> Application scaling
     -> Dashboard / observability (logs/events.csv -> dashboard/live_plot.py)
 ```
 
-`main.py` orchestrates the loop: read the last 10 readings, `predict_load()`,
-`engine.evaluate()`, execute the signal, log the decision for the dashboard.
+`main.py` orchestrates the loop: read the last `HISTORY_SIZE` (30) readings,
+`predict_load()`, `engine.evaluate()`, execute the signal, log the decision for
+the dashboard.
 
 Interfaces:
 
 - `predict_load(window) -> (predicted_cpu, upper_bound, anomaly_flag)` — `model/predict.py`
-- `engine.evaluate(predicted_cpu, upper_bound=None, anomaly_flag=False) -> signal`
+- `engine.evaluate(predicted_cpu, upper_bound=None, anomaly_flag=False, current_cpu=None) -> signal`
   (`scale_up` / `scale_down` / `hold` / `hold_cooldown` / ...; see `docs/data_schema.md`)
+
+### The served model
+
+`predict_load()` serves the stacked bundle in `model/saved/proximascale_v4/`
+(`model/forecaster.py`) whenever it is given at least 30 readings, and the
+original 10-reading model (`proximascale_lstm.h5`) for 10-29 readings (the
+first 15 minutes after a cold start). v4 is trained on the original data plus
+data with varied spike shapes. `PROXIMASCALE_MODEL=v3` / `=v2` serve earlier
+bundles and `PROXIMASCALE_MODEL=legacy` the original model only.
+
+On the test split: RMSE 4.35 (original model 5.09), lead time 58 s, no
+forecast false alarms; with the tuned engine 36/36 spikes get a scale-up
+30-90 s ahead, with no false scale-ups and 2.7 replicas on average (original
+live config: 20/36, 44 false scale-ups a day, 5.9 replicas). All synthetic data.
+How the bundle was chosen, and every result behind it, is in
+`docs/model_evaluation.md`.
+
+The decision engine has three switches (`config.yaml`), each chosen on the
+validation period by `model/tune_decisions.py`: `use_anomaly_bypass: false`,
+`use_upper_bound_risk: false`, and `scale_down_max_current_cpu: 75` (no
+scale-down while CPU is still above 75%). `scale_up_on_current_cpu` (a
+reactive floor) exists but is off: it made every evaluated period worse.
 
 ### Why residual stacking
 
@@ -134,4 +157,6 @@ group), `python cleanup.py` (remove scaled worker containers).
 - `docs/setup_guide.md` — environment, Docker setup, demo steps
 - `docs/data_schema.md` — metric record schema and module interfaces
 - `docs/scaling_events.md` — scaling event log format
+- `docs/model_evaluation.md` — model search, calibration, engine tuning,
+  unseen-data tests and how to reproduce every number
 - `PROGRESS.md` — milestone tracking and the audit repair log

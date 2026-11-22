@@ -1,0 +1,2 @@
+n_passes,n_seeds,dump,rmse,rmse_sd,mae,mae_sd,lead_mean_s,lead_mean_s_sd,crossings,crossings_sd,coverage_upper,coverage_upper_sd,mean_sigma,mean_sigma_sd,point_sd_across_seeds,point_max_diff_across_seeds,dump_runtime_s
+30,5,results/eval_dump/v3_tuned,4.31119,0.000907971,2.64629,0.000912563,52.3333,0.372678,72,0,0.948999,0.000376227,0.448222,0.000769196,0.0575433,5.5486,201.9

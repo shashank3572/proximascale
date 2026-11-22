@@ -37,3 +37,6 @@ data/processed/
 logs/events.csv
 
 .freebuff/
+
+# Evaluation prediction dumps (large; regenerate with model/eval_dump.py)
+results/eval_dump/

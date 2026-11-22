@@ -1,0 +1,17 @@
+dataset,bound,coverage,coverage_above_75,mean_width
+original_val,calibrated 95%,0.9495,0.8832,4.9543
+original_val,raw mean + 2 sigma,0.6349,0.9159,0.8396
+original_test,calibrated 95%,0.9482,0.8734,4.9565
+original_test,raw mean + 2 sigma,0.6215,0.9193,0.8882
+varied_val,calibrated 95%,0.9477,0.6364,4.9577
+varied_val,raw mean + 2 sigma,0.6240,0.7063,0.8629
+varied_test,calibrated 95%,0.9361,0.5132,4.9568
+varied_test,raw mean + 2 sigma,0.6117,0.6388,0.9608
+fresh,calibrated 95%,0.9454,0.8785,4.9588
+fresh,raw mean + 2 sigma,0.6050,0.9195,0.8644
+shifted,calibrated 95%,0.9104,0.4614,4.9321
+shifted,raw mean + 2 sigma,0.5673,0.6377,1.1038
+shifted2,calibrated 95%,0.9236,0.5615,4.9492
+shifted2,raw mean + 2 sigma,0.5762,0.7109,0.9705
+real_dev,calibrated 95%,0.9114,,4.6140
+real_dev,raw mean + 2 sigma,0.9367,,7.1073

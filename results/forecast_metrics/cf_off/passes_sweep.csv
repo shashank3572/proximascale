@@ -1,0 +1,2 @@
+n_passes,n_seeds,dump,rmse,rmse_sd,mae,mae_sd,lead_mean_s,lead_mean_s_sd,crossings,crossings_sd,coverage_upper,coverage_upper_sd,mean_sigma,mean_sigma_sd,point_sd_across_seeds,point_max_diff_across_seeds,dump_runtime_s
+30,5,results/eval_dump/cf_off,5.08788,0.00288365,3.06236,0.00128811,56.8333,0.372678,96.4,2.60768,0.563854,0.000583855,0.383147,0.00123793,0.0677083,7.326,121

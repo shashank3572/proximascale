@@ -50,19 +50,23 @@ class DecisionEngine:
         )
 
     # ---------------------------------------------------------------- evaluate
-    def evaluate(self, predicted_cpu, upper_bound=None, anomaly_flag=False):
+    def evaluate(self, predicted_cpu, upper_bound=None, anomaly_flag=False, current_cpu=None):
         """
          Returns one of "scale_up" | "scale_down" | "hold"  (locked 3-value contract).
 
             Why a non-scaling decision was made is exposed via `self.last_reason`,
             one of:
         "in_band"       — CPU inside the adaptive band
+        "scale_down_guard" — the forecast says scale down, but the CURRENT
+                          reading is still above scale_down_max_current_cpu
+                          (only when current_cpu is passed and the key is set)
         "cooldown"      — still inside the hysteresis window
         "max_reached"   — scale_up requested, but actuator at max replicas
             "min_reached"   — scale_down requested, but actuator at min replicas
             "<reason>_no_actuator" — actuator unavailable (Docker down / not wired)
              "<reason>_error"       — SDK call raised
-          "anomaly" | "upper_bound_risk" | "cpu_high" | "cpu_low"  — on success
+          "anomaly" | "upper_bound_risk" | "cpu_high" | "current_cpu_high" | "cpu_low"  — on success
+        ("current_cpu_high": the reactive floor, scale_up_on_current_cpu)
 
         Ordering (and why the cooldown gate sits where it does):
           1. anomaly                — genuine emergencies bypass EVERYTHING
@@ -83,7 +87,7 @@ class DecisionEngine:
         upper_thresh, lower_thresh = self.thresholds.get_thresholds()
 
     # 1. Anomaly bypasses both risk branch and cooldown
-        if anomaly_flag:
+        if anomaly_flag and self.cfg.get("use_anomaly_bypass", True):
             return self._do(
                 "scale_up",
                 predicted_cpu,
@@ -98,7 +102,8 @@ class DecisionEngine:
             return "hold"
 
     # 3. Risk-aware scale-up (mean safe, upper bound risky)
-        if upper_bound is not None and upper_bound > upper_thresh:
+        if (upper_bound is not None and self.cfg.get("use_upper_bound_risk", True)
+                and upper_bound > upper_thresh):
             return self._do(
                 "scale_up",
                 predicted_cpu,
@@ -117,8 +122,28 @@ class DecisionEngine:
                 upper_thresh=upper_thresh,
             )
 
-    # 5. Mean below lower bound
+    # 4b. Reactive floor: CPU is ALREADY above the threshold, whatever the
+    #     forecast says, so scaling up is never later than a reactive scaler
+    #     (a forecaster that misses a spike shape it was not trained on would
+    #     otherwise leave the spike unhandled). Off unless set.
+        if (self.cfg.get("scale_up_on_current_cpu", False) and current_cpu is not None
+                and current_cpu > upper_thresh):
+            return self._do(
+                "scale_up",
+                predicted_cpu,
+                upper_bound,
+                reason="current_cpu_high",
+                upper_thresh=upper_thresh,
+            )
+
+    # 5. Mean below lower bound -- unless CPU is still high right now: a
+    #    forecaster that sees a spike's end coming would otherwise remove
+    #    capacity while the spike is still running.
         if predicted_cpu < lower_thresh:
+            guard = self.cfg.get("scale_down_max_current_cpu")
+            if guard is not None and current_cpu is not None and current_cpu > guard:
+                self.last_reason = "scale_down_guard"
+                return "hold"
             return self._do(
                 "scale_down",
                 predicted_cpu,

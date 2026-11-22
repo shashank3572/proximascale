@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
-WINDOW_SIZE = 10          # readings per prediction (model/predict.py WINDOW_SIZE)
+WINDOW_SIZE = 10          # minimum readings per prediction (model/predict.py WINDOW_SIZE)
 STALE_AFTER_POLLS = 3     # skip prediction if newest CSV row is older than this many polls
 
 # Dashboard feed (dashboard/live_plot.py reads this file; keep columns in sync).
@@ -189,6 +189,7 @@ def _compute_shap(window_records):
         import numpy as np
         import pandas as pd
         from model.predict import prepare_scaled_window, get_shap_artifacts, TRAINING_DATA_HINT_PATH
+        import model.predict as live_predict
         from dashboard.shap_explain import ShapExplainer
 
         # Accept MetricRecord objects from the monitoring loop.
@@ -196,7 +197,15 @@ def _compute_shap(window_records):
             r.to_dict() if hasattr(r, "to_dict") else r for r in window_records
         ]
         scaled, _ = prepare_scaled_window(window_records)
-        model, _feature_scaler = get_shap_artifacts()
+        # The explained model is the one that served this window: the
+        # original 10-reading LSTM (3 features) or the v2 member (30 readings,
+        # Prophet channels too).
+        steps = scaled.shape[0]
+        feature_names = None
+        if scaled.shape[-1] == 3:
+            model, _feature_scaler = get_shap_artifacts()
+        else:
+            model, feature_names = live_predict.get_bundle_shap_artifacts()
 
         # Background set = training distribution, NOT the live window.
         # KernelExplainer's "importance" is distance from the background
@@ -214,25 +223,25 @@ def _compute_shap(window_records):
             hint = pd.read_csv(TRAINING_DATA_HINT_PATH)
             hint = hint.sort_values("timestamp").reset_index(drop=True)
             n = len(hint)
-            if n >= WINDOW_SIZE:
+            if n >= steps:
                 # Sample contiguous WINDOW_SIZE-long segments so every
                 # background window has realistic within-window dynamics
                 # (the LSTM was trained on contiguous windows). KernelExplainer
                 # consumes flattened (10, 3) windows, so the background must
                 # be a stack of windows, not loose rows.
-                n_windows = min(64, n // WINDOW_SIZE)
-                starts = sorted(rng.choice(n - WINDOW_SIZE,
+                n_windows = min(64, n // steps)
+                starts = sorted(rng.choice(n - steps,
                                            size=n_windows, replace=False))
                 stacked = []
                 for s in starts:
-                    seg = hint.iloc[s:s + WINDOW_SIZE]
+                    seg = hint.iloc[s:s + steps]
                     seg_scaled, _ = prepare_scaled_window(seg.to_dict("records"))
                     stacked.append(seg_scaled)
                 bg_windows = np.stack(stacked)
         except Exception as bg_err:
             logger.warning(f"SHAP training-distribution background unavailable: {bg_err}")
 
-        window_3d = scaled.reshape(1, WINDOW_SIZE, -1).astype(np.float32)
+        window_3d = scaled.reshape(1, steps, -1).astype(np.float32)
         if bg_windows is not None and len(bg_windows) >= 2:
             background = np.vstack([bg_windows, window_3d]).astype(np.float32)
         else:
@@ -248,10 +257,14 @@ def _compute_shap(window_records):
             })
             neutral_scaled, _ = prepare_scaled_window(neutral.to_dict("records"))
             background = np.concatenate(
-                [window_3d, neutral_scaled.reshape(1, WINDOW_SIZE, -1)]
+                [window_3d, neutral_scaled.reshape(1, steps, -1)]
             ).astype(np.float32)
 
-        explainer = ShapExplainer(model, background, nsamples=256)
+        if feature_names is None:
+            explainer = ShapExplainer(model, background, nsamples=256)
+        else:
+            explainer = ShapExplainer(model, background, nsamples=256,
+                                      feature_names=feature_names)
         return explainer.explain(window_3d)
     except Exception as e:
         logger.warning(f"SHAP attribution unavailable this cycle: {e}")
@@ -278,12 +291,14 @@ def run_real_loop(engine, poll_interval: int = 30):
     are both computed assuming 30s between samples.
     """
     from monitoring.storage import read_last_n
-    from model.predict import predict_load        # Person B's Semester-2 interface
+    from model.predict import predict_load, HISTORY_SIZE   # Person B's Semester-2 interface
 
     logger.info(f"Real loop starting. Poll interval: {poll_interval}s")
 
     while True:
-        records = read_last_n(WINDOW_SIZE)
+        # HISTORY_SIZE (30) readings feed the v2 model; from WINDOW_SIZE (10)
+        # up, predict_load() serves the original 10-reading model meanwhile.
+        records = read_last_n(HISTORY_SIZE)
 
         if len(records) < WINDOW_SIZE:
             logger.warning(
@@ -305,7 +320,8 @@ def run_real_loop(engine, poll_interval: int = 30):
         # (predicted_cpu, upper_bound, anomaly_flag).
         predicted_cpu, upper_bound, anomaly_flag = predict_load(records)
 
-        raw_signal = engine.evaluate(predicted_cpu, upper_bound, anomaly_flag=anomaly_flag)
+        raw_signal = engine.evaluate(predicted_cpu, upper_bound, anomaly_flag=anomaly_flag,
+                                     current_cpu=records[-1].cpu_percent)
         reason = engine.last_reason
         signal = normalise_signal(raw_signal)
 

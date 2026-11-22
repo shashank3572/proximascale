@@ -1,0 +1,4 @@
+artifact,parameters,bytes
+residual LSTM (.h5),29923.0,397840
+univariate LSTM (.h5),29411.0,393160
+Prophet (.pkl),,6539921

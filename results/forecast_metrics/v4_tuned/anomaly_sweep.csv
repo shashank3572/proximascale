@@ -1,0 +1,9 @@
+detector,z,flags,flags_pct_of_decisions,precision,recall,spikes_flagged,delay_median_s,delay_max_s,false_flags,false_flags_per_day,false_flags_normal,false_flags_post_scaling,hits_ramp,hits_hold,hits_decay
+decision-time,2,1167,6.48766,0.130249,1,36,0,30,1015,162.508,1008,7,107,45,0
+series,2,1105,6.1423,0.136652,1,36,0,30,954,152.725,952,2,107,44,0
+decision-time,2.5,636,3.53569,0.174528,1,36,0,30,525,84.056,521,4,107,4,0
+series,2.5,604,3.35742,0.187086,1,36,0,30,491,78.6037,490,1,107,6,0
+decision-time,3,390,2.16811,0.269231,1,36,0,30,285,45.6304,284,1,105,0,0
+series,3,344,1.91217,0.305233,1,36,0,30,239,38.2613,239,0,105,0,0
+decision-time,3.5,254,1.41205,0.401575,1,36,0,30,152,24.3362,152,0,102,0,0
+series,3.5,234,1.30072,0.448718,1,36,0,30,129,20.6515,129,0,105,0,0

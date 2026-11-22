@@ -32,7 +32,8 @@ FEATURE_NAMES = ["CPU%", "Memory%", "Request Rate"]
 
 class ShapExplainer:
     def __init__(self, model, X_train_sample, background_size: int = 100,
-                 n_background_clusters: int = 10, nsamples: int = 300):
+                 n_background_clusters: int = 10, nsamples: int = 300,
+                 feature_names=None):
         """
         model          : trained Keras LSTM (Person B); output = residual per horizon step
         X_train_sample : np.ndarray, shape (N, 10, 3), scaled like the training data
@@ -42,7 +43,7 @@ class ShapExplainer:
                      # still imports cleanly if shap isn't installed yet
 
         self.model = model
-        self.feature_names = FEATURE_NAMES
+        self.feature_names = list(feature_names) if feature_names else FEATURE_NAMES
         self.nsamples = nsamples
 
         bg = np.asarray(X_train_sample[:background_size], dtype=np.float32)

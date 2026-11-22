@@ -82,5 +82,7 @@ def test_engine_accepts_anomaly_flag_kwarg():
 
         from decision.engine import DecisionEngine
         engine = DecisionEngine(config_path=config_path)
+        # these tests exercise the anomaly and upper-bound branches, which config.yaml now switches off
+        engine.cfg.update(use_anomaly_bypass=True, use_upper_bound_risk=True)
         signal = engine.evaluate(50.0, anomaly_flag=True)
         assert signal == "scale_up"

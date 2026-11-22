@@ -1,0 +1,41 @@
+regime,scored_against,method,rows,share_pct,rmse,rmse_sd,mae,mae_sd,floor_rmse,floor_mae
+all,recorded,persistence,17988,100,6.6441,9.93014e-16,3.91541,0,,
+all,recorded,linear,17988,100,10.2466,0,7.71,0,,
+all,recorded,prophet,17988,100,10.1541,0,4.67523,0,,
+all,recorded,univariate,17988,100,5.1313,0,3.03182,0,,
+all,recorded,hybrid,17988,100,4.34744,0.000724312,2.6789,0.000799934,,
+normal,recorded,persistence,16908,93.996,4.27633,0,3.38998,0,2.99597,2.38814
+normal,recorded,linear,16908,93.996,9.215,0,7.34853,9.93014e-16,2.99597,2.38814
+normal,recorded,prophet,16908,93.996,3.73218,0,2.98502,0,2.99597,2.38814
+normal,recorded,univariate,16908,93.996,3.29638,0,2.62308,0,2.99597,2.38814
+normal,recorded,hybrid,16908,93.996,3.06675,0.000318394,2.44106,0.000287195,2.99597,2.38814
+spike,recorded,persistence,720,4.00267,23.3653,0,13.5633,0,,
+spike,recorded,linear,720,4.00267,22.96,0,14.3542,0,,
+spike,recorded,prophet,720,4.00267,46.9892,0,42.5596,0,,
+spike,recorded,univariate,720,4.00267,19.6432,0,11.8337,0,,
+spike,recorded,hybrid,720,4.00267,15.5731,0.0057921,7.88925,0.0223186,,
+ramp,recorded,persistence,108,0.6004,39.8241,0,34.9158,0,,
+ramp,recorded,linear,108,0.6004,41.2105,0,35.6831,0,,
+ramp,recorded,prophet,108,0.6004,37.4296,0,32.8946,0,,
+ramp,recorded,univariate,108,0.6004,38.5566,0,33.7887,0,,
+ramp,recorded,hybrid,108,0.6004,39.0885,0.00657501,34.5335,0.00538514,,
+hold,recorded,persistence,504,2.80187,10.9278,0,4.60952,0,,
+hold,recorded,linear,504,2.80187,8.25715,0,5.61437,0,,
+hold,recorded,prophet,504,2.80187,52.4233,0,50.0938,0,,
+hold,recorded,univariate,504,2.80187,7.5741,9.93014e-16,4.8924,0,,
+hold,recorded,hybrid,504,2.80187,3.98769,0.0282979,3.22926,0.0328217,,
+decay,recorded,persistence,108,0.6004,38.6824,0,33.9947,0,,
+decay,recorded,linear,108,0.6004,38.7029,0,33.811,0,,
+decay,recorded,prophet,108,0.6004,22.2263,0,17.0651,0,,
+decay,recorded,univariate,108,0.6004,28.6016,0,22.2714,0,,
+decay,recorded,hybrid,108,0.6004,3.83358,0.0302362,2.99164,0.0521471,,
+post_scaling,recorded,persistence,360,2.00133,15.9681,1.98603e-15,9.29739,0,2.50212,1.9951
+post_scaling,recorded,linear,360,2.00133,14.2678,0,11.3987,0,2.50212,1.9951
+post_scaling,recorded,prophet,360,2.00133,9.03937,0,8.29006,0,2.50212,1.9951
+post_scaling,recorded,univariate,360,2.00133,5.79432,0,4.62508,0,2.50212,1.9951
+post_scaling,recorded,hybrid,360,2.00133,4.19744,0.00224726,3.42856,0.00406503,2.50212,1.9951
+post_scaling,true base,persistence,360,2.00133,14.8159,0,10.4689,0,3.14675,2.507
+post_scaling,true base,linear,360,2.00133,18.2544,0,14.5133,0,3.14675,2.507
+post_scaling,true base,prophet,360,2.00133,3.96008,0,3.18368,0,3.14675,2.507
+post_scaling,true base,univariate,360,2.00133,5.42489,0,4.2371,0,3.14675,2.507
+post_scaling,true base,hybrid,360,2.00133,5.30283,0.00673116,4.32788,0.010539,3.14675,2.507

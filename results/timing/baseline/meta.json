@@ -1,0 +1,22 @@
+{
+  "windows": 300,
+  "warmup_calls": 10,
+  "passes_sweep": [
+    1,
+    5,
+    10,
+    30
+  ],
+  "sampling_interval_s": 30,
+  "cold_start_s": 1.8878415999934077,
+  "shap_calls": 5,
+  "shap_nsamples": 256,
+  "machine": {
+    "processor": "Intel64 Family 6 Model 186 Stepping 2, GenuineIntel",
+    "logical_cpus": 12,
+    "os": "Windows-10-10.0.26200-SP0",
+    "python": "3.11.9",
+    "tensorflow": "2.21.0"
+  },
+  "created": "2026-11-20T16:16:34"
+}

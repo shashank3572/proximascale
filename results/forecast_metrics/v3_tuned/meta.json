@@ -1,0 +1,201 @@
+{
+  "created": "2026-11-21T19:20:19",
+  "command": [
+    "forecast_metrics.py",
+    "--dump",
+    "results/eval_dump/v3_tuned",
+    "--out-dir",
+    "results/forecast_metrics/v3_tuned"
+  ],
+  "runtime_seconds": 30.2,
+  "dump": {
+    "path": "results/eval_dump/v3_tuned",
+    "files": {
+      "dump_seed0.csv": "9569c9bca7ea619809fade90f84eb7b80252c6138db4e2db950625ddab17bc3d",
+      "dump_seed1.csv": "f58aeaa391e5deb9305e9029235b0d52a82842eb6fe47f6b76a9fabdd758213b",
+      "dump_seed2.csv": "487fbd090f9af4cb130c9502921d8882a5ae85e6cb7053fa67742ded1805baeb",
+      "dump_seed3.csv": "b8873d87302afcb4968bd0b58a6f8ade751a38ccecaaa0c49c487c207839496a",
+      "dump_seed4.csv": "1687802b745ae4369e2fb2c8020c3546a269d5227b7e9da193de4c182336bef0"
+    },
+    "settings": {
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "n_passes": 30,
+      "std_multiplier": 2.0,
+      "upper_bound_calibration": {
+        "method": "binned",
+        "level": 0.95,
+        "edges": [
+          0.24194024022246552,
+          0.2762759421381651,
+          0.31686895646559193,
+          0.38498302339742935
+        ],
+        "q": [
+          4.920005847224953,
+          5.11778052734834,
+          4.987989473145879,
+          5.145953196765609,
+          4.614009935082133
+        ],
+        "fit_on": "validation period, rows 64800-71999 (model/tune_decisions.py --bundle model/saved/proximascale_v3)"
+      },
+      "counterfactual_at_inference": true,
+      "anomaly_z_threshold": 2.5,
+      "anomaly_min_cpu_percent": 5.0,
+      "table_ii_scale_threshold": 75.0,
+      "train_frac": 0.8,
+      "window_size": 10,
+      "horizon": 3,
+      "sampling_interval_seconds": 30,
+      "windows": 17988,
+      "windows_in_test_split": 17988,
+      "spike_onsets_in_test_split": 36
+    },
+    "artifacts": {
+      "lstm": {
+        "path": "model/saved/proximascale_lstm.h5",
+        "sha256": "1556d46a4bae39625ed2ee9eec96c98883023f022c022b305f1595886b5fcb4c"
+      },
+      "feature_scaler": {
+        "path": "model/saved/scaler.pkl",
+        "sha256": "df1d32735e71b8a05cdd997c14781f5e868ca6e16298a795c869c79790e60644"
+      },
+      "residual_scaler": {
+        "path": "model/saved/scaler_residual.pkl",
+        "sha256": "08d21af1115f7a578d1f08a01ca221875b6ee28473e893eb852a3c182d446947"
+      },
+      "prophet": {
+        "path": "model/saved/proximascale_prophet.pkl",
+        "sha256": "ca1edfaf2a9552b05a43bed040676a03c16babada5be6f06d77810bb51917917"
+      },
+      "univariate_lstm": {
+        "path": "model/saved/proximascale_lstm_univariate.h5",
+        "sha256": "a96a490f559312f700a2e6726c318da3d5e671586572b004d2b54d8fffabe992"
+      },
+      "univariate_scaler": {
+        "path": "model/saved/scaler_univariate.pkl",
+        "sha256": "6bf58e74205be70a9aa399be88da26a2f26911e8d31a5213407dd0955c877d4e"
+      }
+    },
+    "git": {
+      "commit": "bcb98b9658f18aec9813303669c6bb2fa3c45808",
+      "uncommitted_changes": [
+        ".gitignore",
+        "app/app.py",
+        "config.yaml",
+        "dashboard/shap_explain.py",
+        "decision/engine.py",
+        "main.py",
+        "model/predict.py",
+        "tests/test_decision.py",
+        "tests/test_live_demo_fixes.py",
+        "tests/test_orchestration.py",
+        "tests/test_real_loop.py"
+      ]
+    }
+  },
+  "passes_sweep_dumps": {
+    "30": "results/eval_dump/v3_tuned"
+  },
+  "test_split": {
+    "windows": 17988,
+    "days": 6.245833333333334,
+    "spike_onsets": 36,
+    "first_window_t": 9,
+    "last_window_t": 17996
+  },
+  "settings": {
+    "threshold": 75.0,
+    "threshold_sweep": [
+      65.0,
+      70.0,
+      75.0,
+      80.0,
+      85.0
+    ],
+    "crossing_tolerance_windows": 3,
+    "k_sweep": [
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0
+    ],
+    "dm_lags": [
+      2,
+      60
+    ],
+    "block_len_windows": 120,
+    "n_boot": 2000,
+    "n_boot_spikes": 10000,
+    "boot_seed": 12345,
+    "z_sweep": [
+      2.0,
+      2.5,
+      3.0,
+      3.5
+    ],
+    "alpha_sweep": [
+      0.0,
+      0.2,
+      0.4,
+      0.6,
+      0.8,
+      1.0
+    ]
+  },
+  "checks": [
+    "re-derived Table II matches the dump's Table II check (evaluate.py)",
+    "dump aligned with metrics.csv and the generator's ground truth",
+    "decision-time anomaly flags at the configured z match the dump",
+    "vectorized series detector matches anomaly.detect_anomalies_series()"
+  ],
+  "definitions": {
+    "event": "CPU above the threshold at the target row t+3 (90 s ahead); one per window",
+    "precision, recall, f1": "window level: alarm = forecast above the threshold",
+    "false_alarms_per_day": "alarm episodes (runs of consecutive alarm windows) that overlap no window whose target row is above the threshold, per day",
+    "lead time": "evaluate.py: (onset - t) x 30 s for the earliest t in [onset-3, onset-1] whose forecast exceeds the threshold, else 0 (missed)",
+    "ceiling_lead_s": "no input changes before a spike's first ramp row, so no forecast made earlier is informed: min(onset - ramp start, 3) x 30 s",
+    "crossings": "changes of (forecast > threshold) between consecutive windows (evaluate.py's 'oscillations')",
+    "spurious/missed crossings": "forecast and true crossings matched one-to-one when they have the same direction and are at most 3 windows apart; unmatched forecast crossings are spurious, unmatched true ones missed. A forecast crossing that comes more than 3 windows early or late counts once as spurious and once as missed",
+    "spike_*": "lead time over spike onsets only: the first crossing of the threshold inside each generated spike that reaches it. evaluate.py's onsets (lead_mean_s) also include normal-load noise crossings below 75% and re-crossings during a spike's hold above 75%; at exactly 75% the two coincide",
+    "noise floor": "error of an oracle that knows the generator's noiseless base load (seasonal_cpu) but not its N(0, 3^2) noise: normal rows, and post-scaling rows (0.8 x seasonal against recorded CPU)",
+    "coverage": "share of windows with actual CPU at t+3 <= mean + k sigma (one-sided)",
+    "k_for_coverage": "the empirical quantile of (actual - mean) / sigma: the multiplier that would have reached that coverage ON THE TEST SET (descriptive; a deployed k must be chosen on validation data)",
+    "diebold_mariano": "d = loss(ProximaScale) - loss(baseline); Newey-West (Bartlett) long-run variance; negative statistic = ProximaScale better; two-sided normal p-value",
+    "block bootstrap": "moving blocks of 120 windows, 2000 replicates, same blocks for every method (paired), percentile 95% CI",
+    "spike bootstrap": "the spikes resampled with replacement, 10000 replicates",
+    "seed aggregation": "mean and sd (ddof=1) over the dump's MC seeds; for CIs and p-values, the most conservative seed"
+  },
+  "methods": {
+    "persistence": "Persistence (reactive signal)",
+    "linear": "Linear extrapolation (C4)",
+    "prophet": "Prophet alone",
+    "univariate": "Univariate LSTM",
+    "hybrid": "ProximaScale (hybrid mean)",
+    "hybrid_upper": "ProximaScale upper bound (mean + 2 sigma)"
+  },
+  "git": {
+    "commit": "bcb98b9658f18aec9813303669c6bb2fa3c45808",
+    "uncommitted_changes": [
+      ".gitignore",
+      "app/app.py",
+      "config.yaml",
+      "dashboard/shap_explain.py",
+      "decision/engine.py",
+      "main.py",
+      "model/predict.py",
+      "tests/test_decision.py",
+      "tests/test_live_demo_fixes.py",
+      "tests/test_orchestration.py",
+      "tests/test_real_loop.py"
+    ]
+  }
+}

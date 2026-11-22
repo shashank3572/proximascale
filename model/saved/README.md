@@ -27,3 +27,22 @@ Other files:
 - `evaluation_chart_DUMMY_DATA_semester1.png` — Semester-1 chart from
   `data/generate_dummy_data.py` synthetic data. **Not a result**; do not cite.
   `model/evaluate.py` prints a table and does not generate a chart.
+
+## Stacked bundles (evaluation model search, 2026-11-21)
+
+`model/forecaster.py` loads a bundle: `config.json` plus one folder per
+member (`lstm.h5`, `feature_scaler.pkl`, `target_scaler.pkl`, `info.json`),
+copied unchanged from `model/train_variants.py`'s output. All use the
+committed `proximascale_prophet.pkl`.
+
+| Folder | What it is |
+|---|---|
+| `proximascale_v4/` | **Served.** v3's model trained on `metrics.csv` + `metrics_varied.csv` together (copied from `variants_both/`); its own calibrated bound in `config.json`. `PROXIMASCALE_MODEL=v3` serves v3. |
+| `proximascale_v3/` | Variant `hx3_drop10`: 30-reading window, inputs CPU, memory, requests + Prophet's value now and 90 s ahead, residual target, dropout 0.1, 3 seeds pooled. `config.json` holds the calibrated 95% upper bound (fit on the validation period by `model/tune_decisions.py`). |
+| `proximascale_v2/` | Previous bundle (`hx_w30_prophet`, dropout 0.2). `PROXIMASCALE_MODEL=v2` serves it. |
+| `variants/` | Every model-search run (`train_variants.py`), 3 seeds each, trained on `metrics.csv`. |
+| `variants_varied/` | `hx3_drop10` trained on `data/collected/metrics_varied.csv` (varied spike shapes). |
+| `variants_both/` | `hx3_drop10` trained on `metrics.csv` and `metrics_varied.csv` together. |
+
+The original artifacts above are still used for windows of 10-29 readings
+and by `PROXIMASCALE_MODEL=legacy`.

@@ -1,0 +1,64 @@
+dataset,reference,versus,d_rmse,d_rmse_lo,d_rmse_hi
+original_val,v3 (live),Persistence (reactive),-2.2000,-2.6407,-1.7664
+original_val,v3 (live),Prophet alone,-5.0060,-6.6796,-3.4622
+original_val,v3 (live),"ProximaScale, original committed",-0.6888,-0.9048,-0.4862
+original_val,v3 (live),"ProximaScale, fair",-0.7592,-0.9943,-0.5301
+original_val,v3 (live),Univariate LSTM,-0.7425,-0.9674,-0.5235
+original_val,v3 (live),"Multivariate LSTM, direct (C1)",-0.6576,-0.8559,-0.4682
+original_val,v3 (live),v2,-0.0198,-0.0264,-0.0132
+original_val,v3 (live),v3 trained on varied spikes,-0.4781,-0.6582,-0.3013
+original_val,v3 (live),v3 trained on both,-0.0348,-0.0563,-0.0145
+original_test,v3 (live),Persistence (reactive),-2.3287,-2.6248,-2.0103
+original_test,v3 (live),Prophet alone,-5.8387,-6.9542,-4.7408
+original_test,v3 (live),"ProximaScale, original committed",-0.7720,-0.9247,-0.6219
+original_test,v3 (live),"ProximaScale, fair",-0.8110,-0.9648,-0.6505
+original_test,v3 (live),Univariate LSTM,-0.7643,-0.9183,-0.6172
+original_test,v3 (live),"Multivariate LSTM, direct (C1)",-0.7202,-0.8617,-0.5744
+original_test,v3 (live),v2,-0.0239,-0.0326,-0.0162
+original_test,v3 (live),v3 trained on varied spikes,-0.4936,-0.6094,-0.3778
+original_test,v3 (live),v3 trained on both,-0.0361,-0.0505,-0.0221
+varied_val,v3 (live),Persistence (reactive),-0.6953,-1.2317,-0.2183
+varied_val,v3 (live),Prophet alone,-2.8269,-4.2246,-1.5124
+varied_val,v3 (live),"ProximaScale, original committed",0.4776,-0.0788,1.0190
+varied_val,v3 (live),"ProximaScale, fair",0.4787,-0.0231,0.9957
+varied_val,v3 (live),Univariate LSTM,0.2443,-0.1579,0.6569
+varied_val,v3 (live),"Multivariate LSTM, direct (C1)",0.3797,0.0002,0.7775
+varied_val,v3 (live),v2,0.0528,-0.0079,0.1193
+varied_val,v3 (live),v3 trained on varied spikes,0.9895,0.4525,1.5399
+varied_val,v3 (live),v3 trained on both,1.0539,0.4965,1.6209
+varied_test,v3 (live),Persistence (reactive),-0.5742,-1.0423,-0.1332
+varied_test,v3 (live),Prophet alone,-4.0468,-5.1240,-2.8916
+varied_test,v3 (live),"ProximaScale, original committed",0.5724,0.1630,0.9819
+varied_test,v3 (live),"ProximaScale, fair",0.6531,0.2214,1.0255
+varied_test,v3 (live),Univariate LSTM,0.3702,-0.0006,0.7398
+varied_test,v3 (live),"Multivariate LSTM, direct (C1)",0.4530,0.0900,0.8164
+varied_test,v3 (live),v2,0.1355,0.0626,0.2204
+varied_test,v3 (live),v3 trained on varied spikes,1.0860,0.6744,1.5070
+varied_test,v3 (live),v3 trained on both,1.1103,0.7171,1.4882
+fresh,v3 (live),Persistence (reactive),-2.2515,-2.5234,-1.9588
+fresh,v3 (live),Prophet alone,-5.6121,-6.5552,-4.4407
+fresh,v3 (live),"ProximaScale, original committed",-0.7904,-0.9263,-0.6468
+fresh,v3 (live),"ProximaScale, fair",-0.8275,-0.9683,-0.6682
+fresh,v3 (live),Univariate LSTM,-0.7746,-0.9118,-0.6299
+fresh,v3 (live),"Multivariate LSTM, direct (C1)",-0.7222,-0.8558,-0.5859
+fresh,v3 (live),v2,-0.0209,-0.0282,-0.0138
+fresh,v3 (live),v3 trained on varied spikes,-0.4971,-0.6053,-0.3789
+fresh,v3 (live),v3 trained on both,-0.0451,-0.0598,-0.0293
+shifted,v3 (live),Persistence (reactive),-1.4313,-1.5008,-1.3659
+shifted,v3 (live),Prophet alone,-6.1619,-6.8634,-5.4875
+shifted,v3 (live),"ProximaScale, original committed",0.6358,0.4511,0.8154
+shifted,v3 (live),"ProximaScale, fair",0.8161,0.6241,1.0143
+shifted,v3 (live),Univariate LSTM,-0.2126,-0.2814,-0.1418
+shifted,v3 (live),"Multivariate LSTM, direct (C1)",-0.0191,-0.0905,0.0499
+shifted,v3 (live),v2,0.0302,0.0078,0.0523
+shifted,v3 (live),v3 trained on varied spikes,1.3138,1.1180,1.5205
+shifted,v3 (live),v3 trained on both,1.2123,1.0205,1.4046
+shifted2,v3 (live),Persistence (reactive),-1.9567,-2.1076,-1.8074
+shifted2,v3 (live),Prophet alone,-6.1285,-6.9384,-5.2251
+shifted2,v3 (live),"ProximaScale, original committed",0.1417,0.0215,0.2548
+shifted2,v3 (live),"ProximaScale, fair",0.2761,0.1542,0.3981
+shifted2,v3 (live),Univariate LSTM,-0.3585,-0.4163,-0.3022
+shifted2,v3 (live),"Multivariate LSTM, direct (C1)",-0.1465,-0.1986,-0.0919
+shifted2,v3 (live),v2,0.0232,0.0058,0.0404
+shifted2,v3 (live),v3 trained on varied spikes,0.5119,0.4023,0.6192
+shifted2,v3 (live),v3 trained on both,0.4483,0.3577,0.5394

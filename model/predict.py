@@ -31,6 +31,7 @@ cannot read Keras-3-saved models. MODEL_PATH (model/lstm_model.py) must point
 at the residual-stacking LSTM artifact; see model/saved/README.md.
 """
 
+import json
 import logging
 import os
 import sys
@@ -63,11 +64,62 @@ TRAINING_DATA_HINT_PATH = THIS_DIR.parent / "data" / "collected" / "metrics.csv"
 
 SAMPLING_INTERVAL_SECONDS = 30   # must match prophet_model.py's DEFAULT_FREQ ("30s")
 
+# v2 model (evaluation model search winner, see model/forecaster.py): Prophet +
+# residual LSTM over 30 readings with Prophet's forecast as input. Used when
+# the window holds at least V2_WINDOW readings; shorter windows (the first
+# 15 minutes after a cold start) use the original 10-reading model above.
+# The served bundle is v4: v3's model (dropout 0.1) trained on the original
+# data plus data with varied spike shapes, so it also forecasts spikes that
+# ramp differently (results/unseen). PROXIMASCALE_MODEL=v3 or =v2 serves an
+# earlier bundle; =legacy, or removing the folder, serves the original only.
+_BUNDLES = {"v2": "proximascale_v2", "v3": "proximascale_v3", "v4": "proximascale_v4"}
+BUNDLE_DIR = SAVED_DIR / _BUNDLES.get(os.environ.get("PROXIMASCALE_MODEL", "").lower(),
+                                      "proximascale_v4")
+
+
+def _bundle_config():
+    if os.environ.get("PROXIMASCALE_MODEL", "").lower() == "legacy":
+        return None
+    try:
+        return json.loads((BUNDLE_DIR / "config.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+_BUNDLE_CONFIG = _bundle_config()
+V2_WINDOW = int(_BUNDLE_CONFIG["window"]) if _BUNDLE_CONFIG else None
+# Readings a caller should pass: enough for the v2 model when it is installed.
+HISTORY_SIZE = max(WINDOW_SIZE, V2_WINDOW or 0)
+
 # Lazy-loaded, module-level cache -- populated on first call, reused after.
 _model = None
 _scaler = None
 _residual_scaler = None
 _prophet_model = None
+_forecaster = None
+
+
+def _load_forecaster():
+    """The v2 bundle (3 LSTMs + scalers), loaded once, sharing Prophet."""
+    global _forecaster, _prophet_model
+    if _forecaster is None:
+        from forecaster import StackedForecaster
+        if _prophet_model is None:
+            _prophet_model = load_prophet_model()
+        _forecaster = StackedForecaster(BUNDLE_DIR, _prophet_model)
+        print(f"[ProximaScale] v2 model loaded from {BUNDLE_DIR} "
+              f"({len(_forecaster.members)} members, {_forecaster.window}-reading window)")
+    return _forecaster
+
+
+def _uses_v2(window):
+    return V2_WINDOW is not None and len(window) >= V2_WINDOW
+
+
+def _to_dicts(window):
+    if window and hasattr(window[0], "to_dict"):
+        return [record.to_dict() for record in window]
+    return list(window)
 
 
 def _load_artifacts():
@@ -104,8 +156,15 @@ def prepare_scaled_window(window):
                         (predict_load's anomaly check consumes this)
     Requires _load_artifacts() to have run (needs the fitted feature scaler).
     """
-    if window and hasattr(window[0], "to_dict"):
-        window = [record.to_dict() for record in window]
+    window = _to_dicts(window)
+    if _uses_v2(window):
+        # v2: the newest V2_WINDOW readings, scaled for the first member
+        # (the one main.py's SHAP attribution explains).
+        fc = _load_forecaster()
+        df = pd.DataFrame(window[-V2_WINDOW:])
+        raw, _, corrected = fc.window_inputs(df)
+        return fc.scale(raw[None])[0], corrected
+    window = window[-WINDOW_SIZE:]
 
     df = pd.DataFrame(window)
     if "timestamp" not in df.columns:
@@ -130,9 +189,23 @@ def get_shap_artifacts():
     return _model, _scaler
 
 
+V2_FEATURE_NAMES = {"cpu_percent": "CPU%", "memory_percent": "Memory%",
+                    "request_rate": "Request Rate", "yhat": "Prophet (now)",
+                    "yhat_f3": "Prophet (+90 s)", "resid": "CPU - Prophet"}
+
+
+def get_bundle_shap_artifacts():
+    """(keras_model, feature_names) of the v2 member that SHAP explains,
+    matching prepare_scaled_window()'s v2 input."""
+    fc = _load_forecaster()
+    return fc.members[0][0], [V2_FEATURE_NAMES.get(n, n) for n in fc.inputs]
+
+
 def predict_load(window, n_passes=None):
     """
-    window: list of dicts, oldest -> newest, length == WINDOW_SIZE (10).
+    window: list of dicts, oldest -> newest, at least WINDOW_SIZE (10) long;
+    pass HISTORY_SIZE readings. With V2_WINDOW (30) or more the v2 model
+    serves the forecast; with 10-29 the original 10-reading model does.
     Each dict needs 'timestamp', 'cpu_percent', 'memory_percent',
     'request_rate'; an optional 'post_scaling' bool defaults to False.
 
@@ -150,18 +223,21 @@ def predict_load(window, n_passes=None):
     (current_cpu * 1.15, current_cpu * 1.3, True) so Person D's main loop
     never dies because of us.
     """
-   # Accept MetricRecord objects from monitoring.storage
-# and dictionaries from tests/direct callers.
-    if window and hasattr(window[0], "to_dict"):
-        window = [record.to_dict() for record in window]
+    # Accept MetricRecord objects from monitoring.storage
+    # and dictionaries from tests/direct callers.
+    window = _to_dicts(window)
 
     current_cpu = float(window[-1].get("cpu_percent", 0.0)) if window else 0.0
 
     try:
-        _load_artifacts()
+        if len(window) < WINDOW_SIZE:
+            raise ValueError(f"window must have at least {WINDOW_SIZE} readings, got {len(window)}")
 
-        if len(window) != WINDOW_SIZE:
-            raise ValueError(f"window must have exactly {WINDOW_SIZE} readings, got {len(window)}")
+        if _uses_v2(window):
+            return _predict_v2(window, n_passes)
+        window = window[-WINDOW_SIZE:]
+
+        _load_artifacts()
 
         # Prophet forecast, anchored to THIS window's own last timestamp --
         # not to wherever Prophet's training data happened to end.
@@ -233,6 +309,22 @@ def predict_load(window, n_passes=None):
         fallback_mean = min(100.0, max(0.0, current_cpu * 1.15))
         fallback_upper = min(100.0, max(0.0, current_cpu * 1.3))
         return float(fallback_mean), float(fallback_upper), True
+
+
+def _predict_v2(window, n_passes=None):
+    """predict_load() with the v2 bundle. The anomaly flag is computed exactly
+    as before, on the newest WINDOW_SIZE readings."""
+    fc = _load_forecaster()
+    raw, prophet_future, _ = fc.window_inputs(pd.DataFrame(window[-V2_WINDOW:]))
+    out = fc.forecast(raw[None], prophet_future[None],
+                      n_passes=n_passes or int(_BUNDLE_CONFIG.get("default_passes", 30)))
+    predicted_load = min(100.0, max(0.0, float(out["mean"][0, -1])))
+    upper_bound = min(100.0, max(0.0, float(out["upper"][0, -1])))
+    recent = pd.DataFrame(window[-WINDOW_SIZE:])
+    if "post_scaling" not in recent.columns:
+        recent["post_scaling"] = False
+    corrected = apply_counterfactual_correction(recent)["cpu_percent_corrected"].values
+    return predicted_load, upper_bound, bool(is_anomaly(corrected))
 
 
 if __name__ == "__main__":
