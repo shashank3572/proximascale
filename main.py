@@ -8,7 +8,7 @@ Modes:
 
 Pipeline:
   monitoring/collector.py (separate process) -> metrics.csv  [Person A]
-  storage.read_last_n(10)                                    [Person A]
+  storage.read_last_n(30)                                    [Person A]
        ↓
   predict_load(records) -> (cpu, upper_bound, anomaly)       [Person B, Semester-2]
        ↓
@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
-WINDOW_SIZE = 10          # minimum readings per prediction (model/predict.py WINDOW_SIZE)
+# predict_load() needs a full HISTORY_SIZE (30) window -- see run_real_loop().
 STALE_AFTER_POLLS = 3     # skip prediction if newest CSV row is older than this many polls
 
 # Dashboard feed (dashboard/live_plot.py reads this file; keep columns in sync).
@@ -166,6 +166,24 @@ def _replica_count(engine) -> int:
         return 0
 
 
+def _actuator_ready(engine) -> bool:
+    """True only if the engine has an actuator AND Docker answers a ping.
+
+    docker.from_env() succeeds even with the daemon down, so `actuator is None`
+    alone is not proof the loop can act: without the ping the engine builds a
+    client, every real action raises, and the loop would run for hours logging
+    `hold (..._error)` while the panel watches nothing happen.
+    """
+    actuator = getattr(engine, "actuator", None)
+    if actuator is None:
+        return False
+    try:
+        return bool(actuator.client.ping())
+    except Exception as e:
+        logger.error(f"Docker daemon unreachable: {e}")
+        return False
+
+
 def _is_stale(record, max_age_seconds: float) -> bool:
     """True if the newest collected record is too old (collector not running)
     or its timestamp cannot be parsed."""
@@ -274,7 +292,7 @@ def _compute_shap(window_records):
 def run_real_loop(engine, poll_interval: int = 30):
     """
     Production loop:
-      1. Read the last 10 readings from metrics.csv (written by the separate
+      1. Read the last 30 readings from metrics.csv (written by the separate
          `python -m monitoring.collector` process)
       2. Call Person B's predict_load() to get CPU forecast + upper bound + anomaly flag
       3. Evaluate with decision engine (upper_bound-aware, Semester-2)
@@ -296,14 +314,14 @@ def run_real_loop(engine, poll_interval: int = 30):
     logger.info(f"Real loop starting. Poll interval: {poll_interval}s")
 
     while True:
-        # HISTORY_SIZE (30) readings feed the v2 model; from WINDOW_SIZE (10)
-        # up, predict_load() serves the original 10-reading model meanwhile.
+        # predict_load() needs all HISTORY_SIZE (30) readings -- below that it
+        # falls back to the saturating 10-reading legacy LSTM (pred 100.0).
         records = read_last_n(HISTORY_SIZE)
 
-        if len(records) < WINDOW_SIZE:
+        if len(records) < HISTORY_SIZE:
             logger.warning(
-                f"Only {len(records)} records in CSV — need {WINDOW_SIZE}. "
-                "Waiting for more data from collector..."
+                f"Only {len(records)} records in CSV — need {HISTORY_SIZE} "
+                "(the v2 window). Waiting for the collector..."
             )
             time.sleep(poll_interval)
             continue
@@ -421,6 +439,13 @@ if __name__ == "__main__":
     else:
         from decision.engine import DecisionEngine
         engine = DecisionEngine(config_path=args.config)
+        if not _actuator_ready(engine):
+            logger.error(
+                "Docker actuator unavailable — every decision would be a hold "
+                "(no_actuator). Is Docker Desktop running and "
+                "proximascale-worker:latest built? Nothing to scale otherwise."
+            )
+            sys.exit(1)
         try:
             run_real_loop(engine, poll_interval=args.interval)
         except KeyboardInterrupt:

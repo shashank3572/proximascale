@@ -16,7 +16,7 @@ class _StopLoop(Exception):
     pass
 
 
-def _records(n=10, age_seconds=0):
+def _records(n=30, age_seconds=0):
     newest = datetime.now() - timedelta(seconds=age_seconds)
     return [
         MetricRecord(
@@ -87,7 +87,7 @@ def test_real_loop_reads_live_metrics_file(harness):
 
 
 def test_short_window_skips_prediction(harness):
-    harness.reader.return_value = _records(n=4)
+    harness.reader.return_value = _records(n=29)
     with pytest.raises(_StopLoop):
         main.run_real_loop(harness.engine, poll_interval=30)
     harness.predict.assert_not_called()

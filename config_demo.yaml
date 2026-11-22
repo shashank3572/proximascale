@@ -58,6 +58,12 @@ cpu_lower_threshold: 78.0
 adaptive_floor_lower: 60.0
 adaptive_ceil_lower: 78.0
 
+# Forecast-driven scale_down guard (same value as config.yaml). The forecast
+# mean lags a spike while the measured CPU does not, so without this the demo
+# could remove a worker in the middle of a 95% burst. scale_down is only acted
+# on while the newest reading is at or below this.
+scale_down_max_current_cpu: 75.0
+
 anomaly_min_cpu_percent: 5.0           # shared with config.yaml: idle-jitter readings
                                        # (0.00-0.35%) can never be spikes, so demo
                                        # scale-ups come from real traffic only
