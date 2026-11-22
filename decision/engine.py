@@ -38,6 +38,17 @@ class DecisionEngine:
         self.hysteresis = Hysteresis(
             cooldown_seconds=self.cfg.get("cooldown_seconds", 180)
         )
+        # Minimum interval between consecutive *anomaly* scale-ups (seconds).
+        # The anomaly branch is meant to beat the normal cooldown on a real
+        # emergency, but one sustained spike used to add a worker on every
+        # poll (a live demo fired two anomaly scale-ups 34 s apart). 0 turns
+        # the gate off. Kept separate from Hysteresis so an anomaly can still
+        # fire while the normal cooldown is armed.
+        self.anomaly_scale_up_min_interval = float(
+            self.cfg.get("anomaly_scale_up_min_interval", 120)
+        )
+        self.last_anomaly_scale_up = 0.0   # 0 = never acted, so never gated
+
         self.thresholds = AdaptiveThreshold(
             window_size=self.cfg.get("adaptive_window", 30),
             k=self.cfg.get("adaptive_k", 1.5),
@@ -61,6 +72,9 @@ class DecisionEngine:
                           reading is still above scale_down_max_current_cpu
                           (only when current_cpu is passed and the key is set)
         "cooldown"      — still inside the hysteresis window
+        "anomaly_min_interval" — an anomaly spike, but the previous anomaly
+                          scale-up was less than anomaly_scale_up_min_interval
+                          ago (one spike, one worker)
         "max_reached"   — scale_up requested, but actuator at max replicas
             "min_reached"   — scale_down requested, but actuator at min replicas
             "<reason>_no_actuator" — actuator unavailable (Docker down / not wired)
@@ -69,7 +83,10 @@ class DecisionEngine:
         ("current_cpu_high": the reactive floor, scale_up_on_current_cpu)
 
         Ordering (and why the cooldown gate sits where it does):
-          1. anomaly                — genuine emergencies bypass EVERYTHING
+          1. anomaly                — genuine emergencies bypass the normal
+              cooldown, but two anomaly scale-ups are kept at least
+              anomaly_scale_up_min_interval seconds apart (one spike used to
+              add a worker on every poll while the flag stayed set)
           2. cooldown               — gates upper_bound_risk too. The upper bound
               is a *statistical* risk signal, not a measured emergency; without
               this gate a decaying spike re-fires scale_up on every poll because
@@ -88,6 +105,9 @@ class DecisionEngine:
 
     # 1. Anomaly bypasses both risk branch and cooldown
         if anomaly_flag and self.cfg.get("use_anomaly_bypass", True):
+            if self._anomaly_interval_active():
+                self.last_reason = "anomaly_min_interval"
+                return "hold"
             return self._do(
                 "scale_up",
                 predicted_cpu,
@@ -156,6 +176,13 @@ class DecisionEngine:
         return "hold"
 
 
+    def _anomaly_interval_active(self):
+        """True while the last anomaly scale-up is still inside the minimum
+        interval. Separate from Hysteresis so a genuine anomaly can still fire
+        during the normal cooldown."""
+        elapsed = time.time() - self.last_anomaly_scale_up
+        return elapsed < self.anomaly_scale_up_min_interval
+
     def _do(self, action, predicted_cpu, upper_bound, reason, **extra):
         """
          Execute one actuator action. Log + arm cooldown ONLY on actual success.
@@ -186,6 +213,8 @@ class DecisionEngine:
 
     # -------- success path only --------
         self.hysteresis.record_action()
+        if reason == "anomaly":
+            self.last_anomaly_scale_up = time.time()
         self.last_reason = reason
 
         log_scaling_event({

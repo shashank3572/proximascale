@@ -1,5 +1,12 @@
 """DecisionEngine's scale_down_max_current_cpu guard: no scale-down while the
-current reading is still high, however low the forecast; off unless set."""
+current reading is still high, however low the forecast; off unless set.
+
+The anomaly minimum-interval gate lives here too: the anomaly branch bypasses
+cooldown, so one sustained spike used to add a worker on every poll (a demo run
+fired two anomaly scale-ups 34 s apart).
+"""
+import time
+
 from decision.engine import DecisionEngine
 
 
@@ -53,6 +60,54 @@ def test_reactive_floor_scales_up_on_current_cpu():
     assert engine.evaluate(50.0, current_cpu=90.0) == "scale_up"
     assert engine.last_reason == "current_cpu_high"
     assert engine.evaluate(50.0, current_cpu=60.0) == "hold"       # in band, below threshold
+
+
+def test_anomaly_scale_up_respects_min_interval():
+    """One sustained spike must add one worker, not one per poll."""
+    engine = _engine(anomaly_scale_up_min_interval=120)
+    assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.last_reason == "anomaly"
+    assert engine.actuator.replicas == 4
+
+    # Same spike, next poll: anomaly flag is still set, no second worker.
+    assert engine.evaluate(50.0, anomaly_flag=True) == "hold"
+    assert engine.last_reason == "anomaly_min_interval"
+    assert engine.actuator.replicas == 4
+
+
+def test_anomaly_scale_up_fires_again_after_min_interval():
+    engine = _engine(anomaly_scale_up_min_interval=120)
+    engine.evaluate(50.0, anomaly_flag=True)
+    engine.last_anomaly_scale_up = time.time() - 121
+
+    assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.last_reason == "anomaly"
+    assert engine.actuator.replicas == 5
+
+
+def test_anomaly_min_interval_zero_disables_the_gate():
+    engine = _engine(anomaly_scale_up_min_interval=0)
+    assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.last_reason == "anomaly"
+
+
+def test_anomaly_min_interval_is_on_by_default_and_separate_from_cooldown():
+    # _engine() has cooldown_seconds=0, so the gate below cannot be the
+    # normal cooldown doing the work.
+    engine = _engine()
+    assert engine.anomaly_scale_up_min_interval > 0
+    assert engine.evaluate(50.0, anomaly_flag=True) == "scale_up"
+    assert engine.evaluate(50.0, anomaly_flag=True) == "hold"
+    assert engine.last_reason == "anomaly_min_interval"
+
+
+def test_anomaly_gate_does_not_block_normal_branches():
+    engine = _engine(anomaly_scale_up_min_interval=120)
+    engine.evaluate(50.0, anomaly_flag=True)
+    assert engine.evaluate(50.0, anomaly_flag=True) == "hold"   # gated
+    assert engine.evaluate(95.0, anomaly_flag=False) == "scale_up"
+    assert engine.last_reason == "cpu_high"
 
 
 def test_reactive_floor_is_off_by_default():

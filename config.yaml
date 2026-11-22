@@ -20,6 +20,10 @@ cooldown_seconds: 180
 # added false or early scale-ups. Set either back to true to restore it.
 use_anomaly_bypass: false             # anomaly flag no longer forces a scale-up
 use_upper_bound_risk: false           # upper bound no longer triggers scale-ups
+anomaly_scale_up_min_interval: 120    # min seconds between anomaly scale-ups:
+                                      # the anomaly branch still bypasses the
+                                      # cooldown, but one sustained spike must
+                                      # not add a worker on every poll (0 = off)
 scale_down_max_current_cpu: 75.0      # no scale-down while current CPU is above this
 tick_seconds: 3
 
