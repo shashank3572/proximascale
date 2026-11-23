@@ -58,11 +58,30 @@ cpu_lower_threshold: 78.0
 adaptive_floor_lower: 60.0
 adaptive_ceil_lower: 78.0
 
+# Do not remove workers while the container is still pegged right now.
+# WHY: during a sustained 100% spike the rolling window fills with 100s, so the
+# z-score stops flagging an anomaly (anomaly=False) while the demo Prophet mean
+# (~54) sits below cpu_lower_threshold -- the engine then said scale_down
+# (cpu_low) at an actual reading of 100% and collapsed the fleet mid-spike
+# (measured: fleet 1 -> 0 at 13:22:24). This is the engine's existing
+# scale_down_max_current_cpu guard: the forecast may see the spike ending, but
+# capacity is not withdrawn until the CURRENT reading is back under it.
+scale_down_max_current_cpu: 50.0
+
 anomaly_min_cpu_percent: 5.0           # shared with config.yaml: idle-jitter readings
                                        # (0.00-0.35%) can never be spikes, so demo
                                        # scale-ups come from real traffic only
 
 cooldown_seconds: 60      # was 180 -- shorter hysteresis lock after a scale action
+
+# Anomaly scale-ups bypass the cooldown entirely, so a sustained spike used to
+# add one container on EVERY poll (measured: 3 containers in 70 s during one
+# 4-minute 100% spike). This spaces anomaly scale-ups out instead. The clock is
+# the last successful scale-up of ANY kind (anomaly, upper_bound_risk, cpu_high),
+# so a risk-driven scale-up also defers the next anomaly one. 300 s > the length
+# of the demo spike, so one spike produces exactly one anomaly scale-up; the
+# engine reports "hold (anomaly_interval)" while the interval has not elapsed.
+anomaly_min_interval_seconds: 300
 tick_seconds: 3
 
 adaptive_window: 8        # was 30 -- forgets a spike in ~4 min instead of ~15

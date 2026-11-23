@@ -61,6 +61,8 @@ class DecisionEngine:
                           reading is still above scale_down_max_current_cpu
                           (only when current_cpu is passed and the key is set)
         "cooldown"      — still inside the hysteresis window
+        "anomaly_interval" — anomaly detected, but the last scale_up of ANY
+                          reason is younger than anomaly_min_interval_seconds
         "max_reached"   — scale_up requested, but actuator at max replicas
             "min_reached"   — scale_down requested, but actuator at min replicas
             "<reason>_no_actuator" — actuator unavailable (Docker down / not wired)
@@ -69,7 +71,11 @@ class DecisionEngine:
         ("current_cpu_high": the reactive floor, scale_up_on_current_cpu)
 
         Ordering (and why the cooldown gate sits where it does):
-          1. anomaly                — genuine emergencies bypass EVERYTHING
+          1. anomaly                — genuine emergencies bypass the risk branch
+              and the cooldown, but NOT anomaly_min_interval_seconds: that
+              spacing is measured from the last successful scale_up of ANY
+              reason, so one sustained spike adds at most one container per
+              interval instead of one per poll (the 3-in-70s storm).
           2. cooldown               — gates upper_bound_risk too. The upper bound
               is a *statistical* risk signal, not a measured emergency; without
               this gate a decaying spike re-fires scale_up on every poll because
@@ -86,8 +92,14 @@ class DecisionEngine:
         self.thresholds.update(predicted_cpu)
         upper_thresh, lower_thresh = self.thresholds.get_thresholds()
 
-    # 1. Anomaly bypasses both risk branch and cooldown
+    # 1. Anomaly bypasses the risk branch and the cooldown -- but not the
+    #    scale-up spacing: an emergency that lasts 4 minutes must not add a
+    #    container every 30 s. Unset/0 disables the spacing check.
         if anomaly_flag and self.cfg.get("use_anomaly_bypass", True):
+            min_interval = self.cfg.get("anomaly_min_interval_seconds", 0) or 0
+            if not self.hysteresis.scale_up_interval_elapsed(min_interval):
+                self.last_reason = "anomaly_interval"
+                return "hold"
             return self._do(
                 "scale_up",
                 predicted_cpu,
@@ -185,7 +197,7 @@ class DecisionEngine:
             return "hold"
 
     # -------- success path only --------
-        self.hysteresis.record_action()
+        self.hysteresis.record_action(action)
         self.last_reason = reason
 
         log_scaling_event({

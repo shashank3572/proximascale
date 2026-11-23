@@ -183,7 +183,9 @@ feature only gets credit when moving the input away from it actually changes the
 - **One scale-up per spike is correct.** After a scale-up the engine cools down
   (`cooldown_seconds`); a decaying spike can keep the uncertainty (upper) bound elevated for a
   few polls, but that no longer re-triggers scale-ups — only a genuine anomaly flag bypasses the
-  cooldown.
+  cooldown, and anomaly scale-ups are themselves spaced by `anomaly_min_interval_seconds` (measured
+  from the last scale-up of any kind). A sustained spike therefore adds one container per interval
+  instead of one per poll; `config_demo.yaml` sets 300 s, `config.yaml` leaves it unset (0).
 - **Predicted CPU is always within 0–100.** Forecasts are clamped to the physical range; the
   confidence band may sit at 100 while the container is pegged.
 - **One worker container always remains** with `config.yaml` (`min_containers: 1`). Use

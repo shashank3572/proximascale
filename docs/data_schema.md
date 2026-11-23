@@ -151,6 +151,8 @@ Expected reason values include:
 ```text
 in_band
 cooldown
+anomaly_interval
+scale_down_guard
 max_reached
 min_reached
 anomaly
