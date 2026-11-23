@@ -3,6 +3,18 @@
 import numpy as np
 import pytest
 
+# TensorFlow must be imported BEFORE shap here. shap imports scikit-learn,
+# and on Windows scikit-learn's vcomp140.dll and TensorFlow's libiomp5md.dll
+# clash when scikit-learn initialises the OpenMP runtime first: the process
+# dies with an access violation in keras' optree import. Ordering, not a
+# dependency change -- missing TensorFlow still leaves the tests below to
+# skip themselves individually. tools/sitecustomize.py also enforces this for
+# every process using the venv; this keeps the module safe on its own.
+try:
+    import tensorflow  # noqa: F401
+except ImportError:
+    pass
+
 pytest.importorskip("shap", reason="shap not installed")
 
 from dashboard.shap_explain import ShapExplainer  # noqa: E402

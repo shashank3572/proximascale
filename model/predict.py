@@ -44,8 +44,16 @@ import pandas as pd
 # to this file regardless of what cwd the caller is running from.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from preprocessing import scale_features, load_scaler, WINDOW_SIZE
+# ORDER MATTERS on Windows: lstm_model (TensorFlow) must load BEFORE
+# preprocessing (scikit-learn). scikit-learn's vendored vcomp140.dll and
+# TensorFlow's libiomp5md.dll clash if the OpenMP runtime is initialised by
+# scikit-learn first -- the process dies with an access violation/segfault on
+# `import tensorflow`, before any of our code runs. Importing TensorFlow first
+# is enough; no environment variable suppresses it. tools/sitecustomize.py
+# enforces the same order for every other entry point (pytest, main.py,
+# streamlit); this block keeps THIS module correct on its own too.
 from lstm_model import MODEL_PATH, HORIZON
+from preprocessing import scale_features, load_scaler, WINDOW_SIZE
 from prophet_model import load_prophet_model, get_prophet_fitted
 from uncertainty import predict_with_uncertainty
 from anomaly import is_anomaly

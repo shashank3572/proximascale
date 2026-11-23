@@ -90,6 +90,12 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1          # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 
+# TensorFlow must be imported before scikit-learn on Windows, or the process
+# dies with an access violation inside `import tensorflow`. tools/sitecustomize.py
+# makes that ordering automatic for every process using this interpreter.
+# Copy it into the venv (redo this whenever .venv is recreated):
+cp tools/sitecustomize.py .venv/Lib/site-packages/sitecustomize.py
+
 pytest tests -q                     # full suite
 python main.py --simulate           # demo loop, no Docker, no TensorFlow
 streamlit run dashboard/live_plot.py -- --demo
