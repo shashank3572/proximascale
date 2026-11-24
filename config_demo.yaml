@@ -14,8 +14,13 @@
 #                                uncertainty (disabled in config.yaml because
 #                                validation showed it added early scale-ups)
 #   use_anomaly_bypass: true     demonstrate the anomaly branch
-#   anomaly_min_interval 300     one spike adds at most ONE container, instead
-#                                of one per poll (the old 3-in-70s storm)
+#   anomaly_min_interval_seconds: 300
+#                                spaces ANOMALY scale-ups only: one sustained
+#                                anomaly adds at most one container per 5 min
+#                                instead of one per poll (the old 3-in-70s
+#                                storm). The cooldown still allows one
+#                                upper_bound_risk scale-up per 60 s, which is
+#                                what a live spike actually triggers.
 #   scale_down_max_current_cpu 50
 #                                no capacity withdrawn while the container is
 #                                still pegged right now

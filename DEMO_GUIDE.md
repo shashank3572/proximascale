@@ -150,13 +150,20 @@ run: `-- --demo`.
 # one heavy request (saturates the container for several seconds)
 Measure-Command { curl.exe -s http://localhost:5000/work/heavy | Out-Null }
 
-# sustained spike: 25 users for 60 s (Locust is installed)
+# sustained spike, the run measured below (Locust is installed)
 cd D:\proximascale
-.\.venv\Scripts\locust.exe -f "<your locustfile>" --headless -u 25 -r 5 -t 60s --host http://localhost:5000
+.\.venv\Scripts\locust.exe -f data/locust_scenarios/spike_load.py `
+  --headless -u 20 -r 5 -t 120s --host http://localhost:5000
 ```
 
-Measured 2026-09-22 (25 users, 60 s): 80 requests to `/work/heavy`, average
-15.4 s per request; container CPU 0.02 % → 100 % and back.
+Measured 2026-11-24 (20 users, 120 s, `spike_load.py` → `/work/heavy`):
+**194 requests, 0 failures**, mean 11.45 s, median 12 s, max 15.02 s, 1.63 req/s.
+Container CPU went 0.02 % → 100 % → 0.02 %; the collector's request counter read
+5, then 62 requests in one poll window while the spike was live, and 0 again one
+poll after the last request.
+
+An earlier run on 2026-09-22 (25 users, 60 s) produced 80 requests to the same
+endpoint at 15.4 s average. Nothing else from that run is reused here.
 
 ---
 
@@ -166,26 +173,64 @@ Poll interval is 30 s, so a panel run wants **8-10 minutes** of live time.
 
 | Stage | Wall clock | What happens | What to point at |
 |---|---|---|---|
-| A. Cold start | 0-5 min | collector fills the window; the loop prints "need N records" | no decisions on partial data |
-| B. Idle | 5-8 min | `pred ≈ actual ≈ 0-2 %`, `hold (in_band)` | the band `[15, 60]`; the forecast tracks the real CPU |
-| C. Spike | start Locust | `pred` rises, `scale_up` fires, a worker appears | `docker ps` shows `proximascale-worker-1-...` |
-| D. Sustained | during spike | `hold` — `cooldown` or `anomaly_interval` | one spike adds at most one worker |
-| E. Decay | after Locust stops | `pred` falls below the lower bound → `scale_down (cpu_low)` | the worker disappears from `docker ps` |
+| A. Cold start | 0-5 min | collector fills the window; the loop prints `Only N records in CSV - need 10` | no decisions on partial data |
+| B. Idle | 5-8 min | `pred ≈ actual ≈ 0.0 %`, `hold (min_reached)` | band `[30, 75]` while static, `[10, 60]` once `adaptive_min_samples: 5` is met; the forecast tracks the real CPU |
+| C. Spike | start Locust | `pred` and `ub` jump to 100, `scale_up (upper_bound_risk)`, a worker appears | `docker ps` shows `proximascale-worker-1-...` |
+| D. Sustained | during spike | `hold (cooldown)`, then at most one further `scale_up` per `cooldown_seconds` | the cooldown is what spaces scale-ups here; `anomaly_min_interval_seconds` gates the anomaly branch only |
+| E. Decay | after Locust stops | `pred` back to 0, below the lower bound → `scale_down (cpu_low)` | workers leave `docker ps`; `replicas` in `events.csv` goes 2 → 1 → 0 |
 
-Measured on 2026-09-22, **before** live calibration existed (the forecast level
-is therefore the old absolute one; kept only as evidence that both directions
-worked end to end):
+### Measured 2026-11-24, end to end
 
+`main.py --config config_demo.yaml`, collector at 30 s, Locust `spike_load.py`
+20 users for 120 s. Rows below are the real `logs/events.csv` decisions (band is
+the engine's *effective* `[lower, upper]`):
+
+```text
+14:10:22  actual=0.02   pred=0.0   ub=0.83   band [30.0, 75.0]  anomaly=False → hold (min_reached)          replicas 0
+14:12:38  actual=0.02   pred=0.0   ub=1.17   band [10.0, 60.0]  anomaly=False → hold (min_reached)          replicas 0   requests 5
+14:13:27  actual=100.0  pred=100.0 ub=100.0  band [10.0, 72.6]  anomaly=False → scale_up (upper_bound_risk) replicas 0 → 1  requests 62
+14:14:01  actual=100.0  pred=100.0 ub=100.0  band [10.0, 90.0]  anomaly=False → hold (cooldown)             replicas 1   requests 48
+14:14:42  actual=100.0  pred=100.0 ub=100.0  band [10.0, 90.0]  anomaly=False → scale_up (upper_bound_risk) replicas 1 → 2  requests 46
+14:15:16  actual=0.02   pred=0.0   ub=0.0    band [10.0, 90.0]  anomaly=False → hold (cooldown)             replicas 2
+14:15:55  actual=0.02   pred=0.0   ub=1.32   band [10.0, 90.0]  anomaly=False → scale_down (cpu_low)        replicas 2 → 1
+14:16:29  actual=0.02   pred=0.0   ub=0.86   band [10.0, 90.0]  anomaly=False → hold (cooldown)             replicas 1
+14:17:08  actual=0.02   pred=0.0   ub=0.62   band [10.0, 90.0]  anomaly=False → scale_down (cpu_low)        replicas 1 → 0
+14:18:16  actual=0.02   pred=0.0   ub=0.0    band [10.0, 90.0]  anomaly=False → hold (min_reached)          replicas 0
 ```
-11:43:00  actual=0.18   pred=50.22                 → hold
-11:43:21  actual=100.0  pred=100.0  anomaly=True   → scale_up (anomaly)      replicas 0 → 1
-11:44:22  actual=0.02   pred=51.42  ub=56.80       → scale_down (cpu_low)    replicas 1 → 0
-```
 
-The current build should show `pred ≈ actual` in stage B instead of ~50. That is
-the fix for synthetic-baseline anchoring, and it is the single most important
-thing to demonstrate. Re-measure and write down your own numbers before the
-panel; do not reuse the 2026-09-22 table as if it were today's run.
+What that run actually shows — say exactly this much, no more:
+
+1. **The forecast tracks the measurement in both directions.** `pred` was 0.0
+   while the container was idle and 100.0 while it was pegged, with `actual`
+   identical each time; the old mis-scaled ~50 % idle forecast is gone.
+2. **Both scale-ups came from `upper_bound_risk`, not from an anomaly.** With
+   live-scale CPU, Prophet's residual z-score stayed under
+   `anomaly_z_threshold: 2.5` for the whole spike, so `anomaly=False` on every
+   row. Do not claim the anomaly branch fired in this run — it did not.
+3. **Two workers for one spike is the configured behaviour, not a double-fire
+   bug.** `cooldown_seconds: 60` allows one scale-up per minute, and the
+   container was still at 100 % at 14:14:42.
+   `anomaly_min_interval_seconds: 300` only spaces the anomaly branch, which
+   never fired here. (On 2026-09-22, before live calibration and the spacing
+   gate, the anomaly branch did fire and drove the same 0 → 1 scale-up.)
+4. **The band adapts and stays inside its configured limits:** static
+   `[30, 75]` → `[10, 60]` once five samples existed → upper 72.6 from the
+   spike window → capped at `adaptive_ceil_upper: 90`.
+5. **Scale-down is cooldown-paced too, ~73 s apart, 2 → 1 → 0.**
+   `min_containers: 0` is why the idle stage reads `hold (min_reached)` instead
+   of `hold (in_band)`: at zero workers there is nothing left to remove, so the
+   engine reports the limit rather than the band.
+6. **SHAP ran on both scale-ups:** 65.5 % CPU / 11.9 % memory and 76.1 % CPU /
+   5.8 % memory. Attribution exists only on scale-up rows; holds carry zeros.
+
+These numbers come from `config_demo.yaml` (60 s cooldown, 8-sample band,
+`min_containers: 0`). They demonstrate the control loop; they are not
+production figures, and the run measured nothing about lead time or forecast
+error — `lead time (s)` and MAE come from `logs/events.csv` and
+`model/evaluate.py`, never from this table.
+
+Before the panel, rerun it and write down your own numbers. Do not read this
+table out as if it were live.
 
 ---
 
