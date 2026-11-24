@@ -14,7 +14,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        # requirements.txt (tensorflow 2.16.1 / numpy 1.26) is verified on 3.12,
+        # so that is what CI must test. On 3.11 a StopIteration sentinel in
+        # tests/test_bugfix_pass.py surfaces as RuntimeError instead.
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -77,7 +80,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4

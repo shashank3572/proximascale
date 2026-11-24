@@ -33,6 +33,10 @@ def test_predict_load_fallback_reports_no_anomaly():
 
 # ── C2/C5: delta calibration ─────────────────────────────────────────────────
 def test_delta_calibration_moves_absolute_forecast_onto_live_level(monkeypatch):
+    # model.predict imports the LSTM module, so this needs the ML stack. Skip
+    # (never error) in the dependency-light job; the model job makes skips fatal.
+    pytest.importorskip("tensorflow")
+    pytest.importorskip("prophet")
     import model.predict as P
 
     monkeypatch.delenv("PROXIMASCALE_LIVE_CALIBRATION", raising=False)
@@ -46,6 +50,8 @@ def test_delta_calibration_moves_absolute_forecast_onto_live_level(monkeypatch):
 
 
 def test_delta_calibration_has_a_jitter_deadband(monkeypatch):
+    pytest.importorskip("tensorflow")
+    pytest.importorskip("prophet")
     import model.predict as P
 
     monkeypatch.delenv("PROXIMASCALE_LIVE_CALIBRATION", raising=False)
@@ -60,6 +66,8 @@ def test_delta_calibration_has_a_jitter_deadband(monkeypatch):
 
 
 def test_calibration_can_be_switched_off(monkeypatch):
+    pytest.importorskip("tensorflow")
+    pytest.importorskip("prophet")
     import model.predict as P
 
     monkeypatch.setenv("PROXIMASCALE_LIVE_CALIBRATION", "off")
