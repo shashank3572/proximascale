@@ -1,8 +1,7 @@
 """Regression tests for the 2026-09-21 live-demo fixes.
 
 Covers:
-  1. Engine: upper_bound_risk must respect cooldown (the scale-up storm fix),
-     and the anomaly branch must respect its own minimum interval
+  1. Engine: upper_bound_risk must respect cooldown (the scale-up storm fix)
   2. predict_load: clamps forecasts to the physical 0-100 CPU% range
   3. Collector: two-sample CPU math + HTTP-first request reset channel
   4. App: POST /request-rate/reset contract (and that it never self-counts)
@@ -60,18 +59,8 @@ def test_upper_bound_risk_fires_again_after_cooldown_expires(engine):
     assert engine.last_reason == "upper_bound_risk"
 
 
-def test_anomaly_bypasses_cooldown_once_interval_has_passed(engine):
-    """The anomaly branch still beats cooldown_seconds, but only after the
-    anomaly minimum interval from the previous scale_up has elapsed."""
+def test_anomaly_still_bypasses_cooldown(engine):
     engine.evaluate(predicted_cpu=90.0, upper_bound=95.0, anomaly_flag=False)
-
-    # 30 s later: inside the 120 s interval -- one spike, one worker.
-    r_within = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
-    assert r_within == "hold"
-    assert engine.last_reason == "anomaly_min_interval"
-
-    # Past the interval but still inside the 180 s cooldown -> anomaly wins.
-    engine.last_scale_up_time = time.time() - 121
     r = engine.evaluate(predicted_cpu=10.0, upper_bound=None, anomaly_flag=True)
     assert r == "scale_up"
     assert engine.last_reason == "anomaly"
@@ -100,6 +89,12 @@ def _window(cpu=50.0, n=10):
 
 
 def _stub_artifacts(monkeypatch, prophet, uncertainty):
+    # These tests assert the RAW 0-100 clamp on the model's absolute output, so
+    # live calibration (which re-anchors the level on the measured CPU) is
+    # switched off here. Calibration itself is covered by
+    # tests/test_remediation.py::test_delta_calibration_*.
+    monkeypatch.setenv("PROXIMASCALE_LIVE_CALIBRATION", "off")
+    P.reset_live_calibration()
     monkeypatch.setattr(P, "_load_artifacts", lambda: None)
     monkeypatch.setattr(P, "_scaler", object(), raising=False)
     monkeypatch.setattr(P, "_model", object(), raising=False)
@@ -137,7 +132,7 @@ def test_fallback_is_clamped_too(monkeypatch):
     predicted, upper, anomaly = P.predict_load(_window(cpu=95.0))
     assert predicted == 100.0   # 95 * 1.15 = 109.25 raw
     assert upper == 100.0       # 95 * 1.3  = 123.5  raw
-    assert anomaly is True
+    assert anomaly is False
 
 
 # ── 3. Collector: two-sample CPU + request reset channel ─────────────────────
@@ -221,16 +216,29 @@ def flask_client(monkeypatch):
 
 
 def test_reset_endpoint_returns_window_count(flask_client, monkeypatch):
-    monkeypatch.setattr("app.app.reset_request_count", lambda: 5)
+    monkeypatch.setattr(
+        "app.app.reset_request_count_window",
+        lambda: {"request_count": 5, "window_seconds": 30.0,
+                 "requests_per_second": 0.167},
+    )
     resp = flask_client.post("/request-rate/reset")
     assert resp.status_code == 200
-    assert resp.get_json() == {"request_count": 5}
+    body = resp.get_json()
+    assert body["request_count"] == 5
+    # The window length is part of the contract: without it the collector
+    # cannot tell "5 requests in 30 s" from "5 requests in 90 s" (audit C4).
+    assert body["window_seconds"] == 30.0
+    assert body["requests_per_second"] == 0.167
 
 
 def test_reset_endpoint_is_excluded_from_self_counting(monkeypatch):
     inc = MagicMock()
     monkeypatch.setattr("app.app.increment_request_count", inc)
-    monkeypatch.setattr("app.app.reset_request_count", lambda: 0)
+    monkeypatch.setattr(
+        "app.app.reset_request_count_window",
+        lambda: {"request_count": 0, "window_seconds": None,
+                 "requests_per_second": None},
+    )
     app.test_client().post("/request-rate/reset")
     inc.assert_not_called()
 

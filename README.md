@@ -90,6 +90,12 @@ python -m venv .venv
 .venv\Scripts\Activate.ps1          # Linux/macOS: source .venv/bin/activate
 pip install -r requirements.txt
 
+# TensorFlow must be imported before scikit-learn on Windows, or the process
+# dies with an access violation inside `import tensorflow`. tools/sitecustomize.py
+# makes that ordering automatic for every process using this interpreter.
+# Copy it into the venv (redo this whenever .venv is recreated):
+cp tools/sitecustomize.py .venv/Lib/site-packages/sitecustomize.py
+
 pytest tests -q                     # full suite
 python main.py --simulate           # demo loop, no Docker, no TensorFlow
 streamlit run dashboard/live_plot.py -- --demo
@@ -146,17 +152,39 @@ group), `python cleanup.py` (remove scaled worker containers).
 ## Repository rules
 
 - `main` is protected. All work goes through PRs into `dev`.
-- Every PR runs pytest + flake8 via GitHub Actions (lightweight job; the
-  TensorFlow/Prophet model tests skip there, so run `pytest tests -q` locally
-  in the full environment before merging model changes).
+- Every PR runs two GitHub Actions jobs: a **unit** job (compile, lint, config
+  validation, import checks, pytest without the ML stack) and a **model** job
+  that installs the pinned `requirements.txt`, runs `python model/predict.py`
+  and fails if any test was *skipped* — a skip there would mean model behaviour
+  is untested, so it is not treated as green.
 - A red CI check blocks merge.
 - Only the repo owner (Person D) merges into `dev` and promotes `dev` -> `main`.
 
 ## Documentation
 
 - `docs/setup_guide.md` — environment, Docker setup, demo steps
+- `docs/METRICS.md` — every metric's unit and definition (CPU, memory,
+  requests per window vs per second, prediction, effective thresholds)
+- `docs/DEMO_TROUBLESHOOTING.md` — symptom-first fixes for Docker, stale data,
+  model fallbacks, request-rate failures, workers and the dashboard
+- `DEMO_GUIDE.md` — the panel run, start to cleanup, with honest limitations
 - `docs/data_schema.md` — metric record schema and module interfaces
 - `docs/scaling_events.md` — scaling event log format
 - `docs/model_evaluation.md` — model search, calibration, engine tuning,
   unseen-data tests and how to reproduce every number
 - `PROGRESS.md` — milestone tracking and the audit repair log
+
+## Behaviour contracts (post-audit)
+
+These are the invariants the tests pin down; changing them is a design
+decision, not a refactor.
+
+| Contract | Where | What it guarantees |
+|---|---|---|
+| Forecast fallback | `model/predict.py` | On any internal failure, `predict_load()` returns `(cpu*1.15, cpu*1.3, False)` — clamped to 0-100, and **`is_anomaly=False`**: a broken model never masquerades as a detected spike. |
+| Live calibration | `model/predict.py` | `predicted = current_cpu + forecast_delta`. The bundled Prophet was fit on synthetic data (~52 % baseline), so its absolute level is re-anchored on the measured CPU. `PROXIMASCALE_LIVE_CALIBRATION=off` restores the raw output. |
+| Missing measurements | `monitoring/collector.py` | Zero CPU, a missing CPU field, a stopped container and a Docker failure are four different states. Only real measurements are written to `metrics_live.csv`. |
+| Request window | `monitoring/metrics.py`, `POST /request-rate/reset` | Counting and resetting happen in one transaction, and the app reports how many seconds the count covers. |
+| Adaptive band | `decision/adaptive_threshold.py` | `lower < upper`, both inside 0-100, separated by `adaptive_min_band`, limits configurable and validated at startup. |
+| Decision log | `main.py` → `logs/events.csv` | Every row carries the **effective** thresholds and the forecast mode, so the dashboard cannot disagree with the engine. |
+| Actuator honesty | `actuator/docker_scaler.py` | Replica count comes from Docker. `traffic_serving` is reported separately and is `False` in pool mode — no load balancer is claimed. |

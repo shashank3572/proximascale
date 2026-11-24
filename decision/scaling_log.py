@@ -10,7 +10,13 @@ import threading
 from pathlib import Path
 
 _LOCK = threading.Lock()
-_LOG_PATH = Path(os.getenv("SCALING_LOG_PATH", "data/scaling_events.json"))
+# Resolve relative to the project root (this file is at <root>/decision/),
+# not the caller's CWD, so the log path is stable no matter where
+# `python main.py` is launched from.
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_LOG_PATH = Path(
+    os.getenv("SCALING_LOG_PATH", str(_PROJECT_ROOT / "data" / "scaling_events.json"))
+)
 
 
 def _ensure_parent() -> None:

@@ -86,7 +86,10 @@ def test_predict_load_does_not_silently_fall_back(caplog):
 
 
 def test_predict_load_short_window_uses_fallback():
-    """An invalid window should use predict_load()'s documented fallback."""
+    """An invalid window uses predict_load()'s documented fallback, and the
+    fallback MUST report is_anomaly=False: it is a degraded forecast, not a
+    detection. (The old contract said True, which let a failed model call
+    masquerade as a spike and force a scale-up -- audit H1.)"""
     pytest.importorskip("tensorflow", reason="TF stack not installed")
     pytest.importorskip("prophet", reason="Prophet not installed")
 
@@ -98,7 +101,7 @@ def test_predict_load_short_window_uses_fallback():
     assert len(result) == 3
     assert isinstance(result[0], float)
     assert isinstance(result[1], float)
-    assert result[2] is True
+    assert result[2] is False
 
 
 # ── Anomaly detection edge cases ──────────────────────────────────────────────
