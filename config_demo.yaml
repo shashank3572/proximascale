@@ -1,37 +1,43 @@
-# config_demo.yaml — DEMO ONLY. Do not use for real evaluation numbers.
+# config_demo.yaml — DEMO ONLY. Never quote numbers from a run of this file.
 #
-# Identical to config.yaml except: adaptive_window and cooldown_seconds are
-# shortened, the lower threshold is raised for afternoon reviews, and
-# min_containers is 0 -- all so both scaling directions are visible within a
-# ~10-15 minute panel demo (see the per-key comments below).
+# Differences from config.yaml, and why each exists:
 #
-# Why: decision/adaptive_threshold.py's lower threshold is computed from a
-# rolling window of the last `adaptive_window` predictions. Right after a
-# spike, that window is still full of high readings, which keeps the mean
-# and variance elevated and the lower threshold suppressed near its floor
-# -- so scale_down won't fire until the window has "forgotten" the spike,
-# which takes adaptive_window polls (30 * 30s poll_interval = ~15 min with
-# the real config). Shrinking the window here makes it forget faster.
-# Shortening cooldown_seconds removes the second, smaller delay from the
-# post-scale-up hysteresis lock.
+#   min_containers: 0            lets the fleet collapse completely so the
+#                                audience sees scale-down actually happen
+#                                (config.yaml stops at 1 by design)
+#   cooldown_seconds: 60         shorter hysteresis lock, so a 10-15 minute
+#                                panel run can show scale-up AND scale-down
+#   adaptive_window: 8           the band forgets a spike in ~4 min instead of
+#                                ~15 min (8 polls vs 30)
+#   adaptive_min_samples: 5      reaches adaptive mode sooner with 8 samples
+#   use_upper_bound_risk: true   demonstrate the preemptive branch on forecast
+#                                uncertainty (disabled in config.yaml because
+#                                validation showed it added early scale-ups)
+#   use_anomaly_bypass: true     demonstrate the anomaly branch
+#   anomaly_min_interval_seconds: 300
+#                                spaces ANOMALY scale-ups only: one sustained
+#                                anomaly adds at most one container per 5 min
+#                                instead of one per poll (the old 3-in-70s
+#                                storm). The cooldown still allows one
+#                                upper_bound_risk scale-up per 60 s, which is
+#                                what a live spike actually triggers.
+#   scale_down_max_current_cpu 50
+#                                no capacity withdrawn while the container is
+#                                still pegged right now
 #
-# min_containers is 0 here (1 in the real config): a demo should be able to
-# scale all the way down to zero workers so the audience can watch the fleet
-# collapse after the spike, instead of stalling at one container. The main
-# proximascale-app container keeps serving traffic on :5000 regardless --
-# workers are separate containers the actuator creates/removes.
+# The band is NOT inverted any more. It used to set cpu_lower_threshold: 78 so
+# that a ~52 forecast would read as "low"; with live calibration that hack is
+# both unnecessary (idle forecasts are ~0-2%) and invalid (engine validation
+# rejects lower >= upper). The demo now exercises the same band maths as
+# production, just with a shorter memory.
 #
 # Usage:
 #   python main.py --config config_demo.yaml
-#
-# Run model/evaluate.py and any numbers you cite in the report against the
-# real config.yaml, never this file -- it exists purely to make one
-# behavior visible on stage faster, not to represent real tuning.
 
 image: proximascale-worker:latest
 container_prefix: proximascale-worker
 
-min_containers: 0        # was 1 -- full collapse for the demo (see above)
+min_containers: 0
 max_containers: 10
 
 cpu_quota: 50000
@@ -39,34 +45,31 @@ mem_limit: "256m"
 cpu_period: 100000
 
 cpu_upper_threshold: 75.0
+cpu_lower_threshold: 30.0
 
-# Demo-time lower threshold, raised above Prophet's afternoon baseline.
-# WHY: the hybrid's mean on idle afternoons is NOT ~0 -- Prophet's fitted daily
-# curve peaks at ~55% around 15:00 (training data is diurnal, trough 17% at
-# 03:00). The real config's lower threshold (40) is therefore unreachable at
-# 10:00-17:00: the adaptive lower is clamped by ceil_lower, then floored by
-# static_lower, so scale_down can never fire exactly when a panel is watching.
-# With static_lower=78 the adaptive lower pins at 78 during any steady idle
-# period, so scale_down (cpu_low) fires on the very first eligible poll and
-# keeps firing until min_containers=0. Spike handling is unaffected: with a
-# full-spike window (all ~100) the adaptive lower still lands at 78, and the
-# mixed post-spike window (100x3 + 56x5) sits at 72.5 -- in_band -- so the
-# scale-down sweep only starts once the window has actually flushed the spike.
-# Live idle probes verified: 13:50 -> 47%, 14:30 -> 49%, 21:30 -> 32%.
-cpu_lower_threshold: 78.0
-# Optional overrides (defaults 15.0 / 45.0 kept for every non-demo run):
-adaptive_floor_lower: 60.0
-adaptive_ceil_lower: 78.0
+adaptive_window: 8
+adaptive_k: 1.5
+adaptive_min_samples: 5
+adaptive_floor_upper: 60.0
+adaptive_ceil_upper: 90.0
+adaptive_floor_lower: 10.0
+adaptive_ceil_lower: 30.0
+adaptive_min_band: 10.0
 
-anomaly_min_cpu_percent: 5.0           # shared with config.yaml: idle-jitter readings
-                                       # (0.00-0.35%) can never be spikes, so demo
-                                       # scale-ups come from real traffic only
+use_upper_bound_risk: true
+use_anomaly_bypass: true
+anomaly_min_interval_seconds: 300
+scale_up_on_current_cpu: true
 
-cooldown_seconds: 60      # was 180 -- shorter hysteresis lock after a scale action
+scale_down_max_current_cpu: 50.0
+cooldown_seconds: 60
 tick_seconds: 3
 
-adaptive_window: 8        # was 30 -- forgets a spike in ~4 min instead of ~15
-adaptive_k: 1.5
-adaptive_min_samples: 5   # was 10 -- reaches "adaptive" mode sooner with a smaller window
-
 scale_down_strategy: newest
+
+anomaly_z_threshold: 2.5
+anomaly_min_cpu_percent: 5.0
+
+restart_policy: unless-stopped
+worker_health_check: true
+readiness_timeout_seconds: 20

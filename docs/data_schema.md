@@ -82,9 +82,9 @@ Person A — App + Monitoring
 Person B — LSTM + ML
     model/predict.py
         ↑
-    consumes exactly 10 chronological metric records
+    consumes exactly 30 chronological metric records
         ↑
-    main.py → storage.read_last_n(10)
+    main.py → storage.read_last_n(30)
 
     call:
         predict_load(records)
@@ -205,10 +205,10 @@ recent scaling intervention
 1. `request_rate` is always an **integer** and must be cast using `int()` where required. `-1` means the collector could not reach the app's reset endpoint or the SQLite fallback during that poll — it is an error marker, not a load measurement, and should be excluded from training or cleaned before use.
 2. `timestamp` is stored as a **string**, not a `datetime` object, when persisted to CSV or exchanged through JSON/dictionaries.
 3. Metric records must remain in **chronological order** when passed to the prediction pipeline.
-4. `predict_load()` expects **exactly 10 metric records** for the current Phase 2 prediction pipeline.
-5. `main.py` obtains these records using `storage.read_last_n(10)`.
+4. `predict_load()` expects **exactly 30 metric records** for the current v2 prediction pipeline.
+5. `main.py` obtains these records using `storage.read_last_n(30)`.
 6. The current Phase 2 monitoring interval is **30 seconds**.
-7. Therefore, 10 records represent approximately **5 minutes of historical data**.
+7. Therefore, 30 records represent approximately **15 minutes of historical data**.
 8. The monitoring polling interval and the request-rate measurement interval are aligned at **30 seconds** unless the implementation explicitly changes the measurement method.
 9. `cpu_percent` and `memory_percent` refer to **container-level resources**, not host-machine resources.
 10. Any change to the metric fields, field types, meanings, prediction input contract, monitoring interval, or decision-engine interface requires agreement from **all four team members**.

@@ -36,6 +36,13 @@ data/processed/
 # Dashboard feed written by main.py
 logs/events.csv
 
+# Demo/rehearsal run logs (collector, loop, Locust, fleet timeline)
+logs/demo*.log
+
+# Archived one-off data artifacts (stale runs kept off the tracked tree)
+data/archive/
+logs/archive/
+
 .freebuff/
 
 # Evaluation prediction dumps (large; regenerate with model/eval_dump.py)

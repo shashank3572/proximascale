@@ -44,7 +44,11 @@ def test_live_and_batched_inputs_match(setup):
         np.testing.assert_allclose(prophet_live, prophet_batch[j], atol=1e-9)
 
 
-def test_predict_load_serves_v2_with_30_readings(setup):
+def test_predict_load_serves_v2_with_30_readings(setup, monkeypatch):
+    # The model's ABSOLUTE output is what the batched evaluation path computes.
+    # Live calibration (model/predict.py) re-anchors the level on the measured
+    # CPU and is a separate layer, covered by tests/test_remediation.py.
+    monkeypatch.setenv("PROXIMASCALE_LIVE_CALIBRATION", "off")
     df, fc, t_abs = setup
     cols = ["timestamp", "cpu_percent", "memory_percent", "request_rate", "post_scaling"]
     t = int(t_abs[0])

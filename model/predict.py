@@ -44,8 +44,16 @@ import pandas as pd
 # to this file regardless of what cwd the caller is running from.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from preprocessing import scale_features, load_scaler, WINDOW_SIZE
+# ORDER MATTERS on Windows: lstm_model (TensorFlow) must load BEFORE
+# preprocessing (scikit-learn). scikit-learn's vendored vcomp140.dll and
+# TensorFlow's libiomp5md.dll clash if the OpenMP runtime is initialised by
+# scikit-learn first -- the process dies with an access violation/segfault on
+# `import tensorflow`, before any of our code runs. Importing TensorFlow first
+# is enough; no environment variable suppresses it. tools/sitecustomize.py
+# enforces the same order for every other entry point (pytest, main.py,
+# streamlit); this block keeps THIS module correct on its own too.
 from lstm_model import MODEL_PATH, HORIZON
+from preprocessing import scale_features, load_scaler, WINDOW_SIZE
 from prophet_model import load_prophet_model, get_prophet_fitted
 from uncertainty import predict_with_uncertainty
 from anomaly import is_anomaly
@@ -90,6 +98,130 @@ _BUNDLE_CONFIG = _bundle_config()
 V2_WINDOW = int(_BUNDLE_CONFIG["window"]) if _BUNDLE_CONFIG else None
 # Readings a caller should pass: enough for the v2 model when it is installed.
 HISTORY_SIZE = max(WINDOW_SIZE, V2_WINDOW or 0)
+
+# ---------------------------------------------------------------------------
+# Live calibration (C2/C5)
+# ---------------------------------------------------------------------------
+# The saved Prophet model was fit on the frozen 90k SYNTHETIC dataset, whose
+# diurnal baseline sits at ~50-57% CPU. A real container idles at 0.02-1%, so
+# Prophet's ABSOLUTE level is meaningless live: every window inherited a ~52%
+# offset and predictions never fell below ~49 even with the container idle.
+#
+# The residual LSTM was trained on `cpu(t+k) - prophet(t+k)`, so the *change*
+# in (prophet + residual) over the 90 s horizon is the transferable part, while
+# the LEVEL is not. Delta calibration re-anchors the forecast on the measured
+# current CPU:
+#
+#   model_now  = prophet(now) + residual(t+1)     # model's implied level now
+#   offset     = current_cpu - model_now
+#   predicted  = (prophet(t+k) + residual(t+k)) + offset
+#              = current_cpu + [forecast_k - model_now]
+#
+# i.e. exactly `live_prediction = current_cpu + predicted_cpu_delta`, where the
+# delta keeps the model's learned trend/uncertainty and the absolute level is
+# supplied by the live measurement. The residual(t+1) term is used as the proxy
+# for residual(now): the model emits no t+0 step, and over one 30 s interval
+# the residual is close to persistent.
+#
+# PROXIMASCALE_LIVE_CALIBRATION=off restores the old absolute (uncalibrated)
+# behaviour, e.g. to reproduce historical numbers.
+# A change smaller than CALIBRATION_DEADBAND (CPU percentage points) keeps the
+# previous offset (no jitter), but a real workload change is applied at once --
+# smoothing away a genuine 0->100% jump would be worse than a visible step.
+CALIBRATION_DEADBAND = 1.0
+_live_offset = None
+FORECAST_MODE = "unknown"
+
+# One warning per feature per process: a distribution shift is worth reporting
+# once, not on every 30 s poll.
+_range_warned = set()
+
+
+def calibration_enabled() -> bool:
+    """True unless PROXIMASCALE_LIVE_CALIBRATION=off/0/false/no."""
+    return os.environ.get("PROXIMASCALE_LIVE_CALIBRATION", "delta").strip().lower() \
+        not in {"off", "0", "false", "no", "none", "raw"}
+
+
+def get_forecast_mode() -> str:
+    """How the last predict_load() call produced its numbers.
+
+    "delta_calibrated" -- anchored on the live CPU (default)
+    "absolute"         -- raw model output (PROXIMASCALE_LIVE_CALIBRATION=off)
+    "fallback"         -- predict_load()'s safe degraded path
+    "unknown"          -- nothing predicted yet in this process
+    """
+    return FORECAST_MODE
+
+
+def reset_live_calibration() -> None:
+    """Forget the remembered offset (tests, or after a long monitoring gap)."""
+    global _live_offset, FORECAST_MODE
+    _live_offset = None
+    FORECAST_MODE = "unknown"
+
+
+def _apply_live_calibration(predicted, upper, model_now, current_cpu):
+    """Re-anchor an absolute forecast on the live CPU level. Returns
+    (predicted, upper, offset)."""
+    global _live_offset
+    if not calibration_enabled():
+        return predicted, upper, 0.0
+
+    raw_offset = float(current_cpu) - float(model_now)
+    if _live_offset is None:
+        offset = raw_offset
+    elif abs(raw_offset - _live_offset) < CALIBRATION_DEADBAND:
+        offset = _live_offset                      # deadband: ignore jitter
+    else:
+        offset = raw_offset                        # real change: apply at once
+    _live_offset = offset
+    return predicted + offset, upper + offset, offset
+
+
+def _warn_once(key: str, message: str) -> None:
+    if key not in _range_warned:
+        _range_warned.add(key)
+        logger.warning(message)
+        print(f"[ProximaScale] WARNING: {message}")
+
+
+def check_feature_ranges(df, scaler) -> list:
+    """Detect live inputs outside the TRAINING scaler's fitted range (M5).
+
+    A MinMaxScaler extrapolates: a memory reading of 0.7% against a fitted
+    range of [10.8, 62.9] maps to ~-0.19, and a request rate of 3 against
+    [0, 1446] maps to ~0.002. The model then sees a feature channel that is
+    almost constant near the bottom of its training distribution. That is a
+    distribution shift, not a bug in the scaler -- the honest response is to
+    report it once and let the caller decide (retraining is the real fix).
+
+    Non-fatal by design: returns a list of human-readable notes.
+    """
+    notes = []
+    try:
+        names = ["cpu_percent", "memory_percent", "request_rate"]
+        lo = getattr(scaler, "data_min_", None)
+        hi = getattr(scaler, "data_max_", None)
+        if lo is None or hi is None:
+            return notes
+        for i, name in enumerate(names):
+            if i >= len(lo) or name not in df.columns:
+                continue
+            values = pd.to_numeric(df[name], errors="coerce").dropna()
+            if values.empty:
+                continue
+            vmin, vmax = float(values.min()), float(values.max())
+            if vmin < float(lo[i]) or vmax > float(hi[i]):
+                note = (f"feature '{name}' live range [{vmin:.2f}, {vmax:.2f}] is "
+                        f"outside the training range [{float(lo[i]):.2f}, "
+                        f"{float(hi[i]):.2f}]; the model sees an extrapolated "
+                        f"input channel. Consider retraining on live-scale data.")
+                notes.append(note)
+                _warn_once(f"range:{name}", note)
+    except Exception as e:                      # diagnostics must never break a forecast
+        logger.debug("feature-range check skipped: %s", e)
+    return notes
 
 # Lazy-loaded, module-level cache -- populated on first call, reused after.
 _model = None
@@ -219,10 +351,18 @@ def predict_load(window, n_passes=None):
 
     Both load values are clamped to the physical 0–100 CPU% range.
 
-    Never raises -- on any internal failure, falls back to
-    (current_cpu * 1.15, current_cpu * 1.3, True) so Person D's main loop
-    never dies because of us.
+    Never raises -- on any internal failure it falls back to
+    (current_cpu * 1.15, current_cpu * 1.3, False): the degraded forecast is a
+    small conservative overshoot of the last measured CPU, and is_anomaly is
+    False because a failed model run has NOT detected anything. A fallback
+    that reported True would let a broken artifact masquerade as a real spike
+    and force scale-ups on every poll. Person D's main loop still never dies
+    because of us.
+
+    The returned level is calibrated onto the observed CPU (see
+    _apply_live_calibration); get_forecast_mode() reports which path ran.
     """
+    global FORECAST_MODE, _live_offset
     # Accept MetricRecord objects from monitoring.storage
     # and dictionaries from tests/direct callers.
     window = _to_dicts(window)
@@ -245,6 +385,9 @@ def predict_load(window, n_passes=None):
         step = pd.Timedelta(seconds=SAMPLING_INTERVAL_SECONDS)
         future_timestamps = [last_ts + step * i for i in range(1, HORIZON + 1)]
         prophet_forecast = get_prophet_fitted(_prophet_model, future_timestamps)
+        # Prophet's value AT the window's last reading -- the anchor the live
+        # calibration re-bases onto the measured CPU.
+        prophet_now = get_prophet_fitted(_prophet_model, [last_ts])[0]
 
         # Counterfactual correction + feature scaling (shared helper so the
         # SHAP attribution in main.py sees the identical LSTM input).
@@ -270,6 +413,15 @@ def predict_load(window, n_passes=None):
 
         predicted_load = final_mean[-1]            # farthest step, ~90s ahead
         upper_bound = final_upper_bound[-1]
+
+        # C2/C5: re-anchor the absolute level on the live measurement.
+        model_now = prophet_now + uncertainty["mean"][0]
+        predicted_load, upper_bound, offset = _apply_live_calibration(
+            predicted_load, upper_bound, model_now, current_cpu)
+        FORECAST_MODE = "delta_calibrated" if calibration_enabled() else "absolute"
+        if offset:
+            logger.debug("live calibration offset %+.2f (model_now=%.2f, live=%.2f)",
+                         offset, model_now, current_cpu)
 
         # CPU% is physically bounded at 0–100. Prophet + residual + 2σ can
         # overshoot (observed live: upper bounds of 102–156 while the
@@ -297,29 +449,61 @@ def predict_load(window, n_passes=None):
         except Exception:
             pass
 
+        # M5: report live/training distribution shifts once per process.
+        check_feature_ranges(pd.DataFrame(window), _scaler)
+
         anomaly_flag = is_anomaly(corrected_cpu)
 
         return float(predicted_load), float(upper_bound), bool(anomaly_flag)
 
     except Exception as e:
         # Loud on purpose: a broken artifact/dependency makes EVERY call fall
-        # back, which reports is_anomaly=True and so forces scale-ups.
+        # back. The fallback reports is_anomaly=False so a degraded model can
+        # not masquerade as a real spike and force scale-ups (C4).
         logger.error("predict_load FALLBACK (%s): %s", type(e).__name__, e)
         print(f"[ProximaScale] ERROR in predict_load, using fallback: {e}")
+        FORECAST_MODE = "fallback"
+        # The degraded path re-anchors too, so it cannot inherit a stale
+        # absolute baseline either.
+        _live_offset = None
         fallback_mean = min(100.0, max(0.0, current_cpu * 1.15))
         fallback_upper = min(100.0, max(0.0, current_cpu * 1.3))
-        return float(fallback_mean), float(fallback_upper), True
+        return float(fallback_mean), float(fallback_upper), False
 
 
 def _predict_v2(window, n_passes=None):
-    """predict_load() with the v2 bundle. The anomaly flag is computed exactly
-    as before, on the newest WINDOW_SIZE readings."""
+    """predict_load() with the v2/v4 bundle. The anomaly flag is computed
+    exactly as before, on the newest WINDOW_SIZE readings.
+
+    Live calibration uses the bundle's own Prophet channel at the window's last
+    reading plus the model's first-horizon residual as its estimate of "now".
+    """
+    global FORECAST_MODE
     fc = _load_forecaster()
-    raw, prophet_future, _ = fc.window_inputs(pd.DataFrame(window[-V2_WINDOW:]))
+    df = pd.DataFrame(window[-V2_WINDOW:])
+    raw, prophet_future, _ = fc.window_inputs(df)
     out = fc.forecast(raw[None], prophet_future[None],
                       n_passes=n_passes or int(_BUNDLE_CONFIG.get("default_passes", 30)))
-    predicted_load = min(100.0, max(0.0, float(out["mean"][0, -1])))
-    upper_bound = min(100.0, max(0.0, float(out["upper"][0, -1])))
+    mean = float(out["mean"][0, -1])
+    upper = float(out["upper"][0, -1])
+
+    # Prophet's value at the window's last timestamp and the model's residual
+    # for t+1 (the model emits no t+0 step; over one 30 s interval the residual
+    # is close enough to persistent to stand in as "now").
+    last_ts = pd.to_datetime(df["timestamp"].iloc[-1])
+    prophet_now = float(get_prophet_fitted(fc.prophet_model, [last_ts])[0])
+    resid_t1 = float(out["mean"][0, 0]) - float(prophet_future[0])
+    model_now = prophet_now + resid_t1
+
+    current_cpu = float(df["cpu_percent"].iloc[-1])
+    calibrated, calibrated_upper, _ = _apply_live_calibration(
+        mean, upper, model_now, current_cpu)
+    FORECAST_MODE = "delta_calibrated" if calibration_enabled() else "absolute"
+
+    check_feature_ranges(df, fc.members[0][1])
+
+    predicted_load = min(100.0, max(0.0, calibrated))
+    upper_bound = min(100.0, max(0.0, calibrated_upper))
     recent = pd.DataFrame(window[-WINDOW_SIZE:])
     if "post_scaling" not in recent.columns:
         recent["post_scaling"] = False
@@ -348,6 +532,10 @@ if __name__ == "__main__":
 
     fallback_result = predict_load(window[:5])
     print(f"[ProximaScale] Fallback test (short window): {fallback_result}")
-    assert fallback_result[2] is True, "Fallback should always report is_anomaly=True"
+    # The fallback is a degraded forecast, not a detection: it must NOT claim
+    # an anomaly, otherwise a broken artifact forces scale-ups every poll.
+    assert fallback_result[2] is False, "Fallback must report is_anomaly=False"
+    assert 0.0 <= fallback_result[0] <= 100.0
+    assert 0.0 <= fallback_result[1] <= 100.0
 
     print("[ProximaScale] predict_load() self-test PASSED.")

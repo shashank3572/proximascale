@@ -118,6 +118,17 @@ git log --oneline -3                        # you're on dev, clean-ish tree
 7. **Leave evidence.** Keep the terminal open; `events.csv` / the scaling log
    rows for the run are the appendix screenshot.
 
+> **Honest scope: the replicas receive no traffic.** Only `proximascale-app` is
+> published on :5000, and `monitoring/collector.py` measures only that container.
+> The `proximascale-worker-*` containers the actuator starts are extra app copies
+> with no published port and no load balancer in front, so Locust traffic never
+> reaches them -- scaling up does **not** lower the app's CPU. What the demo shows
+> is the *control plane*: forecasting, deciding and acting on the fleet. Actually
+> spreading load needs an nginx/round-robin layer in front (the
+> `proximascale-nginx` image exists, but wiring it is out of scope for the
+> review). Say this plainly if the panel asks why CPU stays at ~100% with two
+> workers running.
+
 ### If something misbehaves on stage
 - **No scale_down after 2 min idle:** check `docker ps` — if workers are
   already 0, it's `min_reached` (correct behaviour; say so).

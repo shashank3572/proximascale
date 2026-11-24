@@ -7,12 +7,17 @@ on:
     branches: [dev]
 
 jobs:
-  test:
+  # ── Fast job: no TensorFlow/Prophet. Covers everything that does not need the
+  #    ML stack: compilation, lint, config validation, and the unit suite.
+  unit:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11"]
+        # requirements.txt (tensorflow 2.16.1 / numpy 1.26) is verified on 3.12,
+        # so that is what CI must test. On 3.11 a StopIteration sentinel in
+        # tests/test_bugfix_pass.py surfaces as RuntimeError instead.
+        python-version: ["3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,18 +28,91 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install dependencies
+      - name: Install lightweight dependencies
         run: |
           python -m pip install --upgrade pip
-          # Install only lightweight deps for CI so TensorFlow doesn't
-          # blow the 6-minute budget. Model tests skip cleanly.
-          pip install pandas numpy pyyaml psutil docker scikit-learn \
-                      joblib pytest flake8 streamlit plotly matplotlib requests
+          pip install pandas==2.2.2 numpy==1.26.4 pyyaml==6.0.1 docker==7.1.0 \
+                      scikit-learn==1.4.2 joblib==1.4.2 pytest==9.0.3 \
+                      flake8==7.3.0 requests==2.32.3 flask==3.0.3 \
+                      streamlit==1.35.0 plotly==7.1.0 matplotlib==3.8.4
 
-      - name: Lint with flake8
+      - name: Compile everything
         run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-line-length=100 --statistics
+          python -m compileall -q app monitoring model decision actuator \
+                 dashboard data tools main.py cleanup.py
 
-      - name: Run tests
-        run: pytest tests/ -v
+      - name: Lint (syntax/undefined-name errors are fatal)
+        run: |
+          flake8 app monitoring model decision actuator dashboard main.py cleanup.py \
+                 --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: Lint (style, advisory)
+        run: |
+          flake8 app monitoring model decision actuator dashboard main.py cleanup.py \
+                 --select=E,W --max-line-length=120 --exit-zero --statistics
+
+      - name: Validate both configs
+        run: |
+          python - <<'PY'
+          from decision.engine import DecisionEngine
+          for path in ("config.yaml", "config_demo.yaml"):
+              eng = DecisionEngine(config_path=path)
+              band = eng.thresholds.describe()
+              assert 0 <= band["lower"] < band["upper"] <= 100, (path, band)
+              print(f"{path}: OK  band=[{band['lower']}, {band['upper']}]")
+          PY
+
+      - name: Import every entry point
+        run: |
+          python -c "import main, cleanup"
+          python -c "import app.app"
+          python -c "import monitoring.collector, monitoring.storage, monitoring.metrics"
+          python -c "import decision.engine, decision.adaptive_threshold, decision.hysteresis"
+          python -c "import actuator.docker_scaler"
+          python -c "import dashboard.live_plot"
+
+      - name: Unit tests
+        run: pytest tests -q -rs
+
+  # ── Model job: installs the real ML stack so model tests CANNOT silently skip.
+  model:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install the pinned project requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify the ML stack actually imports
+        run: |
+          python -c "import tensorflow as tf; print('TF', tf.__version__)"
+          python -c "import prophet; print('prophet', prophet.__version__)"
+
+      - name: Model self-test (real artifacts)
+        run: python model/predict.py
+
+      - name: Model + integration tests
+        run: pytest tests -q -rs | tee pytest-model.log
+
+      - name: Fail if any test was skipped
+        # A skip here means the ML stack did not load, so "green" would be a lie:
+        # model behaviour would be untested. Skips are fatal in this job.
+        run: |
+          if grep -qE "^SKIPPED" pytest-model.log; then
+            echo "::error::model tests were skipped; see pytest-model.log"
+            grep -E "^SKIPPED" pytest-model.log
+            exit 1
+          fi

@@ -65,6 +65,9 @@ class _CyclingDropout:
 
 
 def test_batched_hybrid_matches_predict_load(data, monkeypatch):
+    # Batched evaluation reproduces the model's absolute output; live
+    # calibration is a live-only layer (see tests/test_remediation.py).
+    monkeypatch.setenv("PROXIMASCALE_LIVE_CALIBRATION", "off")
     _, test = data
     windows = D.build_windows(test, _interesting_windows(test))
     real_model = predict._model

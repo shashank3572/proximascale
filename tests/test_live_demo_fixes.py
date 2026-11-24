@@ -89,6 +89,12 @@ def _window(cpu=50.0, n=10):
 
 
 def _stub_artifacts(monkeypatch, prophet, uncertainty):
+    # These tests assert the RAW 0-100 clamp on the model's absolute output, so
+    # live calibration (which re-anchors the level on the measured CPU) is
+    # switched off here. Calibration itself is covered by
+    # tests/test_remediation.py::test_delta_calibration_*.
+    monkeypatch.setenv("PROXIMASCALE_LIVE_CALIBRATION", "off")
+    P.reset_live_calibration()
     monkeypatch.setattr(P, "_load_artifacts", lambda: None)
     monkeypatch.setattr(P, "_scaler", object(), raising=False)
     monkeypatch.setattr(P, "_model", object(), raising=False)
@@ -126,7 +132,7 @@ def test_fallback_is_clamped_too(monkeypatch):
     predicted, upper, anomaly = P.predict_load(_window(cpu=95.0))
     assert predicted == 100.0   # 95 * 1.15 = 109.25 raw
     assert upper == 100.0       # 95 * 1.3  = 123.5  raw
-    assert anomaly is True
+    assert anomaly is False
 
 
 # ── 3. Collector: two-sample CPU + request reset channel ─────────────────────
@@ -210,16 +216,29 @@ def flask_client(monkeypatch):
 
 
 def test_reset_endpoint_returns_window_count(flask_client, monkeypatch):
-    monkeypatch.setattr("app.app.reset_request_count", lambda: 5)
+    monkeypatch.setattr(
+        "app.app.reset_request_count_window",
+        lambda: {"request_count": 5, "window_seconds": 30.0,
+                 "requests_per_second": 0.167},
+    )
     resp = flask_client.post("/request-rate/reset")
     assert resp.status_code == 200
-    assert resp.get_json() == {"request_count": 5}
+    body = resp.get_json()
+    assert body["request_count"] == 5
+    # The window length is part of the contract: without it the collector
+    # cannot tell "5 requests in 30 s" from "5 requests in 90 s" (audit C4).
+    assert body["window_seconds"] == 30.0
+    assert body["requests_per_second"] == 0.167
 
 
 def test_reset_endpoint_is_excluded_from_self_counting(monkeypatch):
     inc = MagicMock()
     monkeypatch.setattr("app.app.increment_request_count", inc)
-    monkeypatch.setattr("app.app.reset_request_count", lambda: 0)
+    monkeypatch.setattr(
+        "app.app.reset_request_count_window",
+        lambda: {"request_count": 0, "window_seconds": None,
+                 "requests_per_second": None},
+    )
     app.test_client().post("/request-rate/reset")
     inc.assert_not_called()
 

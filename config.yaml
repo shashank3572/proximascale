@@ -1,45 +1,76 @@
-# config.yaml (relevant keys)
+# config.yaml — REAL configuration. Use config_demo.yaml only on stage.
+#
+# Every key here is consumed by decision/engine.py or actuator/docker_scaler.py;
+# a key that is absent falls back to the default documented in that module.
+# engine._validate_config() refuses to run with thresholds that cannot produce
+# a sane decision (e.g. lower >= upper).
+
 image: proximascale-worker:latest
 container_prefix: proximascale-worker
 
-min_containers: 1
-max_containers: 10                    # was 5 — matches locked spec
+min_containers: 1                     # never scale below this many workers
+max_containers: 10                    # matches the locked spec
 
-cpu_quota: 50000                      # 0.5 CPU
+cpu_quota: 50000                      # 0.5 CPU per worker
 mem_limit: "256m"
 cpu_period: 100000
 
-cpu_upper_threshold: 75.0             # static fallback for adaptive
+# ---- Static thresholds (the operator's intent) ------------------------------
+# Used verbatim until adaptive_min_samples predictions exist, then they become
+# the fallback/reference for the adaptive band below.
+cpu_upper_threshold: 75.0
 cpu_lower_threshold: 30.0
 
-cooldown_seconds: 180
+# ---- Adaptive band limits ---------------------------------------------------
+# The band is mu +/- k*sigma of the recent predictions, clamped into these
+# windows. They are explicit because hardcoded defaults used to override
+# cpu_upper_threshold: 75 silently with 60 (audit M1) — the engine logged
+# 60.0 while this file said 75.0.
+#
+# With live-calibrated predictions (model/predict.py), an idle container
+# predicts ~0-2%, so the lower bound must be reachable: the band is really
+# "scale down when the forecast falls below its own recent normal", not
+# "below 30%".
+adaptive_window: 30                   # predictions remembered (30 polls = 15 min)
+adaptive_k: 1.5                       # band half-width in std deviations
+adaptive_min_samples: 10              # below this the static thresholds apply
+adaptive_floor_upper: 60.0            # scale-up trigger never goes below this
+adaptive_ceil_upper: 90.0             # ...nor above this
+adaptive_floor_lower: 15.0            # scale-down trigger never goes below this
+adaptive_ceil_lower: 45.0             # ...nor above this
+adaptive_min_band: 10.0               # minimum separation, prevents inversion
 
-# Tuned for the v2 model on the VALIDATION period (model/tune_decisions.py,
-# results/tuning/): the forecast mean alone anticipated every spike there with
-# no false scale-ups, while the anomaly bypass and the upper-bound branch both
-# added false or early scale-ups. Set either back to true to restore it.
+# ---- Decision behaviour -----------------------------------------------------
+cooldown_seconds: 180                 # hysteresis between scale actions
+tick_seconds: 3                       # engine tick; expires_after_steps units
+
+# Tuned on the validation period (model/tune_decisions.py, results/tuning/):
+# the forecast mean alone anticipated every spike with no false scale-ups,
+# while the anomaly bypass and the upper-bound branch both added false or early
+# scale-ups. Set either back to true to restore it.
 use_anomaly_bypass: false             # anomaly flag no longer forces a scale-up
 use_upper_bound_risk: false           # upper bound no longer triggers scale-ups
-scale_down_max_current_cpu: 75.0      # no scale-down while current CPU is above this
-tick_seconds: 3
 
-adaptive_window: 30
-adaptive_k: 1.5
-adaptive_min_samples: 10
+# Reactive floor: if the CURRENT reading is already above the (effective)
+# upper threshold, scale up even if the forecast lags. This makes ProximaScale
+# never slower than a purely reactive scaler; it can only add capacity, and it
+# is still gated by the cooldown.
+scale_up_on_current_cpu: true
 
-scale_down_strategy: newest           # or "oldest" — pick one and update both docs
+# Never withdraw capacity while the container is still pegged right now.
+scale_down_max_current_cpu: 75.0
 
-anomaly_z_threshold: 2.5              # model/anomaly.py's z-score cutoff.
-                                       # 2.5 = current/production behavior (unchanged).
-                                       # Bump to ~3.5 for a demo run so idle-load
-                                       # jitter doesn't fire false "anomaly" scale-ups
-                                       # that reset the cooldown timer.
-anomaly_min_cpu_percent: 5.0           # absolute floor for anomaly detection:
-                                       # a z-score is RELATIVE, so on an idle
-                                       # container one jittery 0.35% reading among
-                                       # 0.00-0.05% neighbors is 20+ stds and used
-                                       # to fire "anomaly" scale-ups on a machine
-                                       # doing no work. Readings below this floor
-                                       # can never be a spike, whatever the z-score
-                                       # says. Spike handling is unaffected: real
-                                       # spikes are far above 5% in absolute terms.
+scale_down_strategy: newest           # or "oldest"
+
+# ---- Anomaly detection ------------------------------------------------------
+anomaly_z_threshold: 2.5              # model/anomaly.py's z-score cutoff
+anomaly_min_cpu_percent: 5.0          # absolute floor: idle jitter (0.0-0.4%)
+                                      # is never a spike, whatever z says
+
+# ---- Worker container lifecycle (actuator) ----------------------------------
+restart_policy: unless-stopped        # workers come back after a reboot/crash
+worker_health_check: true             # /health probe inside each worker
+readiness_timeout_seconds: 20         # wait for "healthy" after creating one
+# worker_host_port_base: 5001         # optional: publish 5001+i -> 5000 so a
+                                      # proxy can reach individual workers
+                                      # (pool mode has no load balancer)

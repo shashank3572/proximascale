@@ -9,6 +9,8 @@ Prophet requires a dataframe with columns 'ds' (datetime) and 'y' (target) --
 this module handles the conversion from our timestamp/cpu_percent columns.
 """
 
+import contextlib
+import inspect
 import pickle
 from pathlib import Path
 
@@ -99,9 +101,65 @@ def save_prophet_model(model, path=PROPHET_PATH):
     print(f"🧠 [ProximaScale] Prophet model saved -> {path}")
 
 
+@contextlib.contextmanager
+def _stringdtype_unpickle_compat():
+    """
+    model/saved/proximascale_prophet.pkl was pickled by an environment whose
+    pd.StringDtype.__init__ signature was (self, storage, na_value). pandas
+    2.2's is (self, storage), so unpickling the artifact raises:
+
+        TypeError: StringDtype.__init__() takes from 1 to 2 positional
+        arguments but 3 were given
+
+    While the patch is active, drop the extra positional na_value (and the
+    keyword form) and delegate to the installed signature. The original is
+    restored on exit so nothing else in the process sees a patched pandas.
+    If the installed pandas already accepts na_value this is a no-op.
+    """
+    orig_init = pd.StringDtype.__init__
+    if "na_value" in inspect.signature(orig_init).parameters:
+        yield
+        return
+
+    def _compat_init(self, *args, **kwargs):
+        kwargs.pop("na_value", None)
+        return orig_init(self, *args[:1], **kwargs)
+
+    pd.StringDtype.__init__ = _compat_init
+    try:
+        yield
+    finally:
+        pd.StringDtype.__init__ = orig_init
+
+
+def _repair_cross_version_state(model):
+    """
+    The committed artifact was pickled on pandas 3 / prophet 1.3.0 and is
+    loaded here on pandas 2.2. One piece of state survives the unpickle but
+    not Prophet.predict()'s own consistency check: train_component_cols (the
+    binary seasonality matrix captured at fit time) has a `string`-dtype
+    column index under pandas 3, while the frame Prophet rebuilds at predict
+    time uses `object`. DataFrame.equals() compares index DTYPES, so the check
+    fails on storage dtype alone and predict() raises
+    "A bug occurred in constructing regressors."
+
+    Casting the captured frame's label indexes back to object (the values were
+    never in question) makes that guard compare what it meant to compare. No
+    model weights or forecasts are touched.
+    """
+    tcc = getattr(model, "train_component_cols", None)
+    if isinstance(tcc, pd.DataFrame):
+        if tcc.columns.dtype != object:
+            tcc.columns = tcc.columns.astype(object)
+        if tcc.index.dtype != object and tcc.index.dtype.name == "string":
+            tcc.index = tcc.index.astype(object)
+    return model
+
+
 def load_prophet_model(path=PROPHET_PATH):
-    with open(path, "rb") as f:
-        return pickle.load(f)
+    with _stringdtype_unpickle_compat(), open(path, "rb") as f:
+        model = pickle.load(f)
+    return _repair_cross_version_state(model)
 
 
 if __name__ == "__main__":

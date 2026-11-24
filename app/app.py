@@ -27,7 +27,11 @@ import os
 # Project-root imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from monitoring.metrics import increment_request_count, get_request_count, reset_request_count
+from monitoring.metrics import (
+    increment_request_count,
+    get_request_count,
+    reset_request_count_window,
+)
 
 
 app = Flask(__name__)
@@ -525,6 +529,7 @@ def metrics():
 
     return jsonify({
         "request_count_since_last_poll": get_request_count(),
+        "unit": "requests in the current monitoring window",
         "status": "running",
     })
 
@@ -551,12 +556,16 @@ def request_rate_reset():
 
     Why an endpoint at all: the app runs inside a container, so the collector
     (on the host) cannot share its SQLite file -- the old file-based read
-    always returned 0 across that boundary. Returns the count observed just
-    before the reset, i.e. the request volume of exactly one polling window.
+    always returned 0 across that boundary.
+
+    Response fields (units matter, see docs/METRICS.md):
+        request_count        requests since the previous reset
+        window_seconds       seconds that count covers, measured here, so a
+                             delayed/retried collector poll cannot silently
+                             turn into "requests per unknown period"
+        requests_per_second  request_count / window_seconds
     """
-    return jsonify({
-        "request_count": reset_request_count()
-    })
+    return jsonify(reset_request_count_window())
 
 
 # ---------------------------------------------------------------------------
@@ -657,8 +666,15 @@ def get_prediction():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    # threaded=True is REQUIRED, not cosmetic: with the default single-threaded
+    # server a /work/heavy request (multi-second CPU burn) blocks the
+    # collector's /request-rate/reset call, which then times out -- the app
+    # reports 0 requests per window exactly when the system is under load
+    # (audit C4). One thread per request keeps the counter readable while
+    # workloads saturate the CPU.
     app.run(
-        host="0.0.0.0",
-        port=5000,
-        debug=False
+        host=os.getenv("PROXIMASCALE_BIND_HOST", "0.0.0.0"),
+        port=int(os.getenv("PROXIMASCALE_BIND_PORT", "5000")),
+        debug=False,
+        threaded=True,
     )

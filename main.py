@@ -60,10 +60,38 @@ STALE_AFTER_POLLS = 3     # skip prediction if newest CSV row is older than this
 
 # Dashboard feed (dashboard/live_plot.py reads this file; keep columns in sync).
 EVENTS_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "events.csv")
+# Schema v2 (audit M2): the EFFECTIVE adaptive thresholds and the forecast mode
+# are logged per decision, so the dashboard plots what the engine actually used
+# instead of re-deriving a static number from a config file. Older files are
+# migrated in place by _migrate_events_file(), and the dashboard tolerates any
+# missing column.
 EVENT_COLUMNS = [
-    "timestamp", "actual_cpu", "predicted_cpu", "upper_bound", "anomaly_flag",
-    "signal", "replicas", "shap_cpu", "shap_memory", "shap_request", "reason",
+    "timestamp", "actual_cpu", "predicted_cpu", "upper_bound",
+    "upper_threshold", "lower_threshold", "anomaly_flag",
+    "signal", "replicas", "request_rate", "forecast_mode",
+    "shap_cpu", "shap_memory", "shap_request", "reason",
 ]
+
+# Defaults for a column that an older log or a partial row does not carry.
+EVENT_DEFAULTS = {
+    "timestamp": "",
+    "signal": "hold",
+    "reason": "unknown",
+    "forecast_mode": "unknown",
+}
+
+
+def _as_float(value):
+    """float(value) or None. Used for engine-provided thresholds so a mock or
+    an older engine cannot raise inside the control loop."""
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _event_default(column: str):
+    return EVENT_DEFAULTS.get(column, 0.0)
 
 
 # ── Signal normaliser ─────────────────────────────────────────────────────────
@@ -126,7 +154,7 @@ def log_event(row: dict, path: str = None) -> None:
             writer = csv.DictWriter(f, fieldnames=EVENT_COLUMNS)
             if new_file:
                 writer.writeheader()
-            writer.writerow({c: row.get(c, 0.0) for c in EVENT_COLUMNS})
+            writer.writerow({c: row.get(c, _event_default(c)) for c in EVENT_COLUMNS})
     except OSError as e:
         logger.warning(f"Could not write dashboard event log: {e}")
 
@@ -148,10 +176,15 @@ def _migrate_events_file(path: str) -> None:
             migrated = {}
             for c in EVENT_COLUMNS:
                 value = old.get(c)
-                if c == "reason":
-                    migrated[c] = value if value not in (None, "") else "pre-reason log"
+                if value in (None, ""):
+                    default = _event_default(c)
+                    if c == "reason":
+                        default = "pre-reason log"
+                    elif c == "forecast_mode":
+                        default = "pre-calibration"
+                    migrated[c] = default
                 else:
-                    migrated[c] = value if value not in (None, "") else 0.0
+                    migrated[c] = value
             writer.writerow(migrated)
     os.replace(tmp, path)
     logger.info(f"Migrated {path} from {len(old_fields)} columns to "
@@ -292,6 +325,11 @@ def run_real_loop(engine, poll_interval: int = 30):
     """
     from monitoring.storage import read_last_n
     from model.predict import predict_load, HISTORY_SIZE   # Person B's Semester-2 interface
+    try:
+        from model.predict import get_forecast_mode
+    except ImportError:            # older/mocked predict module
+        def get_forecast_mode():
+            return "unknown"
 
     logger.info(f"Real loop starting. Poll interval: {poll_interval}s")
 
@@ -301,12 +339,23 @@ def run_real_loop(engine, poll_interval: int = 30):
         records = read_last_n(HISTORY_SIZE)
 
         if len(records) < WINDOW_SIZE:
+            needed = WINDOW_SIZE - len(records)
+            approx_secs = needed * poll_interval
             logger.warning(
                 f"Only {len(records)} records in CSV — need {WINDOW_SIZE}. "
-                "Waiting for more data from collector..."
+                f"~{needed} more samples (~{approx_secs}s) from collector..."
             )
             time.sleep(poll_interval)
             continue
+
+        if len(records) < HISTORY_SIZE:
+            needed = HISTORY_SIZE - len(records)
+            approx_secs = needed * poll_interval
+            logger.info(
+                f"Cold start: {len(records)}/{HISTORY_SIZE} readings "
+                f"(legacy 10-reading model until {HISTORY_SIZE}); "
+                f"~{needed} more samples (~{approx_secs}s) to v4 bundle."
+            )
 
         if _is_stale(records[-1], STALE_AFTER_POLLS * poll_interval):
             logger.warning(
@@ -325,11 +374,21 @@ def run_real_loop(engine, poll_interval: int = 30):
         reason = engine.last_reason
         signal = normalise_signal(raw_signal)
 
+        # Effective thresholds of THIS decision (audit M2). The engine exposes
+        # them; a mock/older engine may not, hence the .get chain.
+        thresholds = getattr(engine, "last_thresholds", None) or {}
+        upper_thresh = _as_float(thresholds.get("upper"))             if hasattr(thresholds, "get") else None
+        lower_thresh = _as_float(thresholds.get("lower"))             if hasattr(thresholds, "get") else None
+        forecast_mode = get_forecast_mode()
+
         # One line per poll — the whole decision at a glance. Real scale
         # actions add an 'Action:' line below; holds stay at exactly this line.
         logger.info(
             f"pred {predicted_cpu:.1f} | ub {upper_bound:.1f} | "
-            f"actual {records[-1].cpu_percent:.1f} | anomaly={anomaly_flag} "
+            f"actual {records[-1].cpu_percent:.1f} | "
+            f"band [{lower_thresh if lower_thresh is not None else float('nan'):.1f}, "
+            f"{upper_thresh if upper_thresh is not None else float('nan'):.1f}] | "
+            f"mode={forecast_mode} | anomaly={anomaly_flag} "
             f"→ {signal} ({reason})"
         )
         execute(signal)
@@ -355,9 +414,15 @@ def run_real_loop(engine, poll_interval: int = 30):
             "actual_cpu": records[-1].cpu_percent,
             "predicted_cpu": predicted_cpu,
             "upper_bound": upper_bound,
+            # NaN is not written: an unknown threshold is logged as empty so a
+            # reader can tell "not available" from a real 0.0.
+            "upper_threshold": "" if upper_thresh is None else float(upper_thresh),
+            "lower_threshold": "" if lower_thresh is None else float(lower_thresh),
             "anomaly_flag": anomaly_flag,
             "signal": signal,
             "replicas": _replica_count(engine),
+            "request_rate": getattr(records[-1], "request_rate", ""),
+            "forecast_mode": forecast_mode,
             **shap_row,
             "reason": engine.last_reason,
         })
@@ -367,7 +432,12 @@ def run_real_loop(engine, poll_interval: int = 30):
 
 # ── Simulation loop ───────────────────────────────────────────────────────────
 def run_simulation():
-    """Demo loop — no Docker or TensorFlow required."""
+    """Demo loop — no Docker or TensorFlow required.
+
+    Uses the demo config's scaling rules but shortens cooldown to 0 so every
+    scenario prints its real signal instead of being swallowed by an 180 s
+    cooldown that outlives a 1 s-per-step simulation.
+    """
     from decision.engine import DecisionEngine
     from unittest.mock import MagicMock, patch
 
@@ -379,7 +449,17 @@ def run_simulation():
         mock_actuator.scale_down.return_value = True
         MockActuator.return_value = mock_actuator
 
-        sim_engine = DecisionEngine(config_path=DEFAULT_CONFIG_PATH)
+        sim_cfg = {
+            "cooldown_seconds": 0,
+            "cpu_upper_threshold": 75.0,
+            "cpu_lower_threshold": 30.0,
+            "adaptive_window": 30,
+            "adaptive_k": 1.5,
+            "adaptive_min_samples": 10,
+            "use_upper_bound_risk": True,
+            "use_anomaly_bypass": True,
+        }
+        sim_engine = DecisionEngine(config=sim_cfg)
 
         for predicted_cpu, upper_bound, anomaly_flag in simulate_lstm_predictions():
             raw_signal = sim_engine.evaluate(predicted_cpu, upper_bound,

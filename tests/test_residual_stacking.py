@@ -16,6 +16,14 @@ sys.path.insert(0, str(ROOT / "model"))
 from counterfactual import apply_counterfactual_correction  # noqa: E402
 
 
+@pytest.fixture(autouse=True)
+def _absolute_forecasts(monkeypatch):
+    """These tests pin the model math (Prophet + residual). Live calibration
+    re-anchors the level on the measured CPU and is tested separately, so it is
+    switched off for the whole module."""
+    monkeypatch.setenv("PROXIMASCALE_LIVE_CALIBRATION", "off")
+
+
 # ── Counterfactual correction (no TF needed) ────────────────────────────────
 def _df(cpu, flags):
     return pd.DataFrame({"cpu_percent": cpu, "post_scaling": flags})

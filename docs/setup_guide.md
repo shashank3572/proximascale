@@ -86,8 +86,9 @@ This polls CPU/memory/request_rate every 30 seconds and appends to `data/collect
 > `data/collected/metrics.csv` is the **frozen 90k synthetic training dataset** the
 > Prophet/LSTM artifacts and both scalers were fit on — the collector never writes
 > to it. Live samples land in `metrics_live.csv` (override with the
-> `PROXIMASCALE_LIVE_METRICS_PATH` env var), and the real loop reads the last 10
-> rows of that file. Mixing live rows into the training file makes every model
+> `PROXIMASCALE_LIVE_METRICS_PATH` env var), and the real loop reads the last 30
+> rows of that file -- a full 15-minute window at the 30 s poll interval.
+> Mixing live rows into the training file makes every model
 > window cross a synthetic→live discontinuity and silently invalidates retraining.
 > To retrain, point training at `metrics.csv` as before — nothing else changes.
 
