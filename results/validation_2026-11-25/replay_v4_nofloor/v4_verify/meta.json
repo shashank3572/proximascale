@@ -1,0 +1,266 @@
+{
+  "created": "2026-11-25T18:05:57",
+  "command": [
+    "decision_replay.py",
+    "--dump",
+    "results/eval_dump/v4_verify",
+    "--out-dir",
+    "results/validation_2026-11-25/replay_v4_nofloor",
+    "--config",
+    "results/validation_2026-11-25/config_no_floor.yaml"
+  ],
+  "runtime_seconds": 41.9,
+  "open_loop": "scaling actions do not change the replayed trace; this scores decision quality on fixed data, not closed-loop dynamics",
+  "dump": {
+    "path": "results/eval_dump/v4_verify",
+    "files": {
+      "dump_seed0.csv": "2c1cb97b8570cfc2448ba61531b9472a47dacace7d5c7471906bde8d3015326f",
+      "dump_seed1.csv": "363cad5990de588cef199fde72cf4b32516f9dd8b127e737ead15482bffc9abf",
+      "dump_seed2.csv": "202aa3f7e9f26df9570bcbc84850331703c381ed64267b38800d74feb1790715",
+      "dump_seed3.csv": "009f803393652d1617efed65cb145a59841c63e85784b768f1fbfae86b3754d5",
+      "dump_seed4.csv": "558a21415c528043b6305e8b83026f64ed79192896c5dd71805fecb337576499"
+    },
+    "git": {
+      "commit": "139e42b8192bbeb8308c71715b4e583c156c1967",
+      "uncommitted_changes": []
+    },
+    "settings": {
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "n_passes": 30,
+      "std_multiplier": 2.0,
+      "upper_bound_calibration": {
+        "method": "binned",
+        "level": 0.95,
+        "edges": [
+          0.22192157086852823,
+          0.2563357747674179,
+          0.29471023409393615,
+          0.3602121869840686
+        ],
+        "q": [
+          5.546403123096911,
+          5.223965909693275,
+          5.192937136726688,
+          4.981523822610977,
+          5.384296830016954
+        ],
+        "fit_on": "validation period, rows 64800-71999 (model/tune_decisions.py --bundle model/saved/proximascale_v4)"
+      },
+      "counterfactual_at_inference": true,
+      "anomaly_z_threshold": 2.5,
+      "anomaly_min_cpu_percent": 5.0,
+      "table_ii_scale_threshold": 75.0,
+      "train_frac": 0.8,
+      "window_size": 10,
+      "horizon": 3,
+      "sampling_interval_seconds": 30,
+      "windows": 17988,
+      "windows_in_test_split": 17988,
+      "spike_onsets_in_test_split": 36
+    },
+    "artifacts": {
+      "lstm": {
+        "path": "model/saved/proximascale_lstm.h5",
+        "sha256": "1556d46a4bae39625ed2ee9eec96c98883023f022c022b305f1595886b5fcb4c"
+      },
+      "feature_scaler": {
+        "path": "model/saved/scaler.pkl",
+        "sha256": "de80a87bf698f8ec2deb1b24232bfcc4241947ce7e4ca4d4ebf9ff649f90f16d"
+      },
+      "residual_scaler": {
+        "path": "model/saved/scaler_residual.pkl",
+        "sha256": "3d8e493bed567ebe9d7670e4ceea9e3f07be49bdd5722c0eb58cb3fb5ce0c2a9"
+      },
+      "prophet": {
+        "path": "model/saved/proximascale_prophet.pkl",
+        "sha256": "ca1edfaf2a9552b05a43bed040676a03c16babada5be6f06d77810bb51917917"
+      },
+      "univariate_lstm": {
+        "path": "model/saved/proximascale_lstm_univariate.h5",
+        "sha256": "a96a490f559312f700a2e6726c318da3d5e671586572b004d2b54d8fffabe992"
+      },
+      "univariate_scaler": {
+        "path": "model/saved/scaler_univariate.pkl",
+        "sha256": "6bf58e74205be70a9aa399be88da26a2f26911e8d31a5213407dd0955c877d4e"
+      }
+    }
+  },
+  "config": {
+    "path": "results/validation_2026-11-25/config_no_floor.yaml",
+    "values": {
+      "image": "proximascale-worker:latest",
+      "container_prefix": "proximascale-worker",
+      "min_containers": 1,
+      "max_containers": 10,
+      "cpu_quota": 50000,
+      "mem_limit": "256m",
+      "cpu_period": 100000,
+      "cpu_upper_threshold": 75.0,
+      "cpu_lower_threshold": 30.0,
+      "adaptive_window": 30,
+      "adaptive_k": 1.5,
+      "adaptive_min_samples": 10,
+      "adaptive_floor_upper": 60.0,
+      "adaptive_ceil_upper": 90.0,
+      "adaptive_floor_lower": 15.0,
+      "adaptive_ceil_lower": 45.0,
+      "adaptive_min_band": 10.0,
+      "cooldown_seconds": 180,
+      "tick_seconds": 3,
+      "use_anomaly_bypass": false,
+      "use_upper_bound_risk": false,
+      "scale_up_on_current_cpu": false,
+      "scale_down_max_current_cpu": 75.0,
+      "scale_down_strategy": "newest",
+      "anomaly_z_threshold": 2.5,
+      "anomaly_min_cpu_percent": 5.0,
+      "restart_policy": "unless-stopped",
+      "worker_health_check": true,
+      "readiness_timeout_seconds": 20
+    }
+  },
+  "trace": {
+    "decisions": 17988,
+    "days": 6.245833333333334,
+    "decision_interval_seconds": 30,
+    "spike_onsets": 36,
+    "first_decision": "2026-10-14T00:04:30",
+    "last_decision": "2026-10-20T05:58:00",
+    "initial_state": "replicas at min_containers, no cooldown armed, empty adaptive-threshold window"
+  },
+  "definitions": {
+    "spike_onset": "first row with actual CPU above 75% after a row at or below it (evaluate.py)",
+    "spike_end": "first row back at or below 75%",
+    "ups": "successful scale-ups",
+    "downs": "successful scale-downs",
+    "ups_anomaly": "scale-ups from the anomaly branch (bypasses cooldown)",
+    "ups_upper_bound": "scale-ups from the upper_bound_risk branch",
+    "ups_cpu_high": "scale-ups because the forecast was above the upper threshold",
+    "ups_current_cpu": "scale-ups because the CURRENT reading was above it (reactive floor)",
+    "blocked_at_max": "decisions that wanted a scale-up while already at max replicas",
+    "reversals_5min": "consecutive actions in opposite directions at most 5 min apart",
+    "anticipated": "spikes with a scale-up 30-90 s before onset (inside the forecast horizon)",
+    "lead_median_s": "median lead over anticipated spikes (onset minus earliest such scale-up)",
+    "lead_mean_s": "mean lead over anticipated spikes",
+    "reacted": "spikes whose first scale-up came at or after onset, while CPU was above 75%",
+    "delay_median_s": "median reaction delay over reacted spikes (first scale-up minus onset)",
+    "at_max": "spikes with no scale-up because replicas were already at max_containers",
+    "missed": "spikes with no scale-up from 90 s before onset to the end of the spike, although replicas were below max_containers",
+    "capacity_up_before_onset": "spikes with more replicas just before onset than 5 min earlier",
+    "false_ups": "scale-ups with CPU at or below 75% for all of the next 5 min",
+    "false_ups_per_day": "false_ups per day of replayed trace",
+    "mean_replicas": "average replica count over all decisions",
+    "replicas_at_onset": "average replica count just before each spike onset",
+    "time_at_max_pct": "share of decisions made at max_containers, in %"
+  },
+  "policies": [
+    {
+      "name": "P0 Reactive",
+      "predicted": "current_cpu",
+      "upper": null,
+      "anomaly": null,
+      "overrides": {},
+      "isolates": "baseline: act on the current reading",
+      "current": null
+    },
+    {
+      "name": "P1 Univariate LSTM",
+      "predicted": "univariate_t3",
+      "upper": null,
+      "anomaly": null,
+      "overrides": {},
+      "isolates": "a CPU-only forecaster",
+      "current": null
+    },
+    {
+      "name": "P2 ProximaScale mean",
+      "predicted": "predicted_load",
+      "upper": null,
+      "anomaly": null,
+      "overrides": {},
+      "isolates": "the hybrid forecaster alone",
+      "current": null
+    },
+    {
+      "name": "P3 + upper bound",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": null,
+      "overrides": {},
+      "isolates": "the upper_bound_risk branch",
+      "current": null
+    },
+    {
+      "name": "P4 Full",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": "anomaly_flag",
+      "overrides": {},
+      "isolates": "the anomaly bypass",
+      "current": null
+    },
+    {
+      "name": "P5 Full, static thresholds",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": "anomaly_flag",
+      "overrides": {
+        "adaptive_min_samples": 1000000000
+      },
+      "isolates": "the adaptive thresholds (P4 vs P5)",
+      "current": null
+    },
+    {
+      "name": "P6 Full, no cooldown",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": "anomaly_flag",
+      "overrides": {
+        "cooldown_seconds": 0
+      },
+      "isolates": "hysteresis and cooldown (P4 vs P6)",
+      "current": null
+    },
+    {
+      "name": "P7 P3, static thresholds",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": null,
+      "overrides": {
+        "adaptive_min_samples": 1000000000
+      },
+      "isolates": "beyond the plan: adaptive thresholds without the anomaly branch (P3 vs P7)",
+      "current": null
+    },
+    {
+      "name": "P8 P3, no cooldown",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": null,
+      "overrides": {
+        "cooldown_seconds": 0
+      },
+      "isolates": "beyond the plan: cooldown without the anomaly branch (P3 vs P8)",
+      "current": null
+    },
+    {
+      "name": "P9 Tuned (config.yaml)",
+      "predicted": "predicted_load",
+      "upper": "upper_bound",
+      "anomaly": "anomaly_flag",
+      "overrides": {},
+      "isolates": "config.yaml as is: switches and guard tuned on validation (model/tune_decisions.py)",
+      "current": "current_cpu"
+    }
+  ],
+  "git": {
+    "commit": "139e42b8192bbeb8308c71715b4e583c156c1967",
+    "uncommitted_changes": []
+  }
+}

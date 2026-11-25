@@ -1,0 +1,24 @@
+D:\proximascale\.venv\Lib\site-packages\requests\__init__.py:113: RequestsDependencyWarning: urllib3 (2.8.0) or chardet (7.7.0)/charset_normalizer (3.5.3) doesn't match a supported version!
+  warnings.warn(
+[ProximaScale] Ground truth rebuilt from the seed-42 generator; matches metrics.csv exactly
+[ProximaScale] 17988 of 17988 test windows | seeds [0, 1, 2, 3, 4] | 30 MC passes | counterfactual on -> results/eval_dump/v4_verify
+D:\proximascale\.venv\Lib\site-packages\sklearn\base.py:376: InconsistentVersionWarning: Trying to unpickle estimator MinMaxScaler from version 1.8.0 when using version 1.4.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+[ProximaScale] Preprocessing windows (per-window counterfactual correction, as predict_load does)...
+[ProximaScale] Prophet forecasts...
+[ProximaScale] Univariate LSTM baseline...
+[ProximaScale] v2 inputs from model/saved/proximascale_v4 (history read from metrics.csv)...
+[ProximaScale]   seed 0: dump_seed0.csv written (38s)
+[ProximaScale]   seed 1: dump_seed1.csv written (39s)
+[ProximaScale]   seed 2: dump_seed2.csv written (39s)
+[ProximaScale]   seed 3: dump_seed3.csv written (39s)
+[ProximaScale]   seed 4: dump_seed4.csv written (39s)
+[ProximaScale] Table II check: evaluate.py's metrics on 17988 windows, 36 spike onsets, Hybrid = mean +/- sd over 5 seed(s)
+         Method           RMSE            MAE Avg Lead Time (s)  Oscillations
+       Reactive           6.64           3.92               0.0          72.0
+Univariate LSTM           5.13           3.03              38.3         102.0
+  Prophet Alone          10.15           4.68               0.0           0.0
+  Hybrid (Full) 4.35 +/- 0.001 2.68 +/- 0.001     58.2 +/- 0.37 81.6 +/- 1.67
+[ProximaScale] Done in 277s -> results/eval_dump/v4_verify
+EXIT=0

@@ -1,0 +1,10 @@
+# Tooling for paper/ only -- NOT runtime dependencies of ProximaScale.
+# Install into the project venv only when rebuilding the manuscript:
+#   python -m pip install -r paper/requirements-paper.txt
+#
+# reportlab is pinned to 4.x: reportlab 5.x requires pillow>=13, which
+# conflicts with the project's pinned streamlit 1.35 (pillow<11).
+python-docx==1.2.0
+reportlab==4.2.5
+pypdf==7.1.1
+pypdfium2==5.15.2

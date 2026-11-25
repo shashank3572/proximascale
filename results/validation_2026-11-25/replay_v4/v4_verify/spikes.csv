@@ -1,0 +1,1801 @@
+policy,seed,onset_row,outcome,lead_s,delay_s,replicas_at_onset,capacity_up_before_onset,onset_ts
+P0 Reactive,0,448,anticipated,30,,2,True,2026-10-14T03:44:00
+P0 Reactive,0,888,anticipated,30,,2,True,2026-10-14T07:24:00
+P0 Reactive,0,1036,anticipated,30,,2,True,2026-10-14T08:38:00
+P0 Reactive,0,1621,at_max,,,10,False,2026-10-14T13:30:30
+P0 Reactive,0,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P0 Reactive,0,2547,anticipated,30,,5,True,2026-10-14T21:13:30
+P0 Reactive,0,3389,anticipated,30,,2,True,2026-10-15T04:14:30
+P0 Reactive,0,3642,anticipated,30,,2,True,2026-10-15T06:21:00
+P0 Reactive,0,4416,anticipated,60,,3,True,2026-10-15T12:48:00
+P0 Reactive,0,4647,at_max,,,10,False,2026-10-15T14:43:30
+P0 Reactive,0,5208,reacted,,30,3,False,2026-10-15T19:24:00
+P0 Reactive,0,5806,anticipated,30,,2,True,2026-10-16T00:23:00
+P0 Reactive,0,6076,reacted,,0,1,False,2026-10-16T02:38:00
+P0 Reactive,0,6761,anticipated,30,,2,True,2026-10-16T08:20:30
+P0 Reactive,0,7239,anticipated,30,,2,True,2026-10-16T12:19:30
+P0 Reactive,0,7859,anticipated,60,,2,True,2026-10-16T17:29:30
+P0 Reactive,0,8450,anticipated,30,,2,True,2026-10-16T22:25:00
+P0 Reactive,0,8807,anticipated,30,,2,True,2026-10-17T01:23:30
+P0 Reactive,0,9197,reacted,,0,1,False,2026-10-17T04:38:30
+P0 Reactive,0,9696,anticipated,30,,2,True,2026-10-17T08:48:00
+P0 Reactive,0,10201,anticipated,30,,2,True,2026-10-17T13:00:30
+P0 Reactive,0,10872,anticipated,30,,2,True,2026-10-17T18:36:00
+P0 Reactive,0,11160,anticipated,30,,2,True,2026-10-17T21:00:00
+P0 Reactive,0,11593,reacted,,0,1,False,2026-10-18T00:36:30
+P0 Reactive,0,12165,reacted,,0,1,False,2026-10-18T05:22:30
+P0 Reactive,0,12531,anticipated,30,,2,True,2026-10-18T08:25:30
+P0 Reactive,0,13067,anticipated,30,,2,True,2026-10-18T12:53:30
+P0 Reactive,0,13560,anticipated,30,,2,True,2026-10-18T17:00:00
+P0 Reactive,0,14353,reacted,,0,1,False,2026-10-18T23:36:30
+P0 Reactive,0,14832,reacted,,0,1,False,2026-10-19T03:36:00
+P0 Reactive,0,15321,anticipated,30,,2,True,2026-10-19T07:40:30
+P0 Reactive,0,15720,anticipated,30,,2,True,2026-10-19T11:00:00
+P0 Reactive,0,16330,at_max,,,10,False,2026-10-19T16:05:00
+P0 Reactive,0,16591,anticipated,30,,5,True,2026-10-19T18:15:30
+P0 Reactive,0,17409,anticipated,30,,2,True,2026-10-20T01:04:30
+P0 Reactive,0,17737,anticipated,30,,2,True,2026-10-20T03:48:30
+P1 Univariate LSTM,0,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P1 Univariate LSTM,0,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P1 Univariate LSTM,0,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P1 Univariate LSTM,0,1621,reacted,,0,7,False,2026-10-14T13:30:30
+P1 Univariate LSTM,0,2375,at_max,,,10,False,2026-10-14T19:47:30
+P1 Univariate LSTM,0,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P1 Univariate LSTM,0,3389,anticipated,60,,10,True,2026-10-15T04:14:30
+P1 Univariate LSTM,0,3642,anticipated,60,,10,True,2026-10-15T06:21:00
+P1 Univariate LSTM,0,4416,at_max,,,10,False,2026-10-15T12:48:00
+P1 Univariate LSTM,0,4647,at_max,,,10,False,2026-10-15T14:43:30
+P1 Univariate LSTM,0,5208,at_max,,,10,False,2026-10-15T19:24:00
+P1 Univariate LSTM,0,5806,anticipated,60,,8,True,2026-10-16T00:23:00
+P1 Univariate LSTM,0,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P1 Univariate LSTM,0,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P1 Univariate LSTM,0,7239,anticipated,30,,4,True,2026-10-16T12:19:30
+P1 Univariate LSTM,0,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+P1 Univariate LSTM,0,8450,anticipated,60,,6,True,2026-10-16T22:25:00
+P1 Univariate LSTM,0,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P1 Univariate LSTM,0,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P1 Univariate LSTM,0,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P1 Univariate LSTM,0,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P1 Univariate LSTM,0,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P1 Univariate LSTM,0,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P1 Univariate LSTM,0,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P1 Univariate LSTM,0,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P1 Univariate LSTM,0,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P1 Univariate LSTM,0,13067,anticipated,30,,4,True,2026-10-18T12:53:30
+P1 Univariate LSTM,0,13560,anticipated,30,,6,True,2026-10-18T17:00:00
+P1 Univariate LSTM,0,14353,anticipated,60,,7,True,2026-10-18T23:36:30
+P1 Univariate LSTM,0,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P1 Univariate LSTM,0,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P1 Univariate LSTM,0,15720,anticipated,30,,4,True,2026-10-19T11:00:00
+P1 Univariate LSTM,0,16330,anticipated,30,,6,True,2026-10-19T16:05:00
+P1 Univariate LSTM,0,16591,anticipated,30,,7,True,2026-10-19T18:15:30
+P1 Univariate LSTM,0,17409,anticipated,60,,9,True,2026-10-20T01:04:30
+P1 Univariate LSTM,0,17737,at_max,,,10,False,2026-10-20T03:48:30
+P2 ProximaScale mean,0,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P2 ProximaScale mean,0,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P2 ProximaScale mean,0,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P2 ProximaScale mean,0,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+P2 ProximaScale mean,0,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P2 ProximaScale mean,0,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P2 ProximaScale mean,0,3389,at_max,,,10,False,2026-10-15T04:14:30
+P2 ProximaScale mean,0,3642,at_max,,,10,False,2026-10-15T06:21:00
+P2 ProximaScale mean,0,4416,at_max,,,10,False,2026-10-15T12:48:00
+P2 ProximaScale mean,0,4647,at_max,,,10,False,2026-10-15T14:43:30
+P2 ProximaScale mean,0,5208,at_max,,,10,False,2026-10-15T19:24:00
+P2 ProximaScale mean,0,5806,at_max,,,10,False,2026-10-16T00:23:00
+P2 ProximaScale mean,0,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P2 ProximaScale mean,0,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P2 ProximaScale mean,0,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P2 ProximaScale mean,0,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P2 ProximaScale mean,0,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P2 ProximaScale mean,0,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P2 ProximaScale mean,0,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P2 ProximaScale mean,0,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P2 ProximaScale mean,0,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P2 ProximaScale mean,0,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P2 ProximaScale mean,0,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P2 ProximaScale mean,0,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P2 ProximaScale mean,0,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P2 ProximaScale mean,0,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P2 ProximaScale mean,0,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P2 ProximaScale mean,0,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P2 ProximaScale mean,0,14353,anticipated,60,,8,True,2026-10-18T23:36:30
+P2 ProximaScale mean,0,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P2 ProximaScale mean,0,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P2 ProximaScale mean,0,15720,anticipated,60,,4,True,2026-10-19T11:00:00
+P2 ProximaScale mean,0,16330,anticipated,60,,6,True,2026-10-19T16:05:00
+P2 ProximaScale mean,0,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+P2 ProximaScale mean,0,17409,anticipated,60,,10,True,2026-10-20T01:04:30
+P2 ProximaScale mean,0,17737,at_max,,,10,False,2026-10-20T03:48:30
+P3 + upper bound,0,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P3 + upper bound,0,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P3 + upper bound,0,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P3 + upper bound,0,1621,at_max,,,10,False,2026-10-14T13:30:30
+P3 + upper bound,0,2375,at_max,,,10,False,2026-10-14T19:47:30
+P3 + upper bound,0,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P3 + upper bound,0,3389,at_max,,,10,False,2026-10-15T04:14:30
+P3 + upper bound,0,3642,at_max,,,10,False,2026-10-15T06:21:00
+P3 + upper bound,0,4416,at_max,,,10,False,2026-10-15T12:48:00
+P3 + upper bound,0,4647,at_max,,,10,False,2026-10-15T14:43:30
+P3 + upper bound,0,5208,at_max,,,10,False,2026-10-15T19:24:00
+P3 + upper bound,0,5806,at_max,,,10,False,2026-10-16T00:23:00
+P3 + upper bound,0,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P3 + upper bound,0,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P3 + upper bound,0,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P3 + upper bound,0,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P3 + upper bound,0,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P3 + upper bound,0,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P3 + upper bound,0,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P3 + upper bound,0,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P3 + upper bound,0,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P3 + upper bound,0,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P3 + upper bound,0,11160,anticipated,60,,9,True,2026-10-17T21:00:00
+P3 + upper bound,0,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P3 + upper bound,0,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P3 + upper bound,0,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P3 + upper bound,0,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P3 + upper bound,0,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P3 + upper bound,0,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P3 + upper bound,0,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P3 + upper bound,0,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P3 + upper bound,0,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P3 + upper bound,0,16330,at_max,,,10,False,2026-10-19T16:05:00
+P3 + upper bound,0,16591,at_max,,,10,False,2026-10-19T18:15:30
+P3 + upper bound,0,17409,at_max,,,10,False,2026-10-20T01:04:30
+P3 + upper bound,0,17737,at_max,,,10,False,2026-10-20T03:48:30
+P4 Full,0,448,anticipated,60,,9,True,2026-10-14T03:44:00
+P4 Full,0,888,at_max,,,10,False,2026-10-14T07:24:00
+P4 Full,0,1036,at_max,,,10,False,2026-10-14T08:38:00
+P4 Full,0,1621,at_max,,,10,False,2026-10-14T13:30:30
+P4 Full,0,2375,at_max,,,10,False,2026-10-14T19:47:30
+P4 Full,0,2547,at_max,,,10,False,2026-10-14T21:13:30
+P4 Full,0,3389,at_max,,,10,False,2026-10-15T04:14:30
+P4 Full,0,3642,at_max,,,10,False,2026-10-15T06:21:00
+P4 Full,0,4416,at_max,,,10,False,2026-10-15T12:48:00
+P4 Full,0,4647,at_max,,,10,False,2026-10-15T14:43:30
+P4 Full,0,5208,at_max,,,10,False,2026-10-15T19:24:00
+P4 Full,0,5806,at_max,,,10,False,2026-10-16T00:23:00
+P4 Full,0,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+P4 Full,0,6761,at_max,,,10,False,2026-10-16T08:20:30
+P4 Full,0,7239,at_max,,,10,False,2026-10-16T12:19:30
+P4 Full,0,7859,at_max,,,10,False,2026-10-16T17:29:30
+P4 Full,0,8450,at_max,,,10,False,2026-10-16T22:25:00
+P4 Full,0,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+P4 Full,0,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+P4 Full,0,9696,at_max,,,10,False,2026-10-17T08:48:00
+P4 Full,0,10201,at_max,,,10,False,2026-10-17T13:00:30
+P4 Full,0,10872,at_max,,,10,False,2026-10-17T18:36:00
+P4 Full,0,11160,at_max,,,10,False,2026-10-17T21:00:00
+P4 Full,0,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+P4 Full,0,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+P4 Full,0,12531,at_max,,,10,False,2026-10-18T08:25:30
+P4 Full,0,13067,at_max,,,10,False,2026-10-18T12:53:30
+P4 Full,0,13560,at_max,,,10,False,2026-10-18T17:00:00
+P4 Full,0,14353,at_max,,,10,False,2026-10-18T23:36:30
+P4 Full,0,14832,anticipated,60,,5,True,2026-10-19T03:36:00
+P4 Full,0,15321,at_max,,,10,False,2026-10-19T07:40:30
+P4 Full,0,15720,at_max,,,10,False,2026-10-19T11:00:00
+P4 Full,0,16330,at_max,,,10,False,2026-10-19T16:05:00
+P4 Full,0,16591,at_max,,,10,False,2026-10-19T18:15:30
+P4 Full,0,17409,at_max,,,10,False,2026-10-20T01:04:30
+P4 Full,0,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P5 Full, static thresholds",0,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P5 Full, static thresholds",0,888,anticipated,60,,5,True,2026-10-14T07:24:00
+"P5 Full, static thresholds",0,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P5 Full, static thresholds",0,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P5 Full, static thresholds",0,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P5 Full, static thresholds",0,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P5 Full, static thresholds",0,3389,anticipated,60,,3,True,2026-10-15T04:14:30
+"P5 Full, static thresholds",0,3642,anticipated,60,,3,True,2026-10-15T06:21:00
+"P5 Full, static thresholds",0,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P5 Full, static thresholds",0,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P5 Full, static thresholds",0,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P5 Full, static thresholds",0,5806,anticipated,60,,4,True,2026-10-16T00:23:00
+"P5 Full, static thresholds",0,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P5 Full, static thresholds",0,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P5 Full, static thresholds",0,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P5 Full, static thresholds",0,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P5 Full, static thresholds",0,8450,anticipated,60,,3,True,2026-10-16T22:25:00
+"P5 Full, static thresholds",0,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P5 Full, static thresholds",0,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+"P5 Full, static thresholds",0,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P5 Full, static thresholds",0,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P5 Full, static thresholds",0,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P5 Full, static thresholds",0,11160,anticipated,60,,3,True,2026-10-17T21:00:00
+"P5 Full, static thresholds",0,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+"P5 Full, static thresholds",0,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P5 Full, static thresholds",0,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P5 Full, static thresholds",0,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P5 Full, static thresholds",0,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P5 Full, static thresholds",0,14353,anticipated,60,,3,True,2026-10-18T23:36:30
+"P5 Full, static thresholds",0,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P5 Full, static thresholds",0,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P5 Full, static thresholds",0,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P5 Full, static thresholds",0,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P5 Full, static thresholds",0,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P5 Full, static thresholds",0,17409,anticipated,60,,3,True,2026-10-20T01:04:30
+"P5 Full, static thresholds",0,17737,anticipated,60,,3,True,2026-10-20T03:48:30
+"P6 Full, no cooldown",0,448,anticipated,60,,9,True,2026-10-14T03:44:00
+"P6 Full, no cooldown",0,888,at_max,,,10,False,2026-10-14T07:24:00
+"P6 Full, no cooldown",0,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P6 Full, no cooldown",0,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P6 Full, no cooldown",0,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P6 Full, no cooldown",0,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P6 Full, no cooldown",0,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P6 Full, no cooldown",0,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P6 Full, no cooldown",0,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P6 Full, no cooldown",0,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P6 Full, no cooldown",0,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P6 Full, no cooldown",0,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P6 Full, no cooldown",0,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P6 Full, no cooldown",0,6761,at_max,,,10,False,2026-10-16T08:20:30
+"P6 Full, no cooldown",0,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P6 Full, no cooldown",0,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P6 Full, no cooldown",0,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P6 Full, no cooldown",0,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P6 Full, no cooldown",0,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P6 Full, no cooldown",0,9696,at_max,,,10,False,2026-10-17T08:48:00
+"P6 Full, no cooldown",0,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P6 Full, no cooldown",0,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P6 Full, no cooldown",0,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P6 Full, no cooldown",0,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P6 Full, no cooldown",0,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P6 Full, no cooldown",0,12531,anticipated,60,,10,True,2026-10-18T08:25:30
+"P6 Full, no cooldown",0,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P6 Full, no cooldown",0,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P6 Full, no cooldown",0,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P6 Full, no cooldown",0,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P6 Full, no cooldown",0,15321,at_max,,,10,False,2026-10-19T07:40:30
+"P6 Full, no cooldown",0,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P6 Full, no cooldown",0,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P6 Full, no cooldown",0,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P6 Full, no cooldown",0,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P6 Full, no cooldown",0,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P7 P3, static thresholds",0,448,anticipated,60,,2,True,2026-10-14T03:44:00
+"P7 P3, static thresholds",0,888,anticipated,60,,2,True,2026-10-14T07:24:00
+"P7 P3, static thresholds",0,1036,anticipated,60,,5,True,2026-10-14T08:38:00
+"P7 P3, static thresholds",0,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+"P7 P3, static thresholds",0,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P7 P3, static thresholds",0,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P7 P3, static thresholds",0,3389,anticipated,60,,2,True,2026-10-15T04:14:30
+"P7 P3, static thresholds",0,3642,anticipated,60,,2,True,2026-10-15T06:21:00
+"P7 P3, static thresholds",0,4416,anticipated,60,,2,True,2026-10-15T12:48:00
+"P7 P3, static thresholds",0,4647,anticipated,30,,5,True,2026-10-15T14:43:30
+"P7 P3, static thresholds",0,5208,anticipated,60,,8,True,2026-10-15T19:24:00
+"P7 P3, static thresholds",0,5806,anticipated,60,,2,True,2026-10-16T00:23:00
+"P7 P3, static thresholds",0,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+"P7 P3, static thresholds",0,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+"P7 P3, static thresholds",0,7239,anticipated,60,,2,True,2026-10-16T12:19:30
+"P7 P3, static thresholds",0,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+"P7 P3, static thresholds",0,8450,anticipated,60,,2,True,2026-10-16T22:25:00
+"P7 P3, static thresholds",0,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+"P7 P3, static thresholds",0,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+"P7 P3, static thresholds",0,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+"P7 P3, static thresholds",0,10201,anticipated,60,,2,True,2026-10-17T13:00:30
+"P7 P3, static thresholds",0,10872,anticipated,60,,5,True,2026-10-17T18:36:00
+"P7 P3, static thresholds",0,11160,anticipated,60,,2,True,2026-10-17T21:00:00
+"P7 P3, static thresholds",0,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+"P7 P3, static thresholds",0,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+"P7 P3, static thresholds",0,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+"P7 P3, static thresholds",0,13067,anticipated,60,,2,True,2026-10-18T12:53:30
+"P7 P3, static thresholds",0,13560,anticipated,60,,5,True,2026-10-18T17:00:00
+"P7 P3, static thresholds",0,14353,anticipated,60,,2,True,2026-10-18T23:36:30
+"P7 P3, static thresholds",0,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+"P7 P3, static thresholds",0,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+"P7 P3, static thresholds",0,15720,anticipated,60,,2,True,2026-10-19T11:00:00
+"P7 P3, static thresholds",0,16330,anticipated,60,,5,True,2026-10-19T16:05:00
+"P7 P3, static thresholds",0,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+"P7 P3, static thresholds",0,17409,anticipated,60,,2,True,2026-10-20T01:04:30
+"P7 P3, static thresholds",0,17737,anticipated,60,,2,True,2026-10-20T03:48:30
+"P8 P3, no cooldown",0,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P8 P3, no cooldown",0,888,at_max,,,10,False,2026-10-14T07:24:00
+"P8 P3, no cooldown",0,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P8 P3, no cooldown",0,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P8 P3, no cooldown",0,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P8 P3, no cooldown",0,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+"P8 P3, no cooldown",0,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P8 P3, no cooldown",0,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P8 P3, no cooldown",0,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P8 P3, no cooldown",0,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P8 P3, no cooldown",0,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P8 P3, no cooldown",0,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P8 P3, no cooldown",0,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P8 P3, no cooldown",0,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P8 P3, no cooldown",0,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P8 P3, no cooldown",0,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P8 P3, no cooldown",0,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P8 P3, no cooldown",0,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P8 P3, no cooldown",0,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P8 P3, no cooldown",0,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P8 P3, no cooldown",0,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P8 P3, no cooldown",0,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P8 P3, no cooldown",0,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P8 P3, no cooldown",0,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P8 P3, no cooldown",0,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P8 P3, no cooldown",0,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P8 P3, no cooldown",0,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P8 P3, no cooldown",0,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P8 P3, no cooldown",0,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P8 P3, no cooldown",0,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P8 P3, no cooldown",0,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P8 P3, no cooldown",0,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P8 P3, no cooldown",0,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P8 P3, no cooldown",0,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P8 P3, no cooldown",0,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P8 P3, no cooldown",0,17737,at_max,,,10,False,2026-10-20T03:48:30
+P9 Tuned (config.yaml),0,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P9 Tuned (config.yaml),0,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P9 Tuned (config.yaml),0,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P9 Tuned (config.yaml),0,1621,at_max,,,10,False,2026-10-14T13:30:30
+P9 Tuned (config.yaml),0,2375,at_max,,,10,False,2026-10-14T19:47:30
+P9 Tuned (config.yaml),0,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P9 Tuned (config.yaml),0,3389,at_max,,,10,False,2026-10-15T04:14:30
+P9 Tuned (config.yaml),0,3642,at_max,,,10,False,2026-10-15T06:21:00
+P9 Tuned (config.yaml),0,4416,at_max,,,10,False,2026-10-15T12:48:00
+P9 Tuned (config.yaml),0,4647,at_max,,,10,False,2026-10-15T14:43:30
+P9 Tuned (config.yaml),0,5208,at_max,,,10,False,2026-10-15T19:24:00
+P9 Tuned (config.yaml),0,5806,at_max,,,10,False,2026-10-16T00:23:00
+P9 Tuned (config.yaml),0,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P9 Tuned (config.yaml),0,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P9 Tuned (config.yaml),0,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P9 Tuned (config.yaml),0,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P9 Tuned (config.yaml),0,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P9 Tuned (config.yaml),0,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P9 Tuned (config.yaml),0,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P9 Tuned (config.yaml),0,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P9 Tuned (config.yaml),0,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P9 Tuned (config.yaml),0,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P9 Tuned (config.yaml),0,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P9 Tuned (config.yaml),0,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P9 Tuned (config.yaml),0,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P9 Tuned (config.yaml),0,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P9 Tuned (config.yaml),0,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P9 Tuned (config.yaml),0,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P9 Tuned (config.yaml),0,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P9 Tuned (config.yaml),0,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P9 Tuned (config.yaml),0,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P9 Tuned (config.yaml),0,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P9 Tuned (config.yaml),0,16330,at_max,,,10,False,2026-10-19T16:05:00
+P9 Tuned (config.yaml),0,16591,at_max,,,10,False,2026-10-19T18:15:30
+P9 Tuned (config.yaml),0,17409,at_max,,,10,False,2026-10-20T01:04:30
+P9 Tuned (config.yaml),0,17737,at_max,,,10,False,2026-10-20T03:48:30
+P0 Reactive,1,448,anticipated,30,,2,True,2026-10-14T03:44:00
+P0 Reactive,1,888,anticipated,30,,2,True,2026-10-14T07:24:00
+P0 Reactive,1,1036,anticipated,30,,2,True,2026-10-14T08:38:00
+P0 Reactive,1,1621,at_max,,,10,False,2026-10-14T13:30:30
+P0 Reactive,1,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P0 Reactive,1,2547,anticipated,30,,5,True,2026-10-14T21:13:30
+P0 Reactive,1,3389,anticipated,30,,2,True,2026-10-15T04:14:30
+P0 Reactive,1,3642,anticipated,30,,2,True,2026-10-15T06:21:00
+P0 Reactive,1,4416,anticipated,60,,3,True,2026-10-15T12:48:00
+P0 Reactive,1,4647,at_max,,,10,False,2026-10-15T14:43:30
+P0 Reactive,1,5208,reacted,,30,3,False,2026-10-15T19:24:00
+P0 Reactive,1,5806,anticipated,30,,2,True,2026-10-16T00:23:00
+P0 Reactive,1,6076,reacted,,0,1,False,2026-10-16T02:38:00
+P0 Reactive,1,6761,anticipated,30,,2,True,2026-10-16T08:20:30
+P0 Reactive,1,7239,anticipated,30,,2,True,2026-10-16T12:19:30
+P0 Reactive,1,7859,anticipated,60,,2,True,2026-10-16T17:29:30
+P0 Reactive,1,8450,anticipated,30,,2,True,2026-10-16T22:25:00
+P0 Reactive,1,8807,anticipated,30,,2,True,2026-10-17T01:23:30
+P0 Reactive,1,9197,reacted,,0,1,False,2026-10-17T04:38:30
+P0 Reactive,1,9696,anticipated,30,,2,True,2026-10-17T08:48:00
+P0 Reactive,1,10201,anticipated,30,,2,True,2026-10-17T13:00:30
+P0 Reactive,1,10872,anticipated,30,,2,True,2026-10-17T18:36:00
+P0 Reactive,1,11160,anticipated,30,,2,True,2026-10-17T21:00:00
+P0 Reactive,1,11593,reacted,,0,1,False,2026-10-18T00:36:30
+P0 Reactive,1,12165,reacted,,0,1,False,2026-10-18T05:22:30
+P0 Reactive,1,12531,anticipated,30,,2,True,2026-10-18T08:25:30
+P0 Reactive,1,13067,anticipated,30,,2,True,2026-10-18T12:53:30
+P0 Reactive,1,13560,anticipated,30,,2,True,2026-10-18T17:00:00
+P0 Reactive,1,14353,reacted,,0,1,False,2026-10-18T23:36:30
+P0 Reactive,1,14832,reacted,,0,1,False,2026-10-19T03:36:00
+P0 Reactive,1,15321,anticipated,30,,2,True,2026-10-19T07:40:30
+P0 Reactive,1,15720,anticipated,30,,2,True,2026-10-19T11:00:00
+P0 Reactive,1,16330,at_max,,,10,False,2026-10-19T16:05:00
+P0 Reactive,1,16591,anticipated,30,,5,True,2026-10-19T18:15:30
+P0 Reactive,1,17409,anticipated,30,,2,True,2026-10-20T01:04:30
+P0 Reactive,1,17737,anticipated,30,,2,True,2026-10-20T03:48:30
+P1 Univariate LSTM,1,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P1 Univariate LSTM,1,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P1 Univariate LSTM,1,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P1 Univariate LSTM,1,1621,reacted,,0,7,False,2026-10-14T13:30:30
+P1 Univariate LSTM,1,2375,at_max,,,10,False,2026-10-14T19:47:30
+P1 Univariate LSTM,1,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P1 Univariate LSTM,1,3389,anticipated,60,,10,True,2026-10-15T04:14:30
+P1 Univariate LSTM,1,3642,anticipated,60,,10,True,2026-10-15T06:21:00
+P1 Univariate LSTM,1,4416,at_max,,,10,False,2026-10-15T12:48:00
+P1 Univariate LSTM,1,4647,at_max,,,10,False,2026-10-15T14:43:30
+P1 Univariate LSTM,1,5208,at_max,,,10,False,2026-10-15T19:24:00
+P1 Univariate LSTM,1,5806,anticipated,60,,8,True,2026-10-16T00:23:00
+P1 Univariate LSTM,1,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P1 Univariate LSTM,1,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P1 Univariate LSTM,1,7239,anticipated,30,,4,True,2026-10-16T12:19:30
+P1 Univariate LSTM,1,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+P1 Univariate LSTM,1,8450,anticipated,60,,6,True,2026-10-16T22:25:00
+P1 Univariate LSTM,1,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P1 Univariate LSTM,1,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P1 Univariate LSTM,1,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P1 Univariate LSTM,1,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P1 Univariate LSTM,1,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P1 Univariate LSTM,1,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P1 Univariate LSTM,1,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P1 Univariate LSTM,1,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P1 Univariate LSTM,1,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P1 Univariate LSTM,1,13067,anticipated,30,,4,True,2026-10-18T12:53:30
+P1 Univariate LSTM,1,13560,anticipated,30,,6,True,2026-10-18T17:00:00
+P1 Univariate LSTM,1,14353,anticipated,60,,7,True,2026-10-18T23:36:30
+P1 Univariate LSTM,1,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P1 Univariate LSTM,1,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P1 Univariate LSTM,1,15720,anticipated,30,,4,True,2026-10-19T11:00:00
+P1 Univariate LSTM,1,16330,anticipated,30,,6,True,2026-10-19T16:05:00
+P1 Univariate LSTM,1,16591,anticipated,30,,7,True,2026-10-19T18:15:30
+P1 Univariate LSTM,1,17409,anticipated,60,,9,True,2026-10-20T01:04:30
+P1 Univariate LSTM,1,17737,at_max,,,10,False,2026-10-20T03:48:30
+P2 ProximaScale mean,1,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P2 ProximaScale mean,1,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P2 ProximaScale mean,1,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P2 ProximaScale mean,1,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+P2 ProximaScale mean,1,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P2 ProximaScale mean,1,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P2 ProximaScale mean,1,3389,at_max,,,10,False,2026-10-15T04:14:30
+P2 ProximaScale mean,1,3642,at_max,,,10,False,2026-10-15T06:21:00
+P2 ProximaScale mean,1,4416,at_max,,,10,False,2026-10-15T12:48:00
+P2 ProximaScale mean,1,4647,at_max,,,10,False,2026-10-15T14:43:30
+P2 ProximaScale mean,1,5208,at_max,,,10,False,2026-10-15T19:24:00
+P2 ProximaScale mean,1,5806,at_max,,,10,False,2026-10-16T00:23:00
+P2 ProximaScale mean,1,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P2 ProximaScale mean,1,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P2 ProximaScale mean,1,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P2 ProximaScale mean,1,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P2 ProximaScale mean,1,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P2 ProximaScale mean,1,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P2 ProximaScale mean,1,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P2 ProximaScale mean,1,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P2 ProximaScale mean,1,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P2 ProximaScale mean,1,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P2 ProximaScale mean,1,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P2 ProximaScale mean,1,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P2 ProximaScale mean,1,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P2 ProximaScale mean,1,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P2 ProximaScale mean,1,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P2 ProximaScale mean,1,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P2 ProximaScale mean,1,14353,anticipated,60,,8,True,2026-10-18T23:36:30
+P2 ProximaScale mean,1,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P2 ProximaScale mean,1,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P2 ProximaScale mean,1,15720,anticipated,60,,4,True,2026-10-19T11:00:00
+P2 ProximaScale mean,1,16330,anticipated,60,,6,True,2026-10-19T16:05:00
+P2 ProximaScale mean,1,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+P2 ProximaScale mean,1,17409,anticipated,60,,10,True,2026-10-20T01:04:30
+P2 ProximaScale mean,1,17737,at_max,,,10,False,2026-10-20T03:48:30
+P3 + upper bound,1,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P3 + upper bound,1,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P3 + upper bound,1,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P3 + upper bound,1,1621,at_max,,,10,False,2026-10-14T13:30:30
+P3 + upper bound,1,2375,at_max,,,10,False,2026-10-14T19:47:30
+P3 + upper bound,1,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P3 + upper bound,1,3389,at_max,,,10,False,2026-10-15T04:14:30
+P3 + upper bound,1,3642,at_max,,,10,False,2026-10-15T06:21:00
+P3 + upper bound,1,4416,at_max,,,10,False,2026-10-15T12:48:00
+P3 + upper bound,1,4647,at_max,,,10,False,2026-10-15T14:43:30
+P3 + upper bound,1,5208,at_max,,,10,False,2026-10-15T19:24:00
+P3 + upper bound,1,5806,at_max,,,10,False,2026-10-16T00:23:00
+P3 + upper bound,1,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P3 + upper bound,1,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P3 + upper bound,1,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P3 + upper bound,1,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P3 + upper bound,1,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P3 + upper bound,1,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P3 + upper bound,1,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P3 + upper bound,1,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P3 + upper bound,1,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P3 + upper bound,1,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P3 + upper bound,1,11160,anticipated,60,,9,True,2026-10-17T21:00:00
+P3 + upper bound,1,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P3 + upper bound,1,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P3 + upper bound,1,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P3 + upper bound,1,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P3 + upper bound,1,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P3 + upper bound,1,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P3 + upper bound,1,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P3 + upper bound,1,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P3 + upper bound,1,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P3 + upper bound,1,16330,at_max,,,10,False,2026-10-19T16:05:00
+P3 + upper bound,1,16591,at_max,,,10,False,2026-10-19T18:15:30
+P3 + upper bound,1,17409,at_max,,,10,False,2026-10-20T01:04:30
+P3 + upper bound,1,17737,at_max,,,10,False,2026-10-20T03:48:30
+P4 Full,1,448,anticipated,60,,9,True,2026-10-14T03:44:00
+P4 Full,1,888,at_max,,,10,False,2026-10-14T07:24:00
+P4 Full,1,1036,at_max,,,10,False,2026-10-14T08:38:00
+P4 Full,1,1621,at_max,,,10,False,2026-10-14T13:30:30
+P4 Full,1,2375,at_max,,,10,False,2026-10-14T19:47:30
+P4 Full,1,2547,at_max,,,10,False,2026-10-14T21:13:30
+P4 Full,1,3389,at_max,,,10,False,2026-10-15T04:14:30
+P4 Full,1,3642,at_max,,,10,False,2026-10-15T06:21:00
+P4 Full,1,4416,at_max,,,10,False,2026-10-15T12:48:00
+P4 Full,1,4647,at_max,,,10,False,2026-10-15T14:43:30
+P4 Full,1,5208,at_max,,,10,False,2026-10-15T19:24:00
+P4 Full,1,5806,at_max,,,10,False,2026-10-16T00:23:00
+P4 Full,1,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+P4 Full,1,6761,at_max,,,10,False,2026-10-16T08:20:30
+P4 Full,1,7239,at_max,,,10,False,2026-10-16T12:19:30
+P4 Full,1,7859,at_max,,,10,False,2026-10-16T17:29:30
+P4 Full,1,8450,at_max,,,10,False,2026-10-16T22:25:00
+P4 Full,1,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+P4 Full,1,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+P4 Full,1,9696,at_max,,,10,False,2026-10-17T08:48:00
+P4 Full,1,10201,at_max,,,10,False,2026-10-17T13:00:30
+P4 Full,1,10872,at_max,,,10,False,2026-10-17T18:36:00
+P4 Full,1,11160,at_max,,,10,False,2026-10-17T21:00:00
+P4 Full,1,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+P4 Full,1,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+P4 Full,1,12531,at_max,,,10,False,2026-10-18T08:25:30
+P4 Full,1,13067,at_max,,,10,False,2026-10-18T12:53:30
+P4 Full,1,13560,at_max,,,10,False,2026-10-18T17:00:00
+P4 Full,1,14353,at_max,,,10,False,2026-10-18T23:36:30
+P4 Full,1,14832,anticipated,60,,6,True,2026-10-19T03:36:00
+P4 Full,1,15321,at_max,,,10,False,2026-10-19T07:40:30
+P4 Full,1,15720,at_max,,,10,False,2026-10-19T11:00:00
+P4 Full,1,16330,at_max,,,10,False,2026-10-19T16:05:00
+P4 Full,1,16591,at_max,,,10,False,2026-10-19T18:15:30
+P4 Full,1,17409,at_max,,,10,False,2026-10-20T01:04:30
+P4 Full,1,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P5 Full, static thresholds",1,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P5 Full, static thresholds",1,888,anticipated,60,,5,True,2026-10-14T07:24:00
+"P5 Full, static thresholds",1,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P5 Full, static thresholds",1,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P5 Full, static thresholds",1,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P5 Full, static thresholds",1,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P5 Full, static thresholds",1,3389,anticipated,60,,3,True,2026-10-15T04:14:30
+"P5 Full, static thresholds",1,3642,anticipated,60,,3,True,2026-10-15T06:21:00
+"P5 Full, static thresholds",1,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P5 Full, static thresholds",1,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P5 Full, static thresholds",1,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P5 Full, static thresholds",1,5806,anticipated,60,,4,True,2026-10-16T00:23:00
+"P5 Full, static thresholds",1,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P5 Full, static thresholds",1,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P5 Full, static thresholds",1,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P5 Full, static thresholds",1,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P5 Full, static thresholds",1,8450,anticipated,60,,3,True,2026-10-16T22:25:00
+"P5 Full, static thresholds",1,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P5 Full, static thresholds",1,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+"P5 Full, static thresholds",1,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P5 Full, static thresholds",1,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P5 Full, static thresholds",1,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P5 Full, static thresholds",1,11160,anticipated,60,,3,True,2026-10-17T21:00:00
+"P5 Full, static thresholds",1,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+"P5 Full, static thresholds",1,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P5 Full, static thresholds",1,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P5 Full, static thresholds",1,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P5 Full, static thresholds",1,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P5 Full, static thresholds",1,14353,anticipated,60,,3,True,2026-10-18T23:36:30
+"P5 Full, static thresholds",1,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P5 Full, static thresholds",1,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P5 Full, static thresholds",1,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P5 Full, static thresholds",1,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P5 Full, static thresholds",1,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P5 Full, static thresholds",1,17409,anticipated,60,,3,True,2026-10-20T01:04:30
+"P5 Full, static thresholds",1,17737,anticipated,60,,3,True,2026-10-20T03:48:30
+"P6 Full, no cooldown",1,448,anticipated,60,,9,True,2026-10-14T03:44:00
+"P6 Full, no cooldown",1,888,at_max,,,10,False,2026-10-14T07:24:00
+"P6 Full, no cooldown",1,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P6 Full, no cooldown",1,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P6 Full, no cooldown",1,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P6 Full, no cooldown",1,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P6 Full, no cooldown",1,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P6 Full, no cooldown",1,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P6 Full, no cooldown",1,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P6 Full, no cooldown",1,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P6 Full, no cooldown",1,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P6 Full, no cooldown",1,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P6 Full, no cooldown",1,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P6 Full, no cooldown",1,6761,at_max,,,10,False,2026-10-16T08:20:30
+"P6 Full, no cooldown",1,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P6 Full, no cooldown",1,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P6 Full, no cooldown",1,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P6 Full, no cooldown",1,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P6 Full, no cooldown",1,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P6 Full, no cooldown",1,9696,at_max,,,10,False,2026-10-17T08:48:00
+"P6 Full, no cooldown",1,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P6 Full, no cooldown",1,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P6 Full, no cooldown",1,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P6 Full, no cooldown",1,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P6 Full, no cooldown",1,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P6 Full, no cooldown",1,12531,anticipated,60,,10,True,2026-10-18T08:25:30
+"P6 Full, no cooldown",1,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P6 Full, no cooldown",1,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P6 Full, no cooldown",1,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P6 Full, no cooldown",1,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P6 Full, no cooldown",1,15321,at_max,,,10,False,2026-10-19T07:40:30
+"P6 Full, no cooldown",1,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P6 Full, no cooldown",1,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P6 Full, no cooldown",1,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P6 Full, no cooldown",1,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P6 Full, no cooldown",1,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P7 P3, static thresholds",1,448,anticipated,60,,2,True,2026-10-14T03:44:00
+"P7 P3, static thresholds",1,888,anticipated,60,,2,True,2026-10-14T07:24:00
+"P7 P3, static thresholds",1,1036,anticipated,60,,5,True,2026-10-14T08:38:00
+"P7 P3, static thresholds",1,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+"P7 P3, static thresholds",1,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P7 P3, static thresholds",1,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P7 P3, static thresholds",1,3389,anticipated,60,,2,True,2026-10-15T04:14:30
+"P7 P3, static thresholds",1,3642,anticipated,60,,2,True,2026-10-15T06:21:00
+"P7 P3, static thresholds",1,4416,anticipated,60,,2,True,2026-10-15T12:48:00
+"P7 P3, static thresholds",1,4647,anticipated,30,,5,True,2026-10-15T14:43:30
+"P7 P3, static thresholds",1,5208,anticipated,60,,8,True,2026-10-15T19:24:00
+"P7 P3, static thresholds",1,5806,anticipated,60,,2,True,2026-10-16T00:23:00
+"P7 P3, static thresholds",1,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+"P7 P3, static thresholds",1,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+"P7 P3, static thresholds",1,7239,anticipated,60,,2,True,2026-10-16T12:19:30
+"P7 P3, static thresholds",1,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+"P7 P3, static thresholds",1,8450,anticipated,60,,2,True,2026-10-16T22:25:00
+"P7 P3, static thresholds",1,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+"P7 P3, static thresholds",1,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+"P7 P3, static thresholds",1,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+"P7 P3, static thresholds",1,10201,anticipated,60,,2,True,2026-10-17T13:00:30
+"P7 P3, static thresholds",1,10872,anticipated,60,,5,True,2026-10-17T18:36:00
+"P7 P3, static thresholds",1,11160,anticipated,60,,2,True,2026-10-17T21:00:00
+"P7 P3, static thresholds",1,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+"P7 P3, static thresholds",1,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+"P7 P3, static thresholds",1,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+"P7 P3, static thresholds",1,13067,anticipated,60,,2,True,2026-10-18T12:53:30
+"P7 P3, static thresholds",1,13560,anticipated,60,,5,True,2026-10-18T17:00:00
+"P7 P3, static thresholds",1,14353,anticipated,60,,2,True,2026-10-18T23:36:30
+"P7 P3, static thresholds",1,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+"P7 P3, static thresholds",1,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+"P7 P3, static thresholds",1,15720,anticipated,60,,2,True,2026-10-19T11:00:00
+"P7 P3, static thresholds",1,16330,anticipated,60,,5,True,2026-10-19T16:05:00
+"P7 P3, static thresholds",1,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+"P7 P3, static thresholds",1,17409,anticipated,60,,2,True,2026-10-20T01:04:30
+"P7 P3, static thresholds",1,17737,anticipated,60,,2,True,2026-10-20T03:48:30
+"P8 P3, no cooldown",1,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P8 P3, no cooldown",1,888,at_max,,,10,False,2026-10-14T07:24:00
+"P8 P3, no cooldown",1,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P8 P3, no cooldown",1,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P8 P3, no cooldown",1,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P8 P3, no cooldown",1,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+"P8 P3, no cooldown",1,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P8 P3, no cooldown",1,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P8 P3, no cooldown",1,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P8 P3, no cooldown",1,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P8 P3, no cooldown",1,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P8 P3, no cooldown",1,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P8 P3, no cooldown",1,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P8 P3, no cooldown",1,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P8 P3, no cooldown",1,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P8 P3, no cooldown",1,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P8 P3, no cooldown",1,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P8 P3, no cooldown",1,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P8 P3, no cooldown",1,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P8 P3, no cooldown",1,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P8 P3, no cooldown",1,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P8 P3, no cooldown",1,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P8 P3, no cooldown",1,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P8 P3, no cooldown",1,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P8 P3, no cooldown",1,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P8 P3, no cooldown",1,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P8 P3, no cooldown",1,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P8 P3, no cooldown",1,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P8 P3, no cooldown",1,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P8 P3, no cooldown",1,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P8 P3, no cooldown",1,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P8 P3, no cooldown",1,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P8 P3, no cooldown",1,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P8 P3, no cooldown",1,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P8 P3, no cooldown",1,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P8 P3, no cooldown",1,17737,at_max,,,10,False,2026-10-20T03:48:30
+P9 Tuned (config.yaml),1,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P9 Tuned (config.yaml),1,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P9 Tuned (config.yaml),1,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P9 Tuned (config.yaml),1,1621,at_max,,,10,False,2026-10-14T13:30:30
+P9 Tuned (config.yaml),1,2375,at_max,,,10,False,2026-10-14T19:47:30
+P9 Tuned (config.yaml),1,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P9 Tuned (config.yaml),1,3389,at_max,,,10,False,2026-10-15T04:14:30
+P9 Tuned (config.yaml),1,3642,at_max,,,10,False,2026-10-15T06:21:00
+P9 Tuned (config.yaml),1,4416,at_max,,,10,False,2026-10-15T12:48:00
+P9 Tuned (config.yaml),1,4647,at_max,,,10,False,2026-10-15T14:43:30
+P9 Tuned (config.yaml),1,5208,at_max,,,10,False,2026-10-15T19:24:00
+P9 Tuned (config.yaml),1,5806,at_max,,,10,False,2026-10-16T00:23:00
+P9 Tuned (config.yaml),1,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P9 Tuned (config.yaml),1,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P9 Tuned (config.yaml),1,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P9 Tuned (config.yaml),1,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P9 Tuned (config.yaml),1,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P9 Tuned (config.yaml),1,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P9 Tuned (config.yaml),1,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P9 Tuned (config.yaml),1,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P9 Tuned (config.yaml),1,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P9 Tuned (config.yaml),1,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P9 Tuned (config.yaml),1,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P9 Tuned (config.yaml),1,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P9 Tuned (config.yaml),1,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P9 Tuned (config.yaml),1,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P9 Tuned (config.yaml),1,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P9 Tuned (config.yaml),1,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P9 Tuned (config.yaml),1,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P9 Tuned (config.yaml),1,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P9 Tuned (config.yaml),1,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P9 Tuned (config.yaml),1,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P9 Tuned (config.yaml),1,16330,at_max,,,10,False,2026-10-19T16:05:00
+P9 Tuned (config.yaml),1,16591,at_max,,,10,False,2026-10-19T18:15:30
+P9 Tuned (config.yaml),1,17409,at_max,,,10,False,2026-10-20T01:04:30
+P9 Tuned (config.yaml),1,17737,at_max,,,10,False,2026-10-20T03:48:30
+P0 Reactive,2,448,anticipated,30,,2,True,2026-10-14T03:44:00
+P0 Reactive,2,888,anticipated,30,,2,True,2026-10-14T07:24:00
+P0 Reactive,2,1036,anticipated,30,,2,True,2026-10-14T08:38:00
+P0 Reactive,2,1621,at_max,,,10,False,2026-10-14T13:30:30
+P0 Reactive,2,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P0 Reactive,2,2547,anticipated,30,,5,True,2026-10-14T21:13:30
+P0 Reactive,2,3389,anticipated,30,,2,True,2026-10-15T04:14:30
+P0 Reactive,2,3642,anticipated,30,,2,True,2026-10-15T06:21:00
+P0 Reactive,2,4416,anticipated,60,,3,True,2026-10-15T12:48:00
+P0 Reactive,2,4647,at_max,,,10,False,2026-10-15T14:43:30
+P0 Reactive,2,5208,reacted,,30,3,False,2026-10-15T19:24:00
+P0 Reactive,2,5806,anticipated,30,,2,True,2026-10-16T00:23:00
+P0 Reactive,2,6076,reacted,,0,1,False,2026-10-16T02:38:00
+P0 Reactive,2,6761,anticipated,30,,2,True,2026-10-16T08:20:30
+P0 Reactive,2,7239,anticipated,30,,2,True,2026-10-16T12:19:30
+P0 Reactive,2,7859,anticipated,60,,2,True,2026-10-16T17:29:30
+P0 Reactive,2,8450,anticipated,30,,2,True,2026-10-16T22:25:00
+P0 Reactive,2,8807,anticipated,30,,2,True,2026-10-17T01:23:30
+P0 Reactive,2,9197,reacted,,0,1,False,2026-10-17T04:38:30
+P0 Reactive,2,9696,anticipated,30,,2,True,2026-10-17T08:48:00
+P0 Reactive,2,10201,anticipated,30,,2,True,2026-10-17T13:00:30
+P0 Reactive,2,10872,anticipated,30,,2,True,2026-10-17T18:36:00
+P0 Reactive,2,11160,anticipated,30,,2,True,2026-10-17T21:00:00
+P0 Reactive,2,11593,reacted,,0,1,False,2026-10-18T00:36:30
+P0 Reactive,2,12165,reacted,,0,1,False,2026-10-18T05:22:30
+P0 Reactive,2,12531,anticipated,30,,2,True,2026-10-18T08:25:30
+P0 Reactive,2,13067,anticipated,30,,2,True,2026-10-18T12:53:30
+P0 Reactive,2,13560,anticipated,30,,2,True,2026-10-18T17:00:00
+P0 Reactive,2,14353,reacted,,0,1,False,2026-10-18T23:36:30
+P0 Reactive,2,14832,reacted,,0,1,False,2026-10-19T03:36:00
+P0 Reactive,2,15321,anticipated,30,,2,True,2026-10-19T07:40:30
+P0 Reactive,2,15720,anticipated,30,,2,True,2026-10-19T11:00:00
+P0 Reactive,2,16330,at_max,,,10,False,2026-10-19T16:05:00
+P0 Reactive,2,16591,anticipated,30,,5,True,2026-10-19T18:15:30
+P0 Reactive,2,17409,anticipated,30,,2,True,2026-10-20T01:04:30
+P0 Reactive,2,17737,anticipated,30,,2,True,2026-10-20T03:48:30
+P1 Univariate LSTM,2,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P1 Univariate LSTM,2,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P1 Univariate LSTM,2,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P1 Univariate LSTM,2,1621,reacted,,0,7,False,2026-10-14T13:30:30
+P1 Univariate LSTM,2,2375,at_max,,,10,False,2026-10-14T19:47:30
+P1 Univariate LSTM,2,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P1 Univariate LSTM,2,3389,anticipated,60,,10,True,2026-10-15T04:14:30
+P1 Univariate LSTM,2,3642,anticipated,60,,10,True,2026-10-15T06:21:00
+P1 Univariate LSTM,2,4416,at_max,,,10,False,2026-10-15T12:48:00
+P1 Univariate LSTM,2,4647,at_max,,,10,False,2026-10-15T14:43:30
+P1 Univariate LSTM,2,5208,at_max,,,10,False,2026-10-15T19:24:00
+P1 Univariate LSTM,2,5806,anticipated,60,,8,True,2026-10-16T00:23:00
+P1 Univariate LSTM,2,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P1 Univariate LSTM,2,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P1 Univariate LSTM,2,7239,anticipated,30,,4,True,2026-10-16T12:19:30
+P1 Univariate LSTM,2,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+P1 Univariate LSTM,2,8450,anticipated,60,,6,True,2026-10-16T22:25:00
+P1 Univariate LSTM,2,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P1 Univariate LSTM,2,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P1 Univariate LSTM,2,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P1 Univariate LSTM,2,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P1 Univariate LSTM,2,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P1 Univariate LSTM,2,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P1 Univariate LSTM,2,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P1 Univariate LSTM,2,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P1 Univariate LSTM,2,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P1 Univariate LSTM,2,13067,anticipated,30,,4,True,2026-10-18T12:53:30
+P1 Univariate LSTM,2,13560,anticipated,30,,6,True,2026-10-18T17:00:00
+P1 Univariate LSTM,2,14353,anticipated,60,,7,True,2026-10-18T23:36:30
+P1 Univariate LSTM,2,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P1 Univariate LSTM,2,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P1 Univariate LSTM,2,15720,anticipated,30,,4,True,2026-10-19T11:00:00
+P1 Univariate LSTM,2,16330,anticipated,30,,6,True,2026-10-19T16:05:00
+P1 Univariate LSTM,2,16591,anticipated,30,,7,True,2026-10-19T18:15:30
+P1 Univariate LSTM,2,17409,anticipated,60,,9,True,2026-10-20T01:04:30
+P1 Univariate LSTM,2,17737,at_max,,,10,False,2026-10-20T03:48:30
+P2 ProximaScale mean,2,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P2 ProximaScale mean,2,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P2 ProximaScale mean,2,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P2 ProximaScale mean,2,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+P2 ProximaScale mean,2,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P2 ProximaScale mean,2,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P2 ProximaScale mean,2,3389,at_max,,,10,False,2026-10-15T04:14:30
+P2 ProximaScale mean,2,3642,at_max,,,10,False,2026-10-15T06:21:00
+P2 ProximaScale mean,2,4416,at_max,,,10,False,2026-10-15T12:48:00
+P2 ProximaScale mean,2,4647,at_max,,,10,False,2026-10-15T14:43:30
+P2 ProximaScale mean,2,5208,at_max,,,10,False,2026-10-15T19:24:00
+P2 ProximaScale mean,2,5806,at_max,,,10,False,2026-10-16T00:23:00
+P2 ProximaScale mean,2,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P2 ProximaScale mean,2,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P2 ProximaScale mean,2,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P2 ProximaScale mean,2,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P2 ProximaScale mean,2,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P2 ProximaScale mean,2,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P2 ProximaScale mean,2,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P2 ProximaScale mean,2,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P2 ProximaScale mean,2,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P2 ProximaScale mean,2,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P2 ProximaScale mean,2,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P2 ProximaScale mean,2,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P2 ProximaScale mean,2,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P2 ProximaScale mean,2,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P2 ProximaScale mean,2,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P2 ProximaScale mean,2,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P2 ProximaScale mean,2,14353,anticipated,60,,8,True,2026-10-18T23:36:30
+P2 ProximaScale mean,2,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P2 ProximaScale mean,2,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P2 ProximaScale mean,2,15720,anticipated,60,,4,True,2026-10-19T11:00:00
+P2 ProximaScale mean,2,16330,anticipated,60,,6,True,2026-10-19T16:05:00
+P2 ProximaScale mean,2,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+P2 ProximaScale mean,2,17409,anticipated,60,,10,True,2026-10-20T01:04:30
+P2 ProximaScale mean,2,17737,at_max,,,10,False,2026-10-20T03:48:30
+P3 + upper bound,2,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P3 + upper bound,2,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P3 + upper bound,2,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P3 + upper bound,2,1621,at_max,,,10,False,2026-10-14T13:30:30
+P3 + upper bound,2,2375,at_max,,,10,False,2026-10-14T19:47:30
+P3 + upper bound,2,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P3 + upper bound,2,3389,at_max,,,10,False,2026-10-15T04:14:30
+P3 + upper bound,2,3642,at_max,,,10,False,2026-10-15T06:21:00
+P3 + upper bound,2,4416,at_max,,,10,False,2026-10-15T12:48:00
+P3 + upper bound,2,4647,at_max,,,10,False,2026-10-15T14:43:30
+P3 + upper bound,2,5208,at_max,,,10,False,2026-10-15T19:24:00
+P3 + upper bound,2,5806,at_max,,,10,False,2026-10-16T00:23:00
+P3 + upper bound,2,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P3 + upper bound,2,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P3 + upper bound,2,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P3 + upper bound,2,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P3 + upper bound,2,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P3 + upper bound,2,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P3 + upper bound,2,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P3 + upper bound,2,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P3 + upper bound,2,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P3 + upper bound,2,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P3 + upper bound,2,11160,anticipated,60,,9,True,2026-10-17T21:00:00
+P3 + upper bound,2,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P3 + upper bound,2,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P3 + upper bound,2,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P3 + upper bound,2,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P3 + upper bound,2,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P3 + upper bound,2,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P3 + upper bound,2,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P3 + upper bound,2,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P3 + upper bound,2,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P3 + upper bound,2,16330,at_max,,,10,False,2026-10-19T16:05:00
+P3 + upper bound,2,16591,at_max,,,10,False,2026-10-19T18:15:30
+P3 + upper bound,2,17409,at_max,,,10,False,2026-10-20T01:04:30
+P3 + upper bound,2,17737,at_max,,,10,False,2026-10-20T03:48:30
+P4 Full,2,448,anticipated,60,,9,True,2026-10-14T03:44:00
+P4 Full,2,888,at_max,,,10,False,2026-10-14T07:24:00
+P4 Full,2,1036,at_max,,,10,False,2026-10-14T08:38:00
+P4 Full,2,1621,at_max,,,10,False,2026-10-14T13:30:30
+P4 Full,2,2375,at_max,,,10,False,2026-10-14T19:47:30
+P4 Full,2,2547,at_max,,,10,False,2026-10-14T21:13:30
+P4 Full,2,3389,at_max,,,10,False,2026-10-15T04:14:30
+P4 Full,2,3642,at_max,,,10,False,2026-10-15T06:21:00
+P4 Full,2,4416,at_max,,,10,False,2026-10-15T12:48:00
+P4 Full,2,4647,at_max,,,10,False,2026-10-15T14:43:30
+P4 Full,2,5208,at_max,,,10,False,2026-10-15T19:24:00
+P4 Full,2,5806,at_max,,,10,False,2026-10-16T00:23:00
+P4 Full,2,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+P4 Full,2,6761,at_max,,,10,False,2026-10-16T08:20:30
+P4 Full,2,7239,at_max,,,10,False,2026-10-16T12:19:30
+P4 Full,2,7859,at_max,,,10,False,2026-10-16T17:29:30
+P4 Full,2,8450,at_max,,,10,False,2026-10-16T22:25:00
+P4 Full,2,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+P4 Full,2,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+P4 Full,2,9696,at_max,,,10,False,2026-10-17T08:48:00
+P4 Full,2,10201,at_max,,,10,False,2026-10-17T13:00:30
+P4 Full,2,10872,at_max,,,10,False,2026-10-17T18:36:00
+P4 Full,2,11160,at_max,,,10,False,2026-10-17T21:00:00
+P4 Full,2,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+P4 Full,2,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+P4 Full,2,12531,at_max,,,10,False,2026-10-18T08:25:30
+P4 Full,2,13067,at_max,,,10,False,2026-10-18T12:53:30
+P4 Full,2,13560,at_max,,,10,False,2026-10-18T17:00:00
+P4 Full,2,14353,at_max,,,10,False,2026-10-18T23:36:30
+P4 Full,2,14832,anticipated,60,,6,True,2026-10-19T03:36:00
+P4 Full,2,15321,at_max,,,10,False,2026-10-19T07:40:30
+P4 Full,2,15720,at_max,,,10,False,2026-10-19T11:00:00
+P4 Full,2,16330,at_max,,,10,False,2026-10-19T16:05:00
+P4 Full,2,16591,at_max,,,10,False,2026-10-19T18:15:30
+P4 Full,2,17409,at_max,,,10,False,2026-10-20T01:04:30
+P4 Full,2,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P5 Full, static thresholds",2,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P5 Full, static thresholds",2,888,anticipated,60,,5,True,2026-10-14T07:24:00
+"P5 Full, static thresholds",2,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P5 Full, static thresholds",2,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P5 Full, static thresholds",2,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P5 Full, static thresholds",2,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P5 Full, static thresholds",2,3389,anticipated,60,,3,True,2026-10-15T04:14:30
+"P5 Full, static thresholds",2,3642,anticipated,60,,3,True,2026-10-15T06:21:00
+"P5 Full, static thresholds",2,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P5 Full, static thresholds",2,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P5 Full, static thresholds",2,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P5 Full, static thresholds",2,5806,anticipated,60,,4,True,2026-10-16T00:23:00
+"P5 Full, static thresholds",2,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P5 Full, static thresholds",2,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P5 Full, static thresholds",2,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P5 Full, static thresholds",2,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P5 Full, static thresholds",2,8450,anticipated,60,,3,True,2026-10-16T22:25:00
+"P5 Full, static thresholds",2,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P5 Full, static thresholds",2,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+"P5 Full, static thresholds",2,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P5 Full, static thresholds",2,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P5 Full, static thresholds",2,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P5 Full, static thresholds",2,11160,anticipated,60,,3,True,2026-10-17T21:00:00
+"P5 Full, static thresholds",2,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+"P5 Full, static thresholds",2,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P5 Full, static thresholds",2,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P5 Full, static thresholds",2,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P5 Full, static thresholds",2,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P5 Full, static thresholds",2,14353,anticipated,60,,3,True,2026-10-18T23:36:30
+"P5 Full, static thresholds",2,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P5 Full, static thresholds",2,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P5 Full, static thresholds",2,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P5 Full, static thresholds",2,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P5 Full, static thresholds",2,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P5 Full, static thresholds",2,17409,anticipated,60,,3,True,2026-10-20T01:04:30
+"P5 Full, static thresholds",2,17737,anticipated,60,,3,True,2026-10-20T03:48:30
+"P6 Full, no cooldown",2,448,anticipated,60,,9,True,2026-10-14T03:44:00
+"P6 Full, no cooldown",2,888,at_max,,,10,False,2026-10-14T07:24:00
+"P6 Full, no cooldown",2,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P6 Full, no cooldown",2,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P6 Full, no cooldown",2,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P6 Full, no cooldown",2,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P6 Full, no cooldown",2,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P6 Full, no cooldown",2,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P6 Full, no cooldown",2,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P6 Full, no cooldown",2,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P6 Full, no cooldown",2,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P6 Full, no cooldown",2,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P6 Full, no cooldown",2,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P6 Full, no cooldown",2,6761,at_max,,,10,False,2026-10-16T08:20:30
+"P6 Full, no cooldown",2,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P6 Full, no cooldown",2,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P6 Full, no cooldown",2,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P6 Full, no cooldown",2,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P6 Full, no cooldown",2,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P6 Full, no cooldown",2,9696,at_max,,,10,False,2026-10-17T08:48:00
+"P6 Full, no cooldown",2,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P6 Full, no cooldown",2,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P6 Full, no cooldown",2,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P6 Full, no cooldown",2,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P6 Full, no cooldown",2,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P6 Full, no cooldown",2,12531,anticipated,60,,10,True,2026-10-18T08:25:30
+"P6 Full, no cooldown",2,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P6 Full, no cooldown",2,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P6 Full, no cooldown",2,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P6 Full, no cooldown",2,14832,anticipated,60,,4,True,2026-10-19T03:36:00
+"P6 Full, no cooldown",2,15321,at_max,,,10,False,2026-10-19T07:40:30
+"P6 Full, no cooldown",2,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P6 Full, no cooldown",2,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P6 Full, no cooldown",2,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P6 Full, no cooldown",2,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P6 Full, no cooldown",2,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P7 P3, static thresholds",2,448,anticipated,60,,2,True,2026-10-14T03:44:00
+"P7 P3, static thresholds",2,888,anticipated,60,,2,True,2026-10-14T07:24:00
+"P7 P3, static thresholds",2,1036,anticipated,60,,5,True,2026-10-14T08:38:00
+"P7 P3, static thresholds",2,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+"P7 P3, static thresholds",2,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P7 P3, static thresholds",2,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P7 P3, static thresholds",2,3389,anticipated,60,,2,True,2026-10-15T04:14:30
+"P7 P3, static thresholds",2,3642,anticipated,60,,2,True,2026-10-15T06:21:00
+"P7 P3, static thresholds",2,4416,anticipated,60,,2,True,2026-10-15T12:48:00
+"P7 P3, static thresholds",2,4647,anticipated,30,,5,True,2026-10-15T14:43:30
+"P7 P3, static thresholds",2,5208,anticipated,60,,8,True,2026-10-15T19:24:00
+"P7 P3, static thresholds",2,5806,anticipated,60,,2,True,2026-10-16T00:23:00
+"P7 P3, static thresholds",2,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+"P7 P3, static thresholds",2,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+"P7 P3, static thresholds",2,7239,anticipated,60,,2,True,2026-10-16T12:19:30
+"P7 P3, static thresholds",2,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+"P7 P3, static thresholds",2,8450,anticipated,60,,2,True,2026-10-16T22:25:00
+"P7 P3, static thresholds",2,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+"P7 P3, static thresholds",2,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+"P7 P3, static thresholds",2,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+"P7 P3, static thresholds",2,10201,anticipated,60,,2,True,2026-10-17T13:00:30
+"P7 P3, static thresholds",2,10872,anticipated,60,,5,True,2026-10-17T18:36:00
+"P7 P3, static thresholds",2,11160,anticipated,60,,2,True,2026-10-17T21:00:00
+"P7 P3, static thresholds",2,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+"P7 P3, static thresholds",2,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+"P7 P3, static thresholds",2,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+"P7 P3, static thresholds",2,13067,anticipated,60,,2,True,2026-10-18T12:53:30
+"P7 P3, static thresholds",2,13560,anticipated,60,,5,True,2026-10-18T17:00:00
+"P7 P3, static thresholds",2,14353,anticipated,60,,2,True,2026-10-18T23:36:30
+"P7 P3, static thresholds",2,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+"P7 P3, static thresholds",2,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+"P7 P3, static thresholds",2,15720,anticipated,60,,2,True,2026-10-19T11:00:00
+"P7 P3, static thresholds",2,16330,anticipated,60,,5,True,2026-10-19T16:05:00
+"P7 P3, static thresholds",2,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+"P7 P3, static thresholds",2,17409,anticipated,60,,2,True,2026-10-20T01:04:30
+"P7 P3, static thresholds",2,17737,anticipated,60,,2,True,2026-10-20T03:48:30
+"P8 P3, no cooldown",2,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P8 P3, no cooldown",2,888,at_max,,,10,False,2026-10-14T07:24:00
+"P8 P3, no cooldown",2,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P8 P3, no cooldown",2,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P8 P3, no cooldown",2,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P8 P3, no cooldown",2,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+"P8 P3, no cooldown",2,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P8 P3, no cooldown",2,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P8 P3, no cooldown",2,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P8 P3, no cooldown",2,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P8 P3, no cooldown",2,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P8 P3, no cooldown",2,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P8 P3, no cooldown",2,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P8 P3, no cooldown",2,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P8 P3, no cooldown",2,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P8 P3, no cooldown",2,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P8 P3, no cooldown",2,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P8 P3, no cooldown",2,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P8 P3, no cooldown",2,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P8 P3, no cooldown",2,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P8 P3, no cooldown",2,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P8 P3, no cooldown",2,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P8 P3, no cooldown",2,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P8 P3, no cooldown",2,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P8 P3, no cooldown",2,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P8 P3, no cooldown",2,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P8 P3, no cooldown",2,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P8 P3, no cooldown",2,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P8 P3, no cooldown",2,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P8 P3, no cooldown",2,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P8 P3, no cooldown",2,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P8 P3, no cooldown",2,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P8 P3, no cooldown",2,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P8 P3, no cooldown",2,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P8 P3, no cooldown",2,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P8 P3, no cooldown",2,17737,at_max,,,10,False,2026-10-20T03:48:30
+P9 Tuned (config.yaml),2,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P9 Tuned (config.yaml),2,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P9 Tuned (config.yaml),2,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P9 Tuned (config.yaml),2,1621,at_max,,,10,False,2026-10-14T13:30:30
+P9 Tuned (config.yaml),2,2375,at_max,,,10,False,2026-10-14T19:47:30
+P9 Tuned (config.yaml),2,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P9 Tuned (config.yaml),2,3389,at_max,,,10,False,2026-10-15T04:14:30
+P9 Tuned (config.yaml),2,3642,at_max,,,10,False,2026-10-15T06:21:00
+P9 Tuned (config.yaml),2,4416,at_max,,,10,False,2026-10-15T12:48:00
+P9 Tuned (config.yaml),2,4647,at_max,,,10,False,2026-10-15T14:43:30
+P9 Tuned (config.yaml),2,5208,at_max,,,10,False,2026-10-15T19:24:00
+P9 Tuned (config.yaml),2,5806,at_max,,,10,False,2026-10-16T00:23:00
+P9 Tuned (config.yaml),2,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P9 Tuned (config.yaml),2,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P9 Tuned (config.yaml),2,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P9 Tuned (config.yaml),2,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P9 Tuned (config.yaml),2,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P9 Tuned (config.yaml),2,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P9 Tuned (config.yaml),2,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P9 Tuned (config.yaml),2,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P9 Tuned (config.yaml),2,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P9 Tuned (config.yaml),2,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P9 Tuned (config.yaml),2,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P9 Tuned (config.yaml),2,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P9 Tuned (config.yaml),2,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P9 Tuned (config.yaml),2,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P9 Tuned (config.yaml),2,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P9 Tuned (config.yaml),2,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P9 Tuned (config.yaml),2,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P9 Tuned (config.yaml),2,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P9 Tuned (config.yaml),2,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P9 Tuned (config.yaml),2,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P9 Tuned (config.yaml),2,16330,at_max,,,10,False,2026-10-19T16:05:00
+P9 Tuned (config.yaml),2,16591,at_max,,,10,False,2026-10-19T18:15:30
+P9 Tuned (config.yaml),2,17409,at_max,,,10,False,2026-10-20T01:04:30
+P9 Tuned (config.yaml),2,17737,at_max,,,10,False,2026-10-20T03:48:30
+P0 Reactive,3,448,anticipated,30,,2,True,2026-10-14T03:44:00
+P0 Reactive,3,888,anticipated,30,,2,True,2026-10-14T07:24:00
+P0 Reactive,3,1036,anticipated,30,,2,True,2026-10-14T08:38:00
+P0 Reactive,3,1621,at_max,,,10,False,2026-10-14T13:30:30
+P0 Reactive,3,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P0 Reactive,3,2547,anticipated,30,,5,True,2026-10-14T21:13:30
+P0 Reactive,3,3389,anticipated,30,,2,True,2026-10-15T04:14:30
+P0 Reactive,3,3642,anticipated,30,,2,True,2026-10-15T06:21:00
+P0 Reactive,3,4416,anticipated,60,,3,True,2026-10-15T12:48:00
+P0 Reactive,3,4647,at_max,,,10,False,2026-10-15T14:43:30
+P0 Reactive,3,5208,reacted,,30,3,False,2026-10-15T19:24:00
+P0 Reactive,3,5806,anticipated,30,,2,True,2026-10-16T00:23:00
+P0 Reactive,3,6076,reacted,,0,1,False,2026-10-16T02:38:00
+P0 Reactive,3,6761,anticipated,30,,2,True,2026-10-16T08:20:30
+P0 Reactive,3,7239,anticipated,30,,2,True,2026-10-16T12:19:30
+P0 Reactive,3,7859,anticipated,60,,2,True,2026-10-16T17:29:30
+P0 Reactive,3,8450,anticipated,30,,2,True,2026-10-16T22:25:00
+P0 Reactive,3,8807,anticipated,30,,2,True,2026-10-17T01:23:30
+P0 Reactive,3,9197,reacted,,0,1,False,2026-10-17T04:38:30
+P0 Reactive,3,9696,anticipated,30,,2,True,2026-10-17T08:48:00
+P0 Reactive,3,10201,anticipated,30,,2,True,2026-10-17T13:00:30
+P0 Reactive,3,10872,anticipated,30,,2,True,2026-10-17T18:36:00
+P0 Reactive,3,11160,anticipated,30,,2,True,2026-10-17T21:00:00
+P0 Reactive,3,11593,reacted,,0,1,False,2026-10-18T00:36:30
+P0 Reactive,3,12165,reacted,,0,1,False,2026-10-18T05:22:30
+P0 Reactive,3,12531,anticipated,30,,2,True,2026-10-18T08:25:30
+P0 Reactive,3,13067,anticipated,30,,2,True,2026-10-18T12:53:30
+P0 Reactive,3,13560,anticipated,30,,2,True,2026-10-18T17:00:00
+P0 Reactive,3,14353,reacted,,0,1,False,2026-10-18T23:36:30
+P0 Reactive,3,14832,reacted,,0,1,False,2026-10-19T03:36:00
+P0 Reactive,3,15321,anticipated,30,,2,True,2026-10-19T07:40:30
+P0 Reactive,3,15720,anticipated,30,,2,True,2026-10-19T11:00:00
+P0 Reactive,3,16330,at_max,,,10,False,2026-10-19T16:05:00
+P0 Reactive,3,16591,anticipated,30,,5,True,2026-10-19T18:15:30
+P0 Reactive,3,17409,anticipated,30,,2,True,2026-10-20T01:04:30
+P0 Reactive,3,17737,anticipated,30,,2,True,2026-10-20T03:48:30
+P1 Univariate LSTM,3,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P1 Univariate LSTM,3,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P1 Univariate LSTM,3,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P1 Univariate LSTM,3,1621,reacted,,0,7,False,2026-10-14T13:30:30
+P1 Univariate LSTM,3,2375,at_max,,,10,False,2026-10-14T19:47:30
+P1 Univariate LSTM,3,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P1 Univariate LSTM,3,3389,anticipated,60,,10,True,2026-10-15T04:14:30
+P1 Univariate LSTM,3,3642,anticipated,60,,10,True,2026-10-15T06:21:00
+P1 Univariate LSTM,3,4416,at_max,,,10,False,2026-10-15T12:48:00
+P1 Univariate LSTM,3,4647,at_max,,,10,False,2026-10-15T14:43:30
+P1 Univariate LSTM,3,5208,at_max,,,10,False,2026-10-15T19:24:00
+P1 Univariate LSTM,3,5806,anticipated,60,,8,True,2026-10-16T00:23:00
+P1 Univariate LSTM,3,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P1 Univariate LSTM,3,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P1 Univariate LSTM,3,7239,anticipated,30,,4,True,2026-10-16T12:19:30
+P1 Univariate LSTM,3,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+P1 Univariate LSTM,3,8450,anticipated,60,,6,True,2026-10-16T22:25:00
+P1 Univariate LSTM,3,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P1 Univariate LSTM,3,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P1 Univariate LSTM,3,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P1 Univariate LSTM,3,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P1 Univariate LSTM,3,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P1 Univariate LSTM,3,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P1 Univariate LSTM,3,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P1 Univariate LSTM,3,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P1 Univariate LSTM,3,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P1 Univariate LSTM,3,13067,anticipated,30,,4,True,2026-10-18T12:53:30
+P1 Univariate LSTM,3,13560,anticipated,30,,6,True,2026-10-18T17:00:00
+P1 Univariate LSTM,3,14353,anticipated,60,,7,True,2026-10-18T23:36:30
+P1 Univariate LSTM,3,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P1 Univariate LSTM,3,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P1 Univariate LSTM,3,15720,anticipated,30,,4,True,2026-10-19T11:00:00
+P1 Univariate LSTM,3,16330,anticipated,30,,6,True,2026-10-19T16:05:00
+P1 Univariate LSTM,3,16591,anticipated,30,,7,True,2026-10-19T18:15:30
+P1 Univariate LSTM,3,17409,anticipated,60,,9,True,2026-10-20T01:04:30
+P1 Univariate LSTM,3,17737,at_max,,,10,False,2026-10-20T03:48:30
+P2 ProximaScale mean,3,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P2 ProximaScale mean,3,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P2 ProximaScale mean,3,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P2 ProximaScale mean,3,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+P2 ProximaScale mean,3,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P2 ProximaScale mean,3,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P2 ProximaScale mean,3,3389,at_max,,,10,False,2026-10-15T04:14:30
+P2 ProximaScale mean,3,3642,at_max,,,10,False,2026-10-15T06:21:00
+P2 ProximaScale mean,3,4416,at_max,,,10,False,2026-10-15T12:48:00
+P2 ProximaScale mean,3,4647,at_max,,,10,False,2026-10-15T14:43:30
+P2 ProximaScale mean,3,5208,at_max,,,10,False,2026-10-15T19:24:00
+P2 ProximaScale mean,3,5806,at_max,,,10,False,2026-10-16T00:23:00
+P2 ProximaScale mean,3,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P2 ProximaScale mean,3,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P2 ProximaScale mean,3,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P2 ProximaScale mean,3,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P2 ProximaScale mean,3,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P2 ProximaScale mean,3,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P2 ProximaScale mean,3,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P2 ProximaScale mean,3,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P2 ProximaScale mean,3,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P2 ProximaScale mean,3,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P2 ProximaScale mean,3,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P2 ProximaScale mean,3,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P2 ProximaScale mean,3,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P2 ProximaScale mean,3,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P2 ProximaScale mean,3,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P2 ProximaScale mean,3,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P2 ProximaScale mean,3,14353,anticipated,60,,8,True,2026-10-18T23:36:30
+P2 ProximaScale mean,3,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P2 ProximaScale mean,3,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P2 ProximaScale mean,3,15720,anticipated,60,,4,True,2026-10-19T11:00:00
+P2 ProximaScale mean,3,16330,anticipated,60,,6,True,2026-10-19T16:05:00
+P2 ProximaScale mean,3,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+P2 ProximaScale mean,3,17409,anticipated,60,,10,True,2026-10-20T01:04:30
+P2 ProximaScale mean,3,17737,at_max,,,10,False,2026-10-20T03:48:30
+P3 + upper bound,3,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P3 + upper bound,3,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P3 + upper bound,3,1036,anticipated,60,,7,True,2026-10-14T08:38:00
+P3 + upper bound,3,1621,at_max,,,10,False,2026-10-14T13:30:30
+P3 + upper bound,3,2375,at_max,,,10,False,2026-10-14T19:47:30
+P3 + upper bound,3,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P3 + upper bound,3,3389,at_max,,,10,False,2026-10-15T04:14:30
+P3 + upper bound,3,3642,at_max,,,10,False,2026-10-15T06:21:00
+P3 + upper bound,3,4416,at_max,,,10,False,2026-10-15T12:48:00
+P3 + upper bound,3,4647,at_max,,,10,False,2026-10-15T14:43:30
+P3 + upper bound,3,5208,at_max,,,10,False,2026-10-15T19:24:00
+P3 + upper bound,3,5806,at_max,,,10,False,2026-10-16T00:23:00
+P3 + upper bound,3,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P3 + upper bound,3,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P3 + upper bound,3,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P3 + upper bound,3,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P3 + upper bound,3,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P3 + upper bound,3,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P3 + upper bound,3,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P3 + upper bound,3,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P3 + upper bound,3,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P3 + upper bound,3,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P3 + upper bound,3,11160,anticipated,60,,9,True,2026-10-17T21:00:00
+P3 + upper bound,3,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P3 + upper bound,3,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P3 + upper bound,3,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P3 + upper bound,3,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P3 + upper bound,3,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P3 + upper bound,3,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P3 + upper bound,3,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P3 + upper bound,3,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P3 + upper bound,3,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P3 + upper bound,3,16330,at_max,,,10,False,2026-10-19T16:05:00
+P3 + upper bound,3,16591,at_max,,,10,False,2026-10-19T18:15:30
+P3 + upper bound,3,17409,at_max,,,10,False,2026-10-20T01:04:30
+P3 + upper bound,3,17737,at_max,,,10,False,2026-10-20T03:48:30
+P4 Full,3,448,anticipated,60,,9,True,2026-10-14T03:44:00
+P4 Full,3,888,at_max,,,10,False,2026-10-14T07:24:00
+P4 Full,3,1036,at_max,,,10,False,2026-10-14T08:38:00
+P4 Full,3,1621,at_max,,,10,False,2026-10-14T13:30:30
+P4 Full,3,2375,at_max,,,10,False,2026-10-14T19:47:30
+P4 Full,3,2547,at_max,,,10,False,2026-10-14T21:13:30
+P4 Full,3,3389,at_max,,,10,False,2026-10-15T04:14:30
+P4 Full,3,3642,at_max,,,10,False,2026-10-15T06:21:00
+P4 Full,3,4416,at_max,,,10,False,2026-10-15T12:48:00
+P4 Full,3,4647,at_max,,,10,False,2026-10-15T14:43:30
+P4 Full,3,5208,at_max,,,10,False,2026-10-15T19:24:00
+P4 Full,3,5806,at_max,,,10,False,2026-10-16T00:23:00
+P4 Full,3,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+P4 Full,3,6761,at_max,,,10,False,2026-10-16T08:20:30
+P4 Full,3,7239,at_max,,,10,False,2026-10-16T12:19:30
+P4 Full,3,7859,at_max,,,10,False,2026-10-16T17:29:30
+P4 Full,3,8450,at_max,,,10,False,2026-10-16T22:25:00
+P4 Full,3,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+P4 Full,3,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+P4 Full,3,9696,at_max,,,10,False,2026-10-17T08:48:00
+P4 Full,3,10201,at_max,,,10,False,2026-10-17T13:00:30
+P4 Full,3,10872,at_max,,,10,False,2026-10-17T18:36:00
+P4 Full,3,11160,at_max,,,10,False,2026-10-17T21:00:00
+P4 Full,3,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+P4 Full,3,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+P4 Full,3,12531,at_max,,,10,False,2026-10-18T08:25:30
+P4 Full,3,13067,at_max,,,10,False,2026-10-18T12:53:30
+P4 Full,3,13560,at_max,,,10,False,2026-10-18T17:00:00
+P4 Full,3,14353,at_max,,,10,False,2026-10-18T23:36:30
+P4 Full,3,14832,anticipated,60,,7,True,2026-10-19T03:36:00
+P4 Full,3,15321,at_max,,,10,False,2026-10-19T07:40:30
+P4 Full,3,15720,at_max,,,10,False,2026-10-19T11:00:00
+P4 Full,3,16330,at_max,,,10,False,2026-10-19T16:05:00
+P4 Full,3,16591,at_max,,,10,False,2026-10-19T18:15:30
+P4 Full,3,17409,at_max,,,10,False,2026-10-20T01:04:30
+P4 Full,3,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P5 Full, static thresholds",3,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P5 Full, static thresholds",3,888,anticipated,60,,5,True,2026-10-14T07:24:00
+"P5 Full, static thresholds",3,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P5 Full, static thresholds",3,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P5 Full, static thresholds",3,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P5 Full, static thresholds",3,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P5 Full, static thresholds",3,3389,anticipated,60,,3,True,2026-10-15T04:14:30
+"P5 Full, static thresholds",3,3642,anticipated,60,,3,True,2026-10-15T06:21:00
+"P5 Full, static thresholds",3,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P5 Full, static thresholds",3,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P5 Full, static thresholds",3,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P5 Full, static thresholds",3,5806,anticipated,60,,4,True,2026-10-16T00:23:00
+"P5 Full, static thresholds",3,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P5 Full, static thresholds",3,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P5 Full, static thresholds",3,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P5 Full, static thresholds",3,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P5 Full, static thresholds",3,8450,anticipated,60,,3,True,2026-10-16T22:25:00
+"P5 Full, static thresholds",3,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P5 Full, static thresholds",3,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+"P5 Full, static thresholds",3,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P5 Full, static thresholds",3,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P5 Full, static thresholds",3,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P5 Full, static thresholds",3,11160,anticipated,60,,3,True,2026-10-17T21:00:00
+"P5 Full, static thresholds",3,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+"P5 Full, static thresholds",3,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P5 Full, static thresholds",3,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P5 Full, static thresholds",3,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P5 Full, static thresholds",3,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P5 Full, static thresholds",3,14353,anticipated,60,,3,True,2026-10-18T23:36:30
+"P5 Full, static thresholds",3,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P5 Full, static thresholds",3,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P5 Full, static thresholds",3,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P5 Full, static thresholds",3,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P5 Full, static thresholds",3,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P5 Full, static thresholds",3,17409,anticipated,60,,3,True,2026-10-20T01:04:30
+"P5 Full, static thresholds",3,17737,anticipated,60,,3,True,2026-10-20T03:48:30
+"P6 Full, no cooldown",3,448,anticipated,60,,9,True,2026-10-14T03:44:00
+"P6 Full, no cooldown",3,888,at_max,,,10,False,2026-10-14T07:24:00
+"P6 Full, no cooldown",3,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P6 Full, no cooldown",3,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P6 Full, no cooldown",3,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P6 Full, no cooldown",3,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P6 Full, no cooldown",3,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P6 Full, no cooldown",3,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P6 Full, no cooldown",3,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P6 Full, no cooldown",3,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P6 Full, no cooldown",3,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P6 Full, no cooldown",3,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P6 Full, no cooldown",3,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P6 Full, no cooldown",3,6761,at_max,,,10,False,2026-10-16T08:20:30
+"P6 Full, no cooldown",3,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P6 Full, no cooldown",3,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P6 Full, no cooldown",3,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P6 Full, no cooldown",3,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P6 Full, no cooldown",3,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P6 Full, no cooldown",3,9696,at_max,,,10,False,2026-10-17T08:48:00
+"P6 Full, no cooldown",3,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P6 Full, no cooldown",3,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P6 Full, no cooldown",3,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P6 Full, no cooldown",3,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P6 Full, no cooldown",3,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P6 Full, no cooldown",3,12531,anticipated,60,,10,True,2026-10-18T08:25:30
+"P6 Full, no cooldown",3,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P6 Full, no cooldown",3,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P6 Full, no cooldown",3,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P6 Full, no cooldown",3,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P6 Full, no cooldown",3,15321,at_max,,,10,False,2026-10-19T07:40:30
+"P6 Full, no cooldown",3,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P6 Full, no cooldown",3,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P6 Full, no cooldown",3,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P6 Full, no cooldown",3,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P6 Full, no cooldown",3,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P7 P3, static thresholds",3,448,anticipated,60,,2,True,2026-10-14T03:44:00
+"P7 P3, static thresholds",3,888,anticipated,60,,2,True,2026-10-14T07:24:00
+"P7 P3, static thresholds",3,1036,anticipated,60,,5,True,2026-10-14T08:38:00
+"P7 P3, static thresholds",3,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+"P7 P3, static thresholds",3,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P7 P3, static thresholds",3,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P7 P3, static thresholds",3,3389,anticipated,60,,2,True,2026-10-15T04:14:30
+"P7 P3, static thresholds",3,3642,anticipated,60,,2,True,2026-10-15T06:21:00
+"P7 P3, static thresholds",3,4416,anticipated,60,,2,True,2026-10-15T12:48:00
+"P7 P3, static thresholds",3,4647,anticipated,30,,5,True,2026-10-15T14:43:30
+"P7 P3, static thresholds",3,5208,anticipated,60,,8,True,2026-10-15T19:24:00
+"P7 P3, static thresholds",3,5806,anticipated,60,,2,True,2026-10-16T00:23:00
+"P7 P3, static thresholds",3,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+"P7 P3, static thresholds",3,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+"P7 P3, static thresholds",3,7239,anticipated,60,,2,True,2026-10-16T12:19:30
+"P7 P3, static thresholds",3,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+"P7 P3, static thresholds",3,8450,anticipated,60,,2,True,2026-10-16T22:25:00
+"P7 P3, static thresholds",3,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+"P7 P3, static thresholds",3,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+"P7 P3, static thresholds",3,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+"P7 P3, static thresholds",3,10201,anticipated,60,,2,True,2026-10-17T13:00:30
+"P7 P3, static thresholds",3,10872,anticipated,60,,5,True,2026-10-17T18:36:00
+"P7 P3, static thresholds",3,11160,anticipated,60,,2,True,2026-10-17T21:00:00
+"P7 P3, static thresholds",3,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+"P7 P3, static thresholds",3,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+"P7 P3, static thresholds",3,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+"P7 P3, static thresholds",3,13067,anticipated,60,,2,True,2026-10-18T12:53:30
+"P7 P3, static thresholds",3,13560,anticipated,60,,5,True,2026-10-18T17:00:00
+"P7 P3, static thresholds",3,14353,anticipated,60,,2,True,2026-10-18T23:36:30
+"P7 P3, static thresholds",3,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+"P7 P3, static thresholds",3,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+"P7 P3, static thresholds",3,15720,anticipated,60,,2,True,2026-10-19T11:00:00
+"P7 P3, static thresholds",3,16330,anticipated,60,,5,True,2026-10-19T16:05:00
+"P7 P3, static thresholds",3,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+"P7 P3, static thresholds",3,17409,anticipated,60,,2,True,2026-10-20T01:04:30
+"P7 P3, static thresholds",3,17737,anticipated,60,,2,True,2026-10-20T03:48:30
+"P8 P3, no cooldown",3,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P8 P3, no cooldown",3,888,at_max,,,10,False,2026-10-14T07:24:00
+"P8 P3, no cooldown",3,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P8 P3, no cooldown",3,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P8 P3, no cooldown",3,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P8 P3, no cooldown",3,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+"P8 P3, no cooldown",3,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P8 P3, no cooldown",3,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P8 P3, no cooldown",3,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P8 P3, no cooldown",3,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P8 P3, no cooldown",3,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P8 P3, no cooldown",3,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P8 P3, no cooldown",3,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P8 P3, no cooldown",3,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P8 P3, no cooldown",3,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P8 P3, no cooldown",3,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P8 P3, no cooldown",3,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P8 P3, no cooldown",3,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P8 P3, no cooldown",3,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P8 P3, no cooldown",3,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P8 P3, no cooldown",3,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P8 P3, no cooldown",3,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P8 P3, no cooldown",3,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P8 P3, no cooldown",3,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P8 P3, no cooldown",3,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P8 P3, no cooldown",3,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P8 P3, no cooldown",3,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P8 P3, no cooldown",3,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P8 P3, no cooldown",3,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P8 P3, no cooldown",3,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P8 P3, no cooldown",3,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P8 P3, no cooldown",3,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P8 P3, no cooldown",3,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P8 P3, no cooldown",3,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P8 P3, no cooldown",3,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P8 P3, no cooldown",3,17737,at_max,,,10,False,2026-10-20T03:48:30
+P9 Tuned (config.yaml),3,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P9 Tuned (config.yaml),3,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P9 Tuned (config.yaml),3,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P9 Tuned (config.yaml),3,1621,at_max,,,10,False,2026-10-14T13:30:30
+P9 Tuned (config.yaml),3,2375,at_max,,,10,False,2026-10-14T19:47:30
+P9 Tuned (config.yaml),3,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P9 Tuned (config.yaml),3,3389,at_max,,,10,False,2026-10-15T04:14:30
+P9 Tuned (config.yaml),3,3642,at_max,,,10,False,2026-10-15T06:21:00
+P9 Tuned (config.yaml),3,4416,at_max,,,10,False,2026-10-15T12:48:00
+P9 Tuned (config.yaml),3,4647,at_max,,,10,False,2026-10-15T14:43:30
+P9 Tuned (config.yaml),3,5208,at_max,,,10,False,2026-10-15T19:24:00
+P9 Tuned (config.yaml),3,5806,at_max,,,10,False,2026-10-16T00:23:00
+P9 Tuned (config.yaml),3,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P9 Tuned (config.yaml),3,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P9 Tuned (config.yaml),3,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P9 Tuned (config.yaml),3,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P9 Tuned (config.yaml),3,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P9 Tuned (config.yaml),3,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P9 Tuned (config.yaml),3,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P9 Tuned (config.yaml),3,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P9 Tuned (config.yaml),3,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P9 Tuned (config.yaml),3,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P9 Tuned (config.yaml),3,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P9 Tuned (config.yaml),3,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P9 Tuned (config.yaml),3,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P9 Tuned (config.yaml),3,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P9 Tuned (config.yaml),3,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P9 Tuned (config.yaml),3,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P9 Tuned (config.yaml),3,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P9 Tuned (config.yaml),3,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P9 Tuned (config.yaml),3,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P9 Tuned (config.yaml),3,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P9 Tuned (config.yaml),3,16330,at_max,,,10,False,2026-10-19T16:05:00
+P9 Tuned (config.yaml),3,16591,at_max,,,10,False,2026-10-19T18:15:30
+P9 Tuned (config.yaml),3,17409,at_max,,,10,False,2026-10-20T01:04:30
+P9 Tuned (config.yaml),3,17737,at_max,,,10,False,2026-10-20T03:48:30
+P0 Reactive,4,448,anticipated,30,,2,True,2026-10-14T03:44:00
+P0 Reactive,4,888,anticipated,30,,2,True,2026-10-14T07:24:00
+P0 Reactive,4,1036,anticipated,30,,2,True,2026-10-14T08:38:00
+P0 Reactive,4,1621,at_max,,,10,False,2026-10-14T13:30:30
+P0 Reactive,4,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P0 Reactive,4,2547,anticipated,30,,5,True,2026-10-14T21:13:30
+P0 Reactive,4,3389,anticipated,30,,2,True,2026-10-15T04:14:30
+P0 Reactive,4,3642,anticipated,30,,2,True,2026-10-15T06:21:00
+P0 Reactive,4,4416,anticipated,60,,3,True,2026-10-15T12:48:00
+P0 Reactive,4,4647,at_max,,,10,False,2026-10-15T14:43:30
+P0 Reactive,4,5208,reacted,,30,3,False,2026-10-15T19:24:00
+P0 Reactive,4,5806,anticipated,30,,2,True,2026-10-16T00:23:00
+P0 Reactive,4,6076,reacted,,0,1,False,2026-10-16T02:38:00
+P0 Reactive,4,6761,anticipated,30,,2,True,2026-10-16T08:20:30
+P0 Reactive,4,7239,anticipated,30,,2,True,2026-10-16T12:19:30
+P0 Reactive,4,7859,anticipated,60,,2,True,2026-10-16T17:29:30
+P0 Reactive,4,8450,anticipated,30,,2,True,2026-10-16T22:25:00
+P0 Reactive,4,8807,anticipated,30,,2,True,2026-10-17T01:23:30
+P0 Reactive,4,9197,reacted,,0,1,False,2026-10-17T04:38:30
+P0 Reactive,4,9696,anticipated,30,,2,True,2026-10-17T08:48:00
+P0 Reactive,4,10201,anticipated,30,,2,True,2026-10-17T13:00:30
+P0 Reactive,4,10872,anticipated,30,,2,True,2026-10-17T18:36:00
+P0 Reactive,4,11160,anticipated,30,,2,True,2026-10-17T21:00:00
+P0 Reactive,4,11593,reacted,,0,1,False,2026-10-18T00:36:30
+P0 Reactive,4,12165,reacted,,0,1,False,2026-10-18T05:22:30
+P0 Reactive,4,12531,anticipated,30,,2,True,2026-10-18T08:25:30
+P0 Reactive,4,13067,anticipated,30,,2,True,2026-10-18T12:53:30
+P0 Reactive,4,13560,anticipated,30,,2,True,2026-10-18T17:00:00
+P0 Reactive,4,14353,reacted,,0,1,False,2026-10-18T23:36:30
+P0 Reactive,4,14832,reacted,,0,1,False,2026-10-19T03:36:00
+P0 Reactive,4,15321,anticipated,30,,2,True,2026-10-19T07:40:30
+P0 Reactive,4,15720,anticipated,30,,2,True,2026-10-19T11:00:00
+P0 Reactive,4,16330,at_max,,,10,False,2026-10-19T16:05:00
+P0 Reactive,4,16591,anticipated,30,,5,True,2026-10-19T18:15:30
+P0 Reactive,4,17409,anticipated,30,,2,True,2026-10-20T01:04:30
+P0 Reactive,4,17737,anticipated,30,,2,True,2026-10-20T03:48:30
+P1 Univariate LSTM,4,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P1 Univariate LSTM,4,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P1 Univariate LSTM,4,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P1 Univariate LSTM,4,1621,reacted,,0,7,False,2026-10-14T13:30:30
+P1 Univariate LSTM,4,2375,at_max,,,10,False,2026-10-14T19:47:30
+P1 Univariate LSTM,4,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P1 Univariate LSTM,4,3389,anticipated,60,,10,True,2026-10-15T04:14:30
+P1 Univariate LSTM,4,3642,anticipated,60,,10,True,2026-10-15T06:21:00
+P1 Univariate LSTM,4,4416,at_max,,,10,False,2026-10-15T12:48:00
+P1 Univariate LSTM,4,4647,at_max,,,10,False,2026-10-15T14:43:30
+P1 Univariate LSTM,4,5208,at_max,,,10,False,2026-10-15T19:24:00
+P1 Univariate LSTM,4,5806,anticipated,60,,8,True,2026-10-16T00:23:00
+P1 Univariate LSTM,4,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P1 Univariate LSTM,4,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P1 Univariate LSTM,4,7239,anticipated,30,,4,True,2026-10-16T12:19:30
+P1 Univariate LSTM,4,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+P1 Univariate LSTM,4,8450,anticipated,60,,6,True,2026-10-16T22:25:00
+P1 Univariate LSTM,4,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P1 Univariate LSTM,4,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P1 Univariate LSTM,4,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P1 Univariate LSTM,4,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P1 Univariate LSTM,4,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P1 Univariate LSTM,4,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P1 Univariate LSTM,4,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P1 Univariate LSTM,4,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P1 Univariate LSTM,4,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P1 Univariate LSTM,4,13067,anticipated,30,,4,True,2026-10-18T12:53:30
+P1 Univariate LSTM,4,13560,anticipated,30,,6,True,2026-10-18T17:00:00
+P1 Univariate LSTM,4,14353,anticipated,60,,7,True,2026-10-18T23:36:30
+P1 Univariate LSTM,4,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P1 Univariate LSTM,4,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P1 Univariate LSTM,4,15720,anticipated,30,,4,True,2026-10-19T11:00:00
+P1 Univariate LSTM,4,16330,anticipated,30,,6,True,2026-10-19T16:05:00
+P1 Univariate LSTM,4,16591,anticipated,30,,7,True,2026-10-19T18:15:30
+P1 Univariate LSTM,4,17409,anticipated,60,,9,True,2026-10-20T01:04:30
+P1 Univariate LSTM,4,17737,at_max,,,10,False,2026-10-20T03:48:30
+P2 ProximaScale mean,4,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P2 ProximaScale mean,4,888,anticipated,60,,4,True,2026-10-14T07:24:00
+P2 ProximaScale mean,4,1036,anticipated,60,,6,True,2026-10-14T08:38:00
+P2 ProximaScale mean,4,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+P2 ProximaScale mean,4,2375,anticipated,60,,10,True,2026-10-14T19:47:30
+P2 ProximaScale mean,4,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P2 ProximaScale mean,4,3389,at_max,,,10,False,2026-10-15T04:14:30
+P2 ProximaScale mean,4,3642,at_max,,,10,False,2026-10-15T06:21:00
+P2 ProximaScale mean,4,4416,at_max,,,10,False,2026-10-15T12:48:00
+P2 ProximaScale mean,4,4647,at_max,,,10,False,2026-10-15T14:43:30
+P2 ProximaScale mean,4,5208,at_max,,,10,False,2026-10-15T19:24:00
+P2 ProximaScale mean,4,5806,at_max,,,10,False,2026-10-16T00:23:00
+P2 ProximaScale mean,4,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P2 ProximaScale mean,4,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P2 ProximaScale mean,4,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P2 ProximaScale mean,4,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P2 ProximaScale mean,4,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P2 ProximaScale mean,4,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P2 ProximaScale mean,4,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P2 ProximaScale mean,4,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P2 ProximaScale mean,4,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P2 ProximaScale mean,4,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P2 ProximaScale mean,4,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P2 ProximaScale mean,4,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P2 ProximaScale mean,4,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P2 ProximaScale mean,4,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P2 ProximaScale mean,4,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P2 ProximaScale mean,4,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P2 ProximaScale mean,4,14353,anticipated,60,,8,True,2026-10-18T23:36:30
+P2 ProximaScale mean,4,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P2 ProximaScale mean,4,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P2 ProximaScale mean,4,15720,anticipated,60,,4,True,2026-10-19T11:00:00
+P2 ProximaScale mean,4,16330,anticipated,60,,6,True,2026-10-19T16:05:00
+P2 ProximaScale mean,4,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+P2 ProximaScale mean,4,17409,anticipated,60,,10,True,2026-10-20T01:04:30
+P2 ProximaScale mean,4,17737,at_max,,,10,False,2026-10-20T03:48:30
+P3 + upper bound,4,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P3 + upper bound,4,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P3 + upper bound,4,1036,anticipated,60,,7,True,2026-10-14T08:38:00
+P3 + upper bound,4,1621,at_max,,,10,False,2026-10-14T13:30:30
+P3 + upper bound,4,2375,at_max,,,10,False,2026-10-14T19:47:30
+P3 + upper bound,4,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P3 + upper bound,4,3389,at_max,,,10,False,2026-10-15T04:14:30
+P3 + upper bound,4,3642,at_max,,,10,False,2026-10-15T06:21:00
+P3 + upper bound,4,4416,at_max,,,10,False,2026-10-15T12:48:00
+P3 + upper bound,4,4647,at_max,,,10,False,2026-10-15T14:43:30
+P3 + upper bound,4,5208,at_max,,,10,False,2026-10-15T19:24:00
+P3 + upper bound,4,5806,at_max,,,10,False,2026-10-16T00:23:00
+P3 + upper bound,4,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P3 + upper bound,4,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P3 + upper bound,4,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P3 + upper bound,4,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P3 + upper bound,4,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P3 + upper bound,4,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P3 + upper bound,4,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P3 + upper bound,4,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P3 + upper bound,4,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P3 + upper bound,4,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P3 + upper bound,4,11160,anticipated,60,,9,True,2026-10-17T21:00:00
+P3 + upper bound,4,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P3 + upper bound,4,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P3 + upper bound,4,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P3 + upper bound,4,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P3 + upper bound,4,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P3 + upper bound,4,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P3 + upper bound,4,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P3 + upper bound,4,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P3 + upper bound,4,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P3 + upper bound,4,16330,at_max,,,10,False,2026-10-19T16:05:00
+P3 + upper bound,4,16591,at_max,,,10,False,2026-10-19T18:15:30
+P3 + upper bound,4,17409,at_max,,,10,False,2026-10-20T01:04:30
+P3 + upper bound,4,17737,at_max,,,10,False,2026-10-20T03:48:30
+P4 Full,4,448,anticipated,60,,9,True,2026-10-14T03:44:00
+P4 Full,4,888,at_max,,,10,False,2026-10-14T07:24:00
+P4 Full,4,1036,at_max,,,10,False,2026-10-14T08:38:00
+P4 Full,4,1621,at_max,,,10,False,2026-10-14T13:30:30
+P4 Full,4,2375,at_max,,,10,False,2026-10-14T19:47:30
+P4 Full,4,2547,at_max,,,10,False,2026-10-14T21:13:30
+P4 Full,4,3389,at_max,,,10,False,2026-10-15T04:14:30
+P4 Full,4,3642,at_max,,,10,False,2026-10-15T06:21:00
+P4 Full,4,4416,at_max,,,10,False,2026-10-15T12:48:00
+P4 Full,4,4647,at_max,,,10,False,2026-10-15T14:43:30
+P4 Full,4,5208,at_max,,,10,False,2026-10-15T19:24:00
+P4 Full,4,5806,at_max,,,10,False,2026-10-16T00:23:00
+P4 Full,4,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+P4 Full,4,6761,at_max,,,10,False,2026-10-16T08:20:30
+P4 Full,4,7239,at_max,,,10,False,2026-10-16T12:19:30
+P4 Full,4,7859,at_max,,,10,False,2026-10-16T17:29:30
+P4 Full,4,8450,at_max,,,10,False,2026-10-16T22:25:00
+P4 Full,4,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+P4 Full,4,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+P4 Full,4,9696,at_max,,,10,False,2026-10-17T08:48:00
+P4 Full,4,10201,at_max,,,10,False,2026-10-17T13:00:30
+P4 Full,4,10872,at_max,,,10,False,2026-10-17T18:36:00
+P4 Full,4,11160,at_max,,,10,False,2026-10-17T21:00:00
+P4 Full,4,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+P4 Full,4,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+P4 Full,4,12531,at_max,,,10,False,2026-10-18T08:25:30
+P4 Full,4,13067,at_max,,,10,False,2026-10-18T12:53:30
+P4 Full,4,13560,at_max,,,10,False,2026-10-18T17:00:00
+P4 Full,4,14353,at_max,,,10,False,2026-10-18T23:36:30
+P4 Full,4,14832,anticipated,60,,6,True,2026-10-19T03:36:00
+P4 Full,4,15321,at_max,,,10,False,2026-10-19T07:40:30
+P4 Full,4,15720,at_max,,,10,False,2026-10-19T11:00:00
+P4 Full,4,16330,at_max,,,10,False,2026-10-19T16:05:00
+P4 Full,4,16591,at_max,,,10,False,2026-10-19T18:15:30
+P4 Full,4,17409,at_max,,,10,False,2026-10-20T01:04:30
+P4 Full,4,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P5 Full, static thresholds",4,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P5 Full, static thresholds",4,888,anticipated,60,,5,True,2026-10-14T07:24:00
+"P5 Full, static thresholds",4,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P5 Full, static thresholds",4,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P5 Full, static thresholds",4,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P5 Full, static thresholds",4,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P5 Full, static thresholds",4,3389,anticipated,60,,3,True,2026-10-15T04:14:30
+"P5 Full, static thresholds",4,3642,anticipated,60,,3,True,2026-10-15T06:21:00
+"P5 Full, static thresholds",4,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P5 Full, static thresholds",4,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P5 Full, static thresholds",4,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P5 Full, static thresholds",4,5806,anticipated,60,,4,True,2026-10-16T00:23:00
+"P5 Full, static thresholds",4,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P5 Full, static thresholds",4,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P5 Full, static thresholds",4,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P5 Full, static thresholds",4,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P5 Full, static thresholds",4,8450,anticipated,60,,3,True,2026-10-16T22:25:00
+"P5 Full, static thresholds",4,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P5 Full, static thresholds",4,9197,anticipated,60,,4,True,2026-10-17T04:38:30
+"P5 Full, static thresholds",4,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P5 Full, static thresholds",4,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P5 Full, static thresholds",4,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P5 Full, static thresholds",4,11160,anticipated,60,,3,True,2026-10-17T21:00:00
+"P5 Full, static thresholds",4,11593,anticipated,60,,5,True,2026-10-18T00:36:30
+"P5 Full, static thresholds",4,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P5 Full, static thresholds",4,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P5 Full, static thresholds",4,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P5 Full, static thresholds",4,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P5 Full, static thresholds",4,14353,anticipated,60,,3,True,2026-10-18T23:36:30
+"P5 Full, static thresholds",4,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P5 Full, static thresholds",4,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P5 Full, static thresholds",4,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P5 Full, static thresholds",4,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P5 Full, static thresholds",4,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P5 Full, static thresholds",4,17409,anticipated,60,,3,True,2026-10-20T01:04:30
+"P5 Full, static thresholds",4,17737,anticipated,60,,3,True,2026-10-20T03:48:30
+"P6 Full, no cooldown",4,448,anticipated,60,,9,True,2026-10-14T03:44:00
+"P6 Full, no cooldown",4,888,at_max,,,10,False,2026-10-14T07:24:00
+"P6 Full, no cooldown",4,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P6 Full, no cooldown",4,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P6 Full, no cooldown",4,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P6 Full, no cooldown",4,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P6 Full, no cooldown",4,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P6 Full, no cooldown",4,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P6 Full, no cooldown",4,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P6 Full, no cooldown",4,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P6 Full, no cooldown",4,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P6 Full, no cooldown",4,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P6 Full, no cooldown",4,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P6 Full, no cooldown",4,6761,at_max,,,10,False,2026-10-16T08:20:30
+"P6 Full, no cooldown",4,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P6 Full, no cooldown",4,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P6 Full, no cooldown",4,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P6 Full, no cooldown",4,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P6 Full, no cooldown",4,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P6 Full, no cooldown",4,9696,at_max,,,10,False,2026-10-17T08:48:00
+"P6 Full, no cooldown",4,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P6 Full, no cooldown",4,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P6 Full, no cooldown",4,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P6 Full, no cooldown",4,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P6 Full, no cooldown",4,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P6 Full, no cooldown",4,12531,at_max,,,10,False,2026-10-18T08:25:30
+"P6 Full, no cooldown",4,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P6 Full, no cooldown",4,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P6 Full, no cooldown",4,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P6 Full, no cooldown",4,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P6 Full, no cooldown",4,15321,at_max,,,10,False,2026-10-19T07:40:30
+"P6 Full, no cooldown",4,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P6 Full, no cooldown",4,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P6 Full, no cooldown",4,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P6 Full, no cooldown",4,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P6 Full, no cooldown",4,17737,at_max,,,10,False,2026-10-20T03:48:30
+"P7 P3, static thresholds",4,448,anticipated,60,,2,True,2026-10-14T03:44:00
+"P7 P3, static thresholds",4,888,anticipated,60,,2,True,2026-10-14T07:24:00
+"P7 P3, static thresholds",4,1036,anticipated,60,,5,True,2026-10-14T08:38:00
+"P7 P3, static thresholds",4,1621,anticipated,30,,8,True,2026-10-14T13:30:30
+"P7 P3, static thresholds",4,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P7 P3, static thresholds",4,2547,at_max,,,10,False,2026-10-14T21:13:30
+"P7 P3, static thresholds",4,3389,anticipated,60,,2,True,2026-10-15T04:14:30
+"P7 P3, static thresholds",4,3642,anticipated,60,,2,True,2026-10-15T06:21:00
+"P7 P3, static thresholds",4,4416,anticipated,60,,2,True,2026-10-15T12:48:00
+"P7 P3, static thresholds",4,4647,anticipated,30,,5,True,2026-10-15T14:43:30
+"P7 P3, static thresholds",4,5208,anticipated,60,,8,True,2026-10-15T19:24:00
+"P7 P3, static thresholds",4,5806,anticipated,60,,2,True,2026-10-16T00:23:00
+"P7 P3, static thresholds",4,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+"P7 P3, static thresholds",4,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+"P7 P3, static thresholds",4,7239,anticipated,60,,2,True,2026-10-16T12:19:30
+"P7 P3, static thresholds",4,7859,anticipated,60,,5,True,2026-10-16T17:29:30
+"P7 P3, static thresholds",4,8450,anticipated,60,,2,True,2026-10-16T22:25:00
+"P7 P3, static thresholds",4,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+"P7 P3, static thresholds",4,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+"P7 P3, static thresholds",4,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+"P7 P3, static thresholds",4,10201,anticipated,60,,2,True,2026-10-17T13:00:30
+"P7 P3, static thresholds",4,10872,anticipated,60,,5,True,2026-10-17T18:36:00
+"P7 P3, static thresholds",4,11160,anticipated,60,,2,True,2026-10-17T21:00:00
+"P7 P3, static thresholds",4,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+"P7 P3, static thresholds",4,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+"P7 P3, static thresholds",4,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+"P7 P3, static thresholds",4,13067,anticipated,60,,2,True,2026-10-18T12:53:30
+"P7 P3, static thresholds",4,13560,anticipated,60,,5,True,2026-10-18T17:00:00
+"P7 P3, static thresholds",4,14353,anticipated,60,,2,True,2026-10-18T23:36:30
+"P7 P3, static thresholds",4,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+"P7 P3, static thresholds",4,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+"P7 P3, static thresholds",4,15720,anticipated,60,,2,True,2026-10-19T11:00:00
+"P7 P3, static thresholds",4,16330,anticipated,60,,5,True,2026-10-19T16:05:00
+"P7 P3, static thresholds",4,16591,anticipated,60,,8,True,2026-10-19T18:15:30
+"P7 P3, static thresholds",4,17409,anticipated,60,,2,True,2026-10-20T01:04:30
+"P7 P3, static thresholds",4,17737,anticipated,60,,2,True,2026-10-20T03:48:30
+"P8 P3, no cooldown",4,448,anticipated,60,,3,True,2026-10-14T03:44:00
+"P8 P3, no cooldown",4,888,at_max,,,10,False,2026-10-14T07:24:00
+"P8 P3, no cooldown",4,1036,at_max,,,10,False,2026-10-14T08:38:00
+"P8 P3, no cooldown",4,1621,at_max,,,10,False,2026-10-14T13:30:30
+"P8 P3, no cooldown",4,2375,at_max,,,10,False,2026-10-14T19:47:30
+"P8 P3, no cooldown",4,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+"P8 P3, no cooldown",4,3389,at_max,,,10,False,2026-10-15T04:14:30
+"P8 P3, no cooldown",4,3642,at_max,,,10,False,2026-10-15T06:21:00
+"P8 P3, no cooldown",4,4416,at_max,,,10,False,2026-10-15T12:48:00
+"P8 P3, no cooldown",4,4647,at_max,,,10,False,2026-10-15T14:43:30
+"P8 P3, no cooldown",4,5208,at_max,,,10,False,2026-10-15T19:24:00
+"P8 P3, no cooldown",4,5806,at_max,,,10,False,2026-10-16T00:23:00
+"P8 P3, no cooldown",4,6076,anticipated,60,,3,True,2026-10-16T02:38:00
+"P8 P3, no cooldown",4,6761,anticipated,60,,3,True,2026-10-16T08:20:30
+"P8 P3, no cooldown",4,7239,at_max,,,10,False,2026-10-16T12:19:30
+"P8 P3, no cooldown",4,7859,at_max,,,10,False,2026-10-16T17:29:30
+"P8 P3, no cooldown",4,8450,at_max,,,10,False,2026-10-16T22:25:00
+"P8 P3, no cooldown",4,8807,anticipated,60,,3,True,2026-10-17T01:23:30
+"P8 P3, no cooldown",4,9197,anticipated,60,,3,True,2026-10-17T04:38:30
+"P8 P3, no cooldown",4,9696,anticipated,60,,3,True,2026-10-17T08:48:00
+"P8 P3, no cooldown",4,10201,at_max,,,10,False,2026-10-17T13:00:30
+"P8 P3, no cooldown",4,10872,at_max,,,10,False,2026-10-17T18:36:00
+"P8 P3, no cooldown",4,11160,at_max,,,10,False,2026-10-17T21:00:00
+"P8 P3, no cooldown",4,11593,anticipated,60,,3,True,2026-10-18T00:36:30
+"P8 P3, no cooldown",4,12165,anticipated,60,,3,True,2026-10-18T05:22:30
+"P8 P3, no cooldown",4,12531,anticipated,60,,3,True,2026-10-18T08:25:30
+"P8 P3, no cooldown",4,13067,at_max,,,10,False,2026-10-18T12:53:30
+"P8 P3, no cooldown",4,13560,at_max,,,10,False,2026-10-18T17:00:00
+"P8 P3, no cooldown",4,14353,at_max,,,10,False,2026-10-18T23:36:30
+"P8 P3, no cooldown",4,14832,anticipated,60,,3,True,2026-10-19T03:36:00
+"P8 P3, no cooldown",4,15321,anticipated,60,,3,True,2026-10-19T07:40:30
+"P8 P3, no cooldown",4,15720,at_max,,,10,False,2026-10-19T11:00:00
+"P8 P3, no cooldown",4,16330,at_max,,,10,False,2026-10-19T16:05:00
+"P8 P3, no cooldown",4,16591,at_max,,,10,False,2026-10-19T18:15:30
+"P8 P3, no cooldown",4,17409,at_max,,,10,False,2026-10-20T01:04:30
+"P8 P3, no cooldown",4,17737,at_max,,,10,False,2026-10-20T03:48:30
+P9 Tuned (config.yaml),4,448,anticipated,60,,2,True,2026-10-14T03:44:00
+P9 Tuned (config.yaml),4,888,anticipated,60,,5,True,2026-10-14T07:24:00
+P9 Tuned (config.yaml),4,1036,anticipated,60,,8,True,2026-10-14T08:38:00
+P9 Tuned (config.yaml),4,1621,at_max,,,10,False,2026-10-14T13:30:30
+P9 Tuned (config.yaml),4,2375,at_max,,,10,False,2026-10-14T19:47:30
+P9 Tuned (config.yaml),4,2547,anticipated,60,,10,True,2026-10-14T21:13:30
+P9 Tuned (config.yaml),4,3389,at_max,,,10,False,2026-10-15T04:14:30
+P9 Tuned (config.yaml),4,3642,at_max,,,10,False,2026-10-15T06:21:00
+P9 Tuned (config.yaml),4,4416,at_max,,,10,False,2026-10-15T12:48:00
+P9 Tuned (config.yaml),4,4647,at_max,,,10,False,2026-10-15T14:43:30
+P9 Tuned (config.yaml),4,5208,at_max,,,10,False,2026-10-15T19:24:00
+P9 Tuned (config.yaml),4,5806,at_max,,,10,False,2026-10-16T00:23:00
+P9 Tuned (config.yaml),4,6076,anticipated,60,,2,True,2026-10-16T02:38:00
+P9 Tuned (config.yaml),4,6761,anticipated,60,,2,True,2026-10-16T08:20:30
+P9 Tuned (config.yaml),4,7239,anticipated,60,,4,True,2026-10-16T12:19:30
+P9 Tuned (config.yaml),4,7859,anticipated,60,,6,True,2026-10-16T17:29:30
+P9 Tuned (config.yaml),4,8450,anticipated,60,,8,True,2026-10-16T22:25:00
+P9 Tuned (config.yaml),4,8807,anticipated,60,,2,True,2026-10-17T01:23:30
+P9 Tuned (config.yaml),4,9197,anticipated,60,,2,True,2026-10-17T04:38:30
+P9 Tuned (config.yaml),4,9696,anticipated,60,,2,True,2026-10-17T08:48:00
+P9 Tuned (config.yaml),4,10201,anticipated,60,,4,True,2026-10-17T13:00:30
+P9 Tuned (config.yaml),4,10872,anticipated,60,,6,True,2026-10-17T18:36:00
+P9 Tuned (config.yaml),4,11160,anticipated,60,,8,True,2026-10-17T21:00:00
+P9 Tuned (config.yaml),4,11593,anticipated,60,,2,True,2026-10-18T00:36:30
+P9 Tuned (config.yaml),4,12165,anticipated,60,,2,True,2026-10-18T05:22:30
+P9 Tuned (config.yaml),4,12531,anticipated,60,,2,True,2026-10-18T08:25:30
+P9 Tuned (config.yaml),4,13067,anticipated,60,,4,True,2026-10-18T12:53:30
+P9 Tuned (config.yaml),4,13560,anticipated,60,,6,True,2026-10-18T17:00:00
+P9 Tuned (config.yaml),4,14353,anticipated,60,,9,True,2026-10-18T23:36:30
+P9 Tuned (config.yaml),4,14832,anticipated,60,,2,True,2026-10-19T03:36:00
+P9 Tuned (config.yaml),4,15321,anticipated,60,,2,True,2026-10-19T07:40:30
+P9 Tuned (config.yaml),4,15720,anticipated,60,,5,True,2026-10-19T11:00:00
+P9 Tuned (config.yaml),4,16330,at_max,,,10,False,2026-10-19T16:05:00
+P9 Tuned (config.yaml),4,16591,at_max,,,10,False,2026-10-19T18:15:30
+P9 Tuned (config.yaml),4,17409,at_max,,,10,False,2026-10-20T01:04:30
+P9 Tuned (config.yaml),4,17737,at_max,,,10,False,2026-10-20T03:48:30

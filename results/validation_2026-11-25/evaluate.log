@@ -1,0 +1,14 @@
+D:\proximascale\.venv\Lib\site-packages\sklearn\base.py:376: InconsistentVersionWarning: Trying to unpickle estimator MinMaxScaler from version 1.8.0 when using version 1.4.2. This might lead to breaking code or invalid results. Use at your own risk. For more info please refer to:
+https://scikit-learn.org/stable/model_persistence.html#security-maintainability-limitations
+  warnings.warn(
+🧠 [ProximaScale] Loaded 90000 rows -> 72000 train / 18000 test
+🧠 [ProximaScale] Prophet model loaded
+🧠 [ProximaScale] Univariate LSTM baseline loaded from cache
+🧠 [ProximaScale] Detected 36 spike onset(s) above 75.0% in test split
+🧠 [ProximaScale] Evaluating 17988 windows for RMSE/MAE (17988 available, stride=1, cap=None), plus 0 extra windows added for exact lead-time coverage around the 36 detected spike(s)...
+🧠 [ProximaScale] Running Hybrid (predict_load, n_passes=None) on 17988 windows -- this is the part most likely to be slow...
+[ProximaScale] LSTM model loaded from D:\proximascale\model\saved\proximascale_lstm.h5
+[ProximaScale] Feature scaler loaded
+[ProximaScale] Residual scaler loaded
+[ProximaScale] Prophet model loaded
+🧠 [ProximaScale]   Hybrid: 1/17988🧠 [ProximaScale]   Hybrid: 2/17988🧠 [ProximaScale]   Hybrid: 3/17988🧠 [ProximaScale]   Hybrid: 4/17988🧠 [ProximaScale]   Hybrid: 5/17988🧠 [ProximaScale]   Hybrid: 6/17988🧠 [ProximaScale]   Hybrid: 7/17988🧠 [ProximaScale]   Hybrid: 8/17988🧠 [ProximaScale]   Hybrid: 9/17988🧠 [ProximaScale]   Hybrid: 10/17988🧠 [ProximaScale]   Hybrid: 11/17988🧠 [ProximaScale]   Hybrid: 12/17988🧠 [ProximaScale]   Hybrid: 13/17988🧠 [ProximaScale]   Hybrid: 14/17988🧠 [ProximaScale]   Hybrid: 15/17988🧠 [ProximaScale]   Hybrid: 16/17988🧠 [ProximaScale]   Hybrid: 17/17988🧠 [ProximaScale]   Hybrid: 18/17988🧠 [ProximaScale]   Hybrid: 19/17988🧠 [ProximaScale]   Hybrid: 20/17988🧠 [ProximaScale]   Hybrid: 21/17988🧠 [ProximaScale]   Hybrid: 22/17988🧠 [ProximaScale]   Hybrid: 23/17988🧠 [ProximaScale]   Hybrid: 24/17988🧠 [ProximaScale]   Hybrid: 25/17988🧠 [ProximaScale]   Hybrid: 26/17988🧠 [ProximaScale]   Hybrid: 27/17988🧠 [ProximaScale]   Hybrid: 28/17988🧠 [ProximaScale]   Hybrid: 29/17988🧠 [ProximaScale]   Hybrid: 30/17988🧠 [ProximaScale]   Hybrid: 31/17988🧠 [ProximaScale]   Hybrid: 32/17988🧠 [ProximaScale]   Hybrid: 33/17988🧠 [ProximaScale]   Hybrid: 34/17988🧠 [ProximaScale]   Hybrid: 35/17988🧠 [ProximaScale]   Hybrid: 36/17988🧠 [ProximaScale]   Hybrid: 37/17988🧠 [ProximaScale]   Hybrid: 38/17988🧠 [ProximaScale]   Hybrid: 39/17988🧠 [ProximaScale]   Hybrid: 40/17988🧠 [ProximaScale]   Hybrid: 41/17988🧠 [ProximaScale]   Hybrid: 42/17988

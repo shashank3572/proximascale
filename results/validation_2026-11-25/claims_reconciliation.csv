@@ -1,0 +1,21 @@
+claim_id,section,prior_claim,status,current_evidence_value,evidence_file,note
+C01,Abstract/Results,RMSE 5.08,Reproduced approximately,5.087 (10-reading model) ; 4.347 (served v4),results/forecast_metrics/baseline/table_ii.csv; results/validation_2026-11-25/forecast_metrics_v4/v4_verify/table_ii.csv,Rounding/version drift: 5.087 rounds to 5.09
+C02,Abstract/Results,MAE 3.06,Reproduced,3.062 (10-reading) ; 2.679 (served),same as C01,
+C03,Abstract/Results,Average lead time 57.5 s,Not reproduced exactly,56.83 +/- 0.37 s (10-reading) ; 58.17 +/- 0.37 s (served) ; ceiling 58.33 s,same as C01,Feasibility ceiling added
+C04,Abstract/Results,Scaling oscillations 98,Removed,96.4 +/- 2.6 (10-reading) ; 81.6 +/- 1.7 (served),same as C01,Definition was undefined in the draft
+C05,Related work,Prophet alone RMSE 10.15 / MAE 4.68,Reproduced,10.154 / 4.675,same as C01,
+C06,Method,Input window 10 observations,Modified,"30 readings (15 min), 10-reading fallback only",model/saved/proximascale_v4/config.json,
+C07,Method,Sampling interval 30 s,Retained,30 s,monitoring/collector.py,
+C08,Method,Forecast horizon 3 steps (90 s),Retained,3 steps = 90 s,config.json,
+C09,Method,"Features CPU, memory, request rate",Modified,"5 channels incl. Prophet yhat(t), yhat(t+90 s)",config.json,
+C10,Method,MC Dropout 30 passes,Retained with change,30 passes pooled over 3 seeded members,config.json; forecaster.py,
+C11,Method,y = 0.6*y_obs + 0.4*y_pred,Corrected,0.6*observed + 0.4*last pre-scaling observed (not predicted),model/counterfactual.py,Term was mislabelled
+C12,Decision,Adaptive thresholds reduce oscillations,Supported,99 reversals (original engine) vs 0-1 (cooldown+guard),results/validation_2026-11-25/replay_v4/v4_verify/summary.csv,Directionally supported
+C13,Decision,Uncertainty-aware scaling improves decisions,Downgraded,upper-bound branch disabled; raw sigma uninformative,config.yaml; uncertainty.csv,Negative result reported
+C14,Decision,"36/36 spikes anticipated, 2.67 replicas",Not reproducible,24/36 shipped config; 29/36 floor off,replay_v4 / replay_v4_nofloor summary.csv,Harness disagreement disclosed
+C15,Evaluation,Latency 1240 -> 780 -> 310 ms,Removed,no reproducible source; pool mode cannot route traffic,results/exp3_latency.csv (no generator),
+C16,Evaluation,Lead times 68-81 s across 5 runs,Removed,no reproducible source; exceeds horizon geometry,results/exp2_lead_time.csv (no generator),
+C17,Evaluation,Oscillations 7 vs 2 from counterfactual,Removed,aggregate effect 0.0009 RMSE; weight 0.2 optimal,cf_ablation.csv; alpha_sweep.csv,
+C18,Uncertainty,MC-Dropout provides usable confidence,Downgraded,2 sigma covers 55-59% at nominal 98%,reliability.csv; uncertainty.csv,
+C19,Calibration,Calibrated 95% bound,Added,"94.85% overall, ~87% above 75% CPU",unseen/coverage.csv; v4 uncertainty,"Marginal, not conditional"
+C20,Generalization,Framework is feasible on real workloads,Not established,121 idle real rows: RMSE 36.0 vs persistence 22.7,results/unseen/forecast.csv,
